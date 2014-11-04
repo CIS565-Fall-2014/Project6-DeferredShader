@@ -134,32 +134,32 @@ CIS565WEBGLCORE.createCamera = function(t){
     };
 
     moveForward = function(){ 
-        vec3.scaleAndAdd( position, position, normal, -5.1 );
+        vec3.scaleAndAdd( position, position, normal, -1.1 );
         update();
     };
 
     moveBackward = function(){
-        vec3.scaleAndAdd( position, position, normal, 5.1 );
+        vec3.scaleAndAdd( position, position, normal, 1.1 );
         update();
     };
 
     moveLeft = function(){
-        vec3.scaleAndAdd( position, position, right, -5.1 );
+        vec3.scaleAndAdd( position, position, right, -1.1 );
         update();
     };
 
     moveRight = function(){
-        vec3.scaleAndAdd( position, position, right, 5.1 );
+        vec3.scaleAndAdd( position, position, right, 1.1 );
         update();
     };
 
     moveUp= function(){
-        vec3.scaleAndAdd( position, position, up, 5.1 );
+        vec3.scaleAndAdd( position, position, up, 1.1 );
         update();
     };
 
     moveDown = function(){
-        vec3.scaleAndAdd( position, position, up, -5.1 );
+        vec3.scaleAndAdd( position, position, up, -1.1 );
         update();
     };
 
