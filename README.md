@@ -1,4 +1,4 @@
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 CIS565: Project 6 -- Deferred Shader
 -------------------------------------------------------------------------------
 Fall 2014
@@ -107,6 +107,35 @@ You must implement one of the following extras:
 * Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
 
 -------------------------------------------------------------------------------
+RUNNING THE CODE:
+-------------------------------------------------------------------------------
+
+Since the code attempts to access files that are local to your computer, you
+will either need to:
+
+* Run your browser under modified security settings, or
+* Create a simple local server that serves the files
+
+
+FIREFOX: change ``strict_origin_policy`` to false in about:config 
+
+CHROME:  run with the following argument : `--allow-file-access-from-files`
+
+(You can do this on OSX by running Chrome from /Applications/Google
+Chrome/Contents/MacOS with `open -a "Google Chrome" --args
+--allow-file-access-from-files`)
+
+* To check if you have set the flag properly, you can open chrome://version and
+  check under the flags
+
+RUNNING A SIMPLE SERVER: 
+
+If you have Python installed, you can simply run a simple HTTP server off your
+machine from the root directory of this repository with the following command:
+
+`python -m SimpleHTTPServer`
+
+-------------------------------------------------------------------------------
 RESOURCES:
 -------------------------------------------------------------------------------
 
@@ -126,7 +155,7 @@ manner with the following:
 * A brief description of the project and the specific features you implemented.
 * At least one screenshot of your project running.
 * A 30 second or longer video of your project running.  To create the video you
-  can use http://www.microsoft.com/expression/products/Encoder4_Overview.aspx 
+  can use [Open Broadcaster Software](http://obsproject.com) 
 * A performance evaluation (described in detail below).
 
 -------------------------------------------------------------------------------
