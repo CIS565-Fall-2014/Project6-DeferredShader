@@ -92,10 +92,10 @@ var initGL = function (canvasId, messageId) {
 var initCamera = function () {
   // Setup camera
   persp = mat4.create();
-  mat4.perspective(persp, todeg(60), canvas.width / canvas.height, 0.1, 1000);
+  mat4.perspective(persp, todeg(60), canvas.width / canvas.height, 0.1, 2000);
 
   camera = CIS565WEBGLCORE.createCamera(CAMERA_TRACKING_TYPE);
-  camera.goHome([0, 0, 4]);
+  camera.goHome([-1, 400, 0]);
   interactor = CIS565WEBGLCORE.CameraInteractor(camera, canvas);
 };
 
@@ -104,7 +104,7 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
