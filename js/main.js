@@ -92,7 +92,7 @@ var initGL = function (canvasId, messageId) {
 var initCamera = function () {
   // Setup camera
   persp = mat4.create();
-  mat4.perspective(persp, todeg(60), canvas.width / canvas.height, 0.1, 100);
+  mat4.perspective(persp, todeg(60), canvas.width / canvas.height, 0.1, 1000);
 
   camera = CIS565WEBGLCORE.createCamera(CAMERA_TRACKING_TYPE);
   camera.goHome([0, 0, 4]);
