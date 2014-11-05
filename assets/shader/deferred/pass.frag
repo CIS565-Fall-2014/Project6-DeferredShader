@@ -1,18 +1,16 @@
-#version 330
+#extension GL_EXT_draw_buffers: require
+precision highp float;
 
-uniform float u_Far;
-uniform vec3 u_Color;
+uniform sampler2D u_sampler;
 
-in vec3 fs_Normal;
-in vec4 fs_Position;
+varying vec4 v_pos;
+varying vec3 v_normal;
+varying vec2 v_texcoord;
+varying float v_depth;
 
-out vec4 out_Normal;
-out vec4 out_Position;
-out vec4 out_Color;
-
-void main(void)
-{
-    out_Normal = vec4(normalize(fs_Normal),0.0f);
-    out_Position = vec4(fs_Position.xyz,1.0f); //Tuck position into 0 1 range
-    out_Color = vec4(u_Color,1.0);
+void main(void){
+	gl_FragData[0] = v_pos;
+	gl_FragData[1] = vec4( normalize(v_normal), 1.0 );
+	gl_FragData[2] = vec4( 1.0, 0.0, 0.0, 1.0 );
+	gl_FragData[3] = vec4( v_depth, 0, 0, 0 );
 }

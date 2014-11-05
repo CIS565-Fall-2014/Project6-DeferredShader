@@ -1,21 +1,26 @@
-#version 330
+precision highp float;
 
+attribute vec3 a_pos;
+attribute vec3 a_normal;
+attribute vec2 a_texcoord;
 
-uniform mat4x4 u_Model;
-uniform mat4x4 u_View;
-uniform mat4x4 u_Persp;
-uniform mat4x4 u_InvTrans;
+uniform mat4 u_projection;
+uniform mat4 u_modelview;
+uniform mat4 u_mvp;
+uniform mat4 u_normalMat;
 
-in  vec3 Position;
-in  vec3 Normal;
+varying vec4 v_pos;
+varying vec3 v_normal;
+varying vec2 v_texcoord;
+varying float v_depth;
 
-out vec3 fs_Normal;
-out vec4 fs_Position;
+void main(void){
+	gl_Position = u_mvp * vec4( a_pos, 1.0 );
 
-void main(void) {
-    fs_Normal = (u_InvTrans*vec4(Normal,0.0f)).xyz;
-    vec4 world = u_Model * vec4(Position, 1.0);
-    vec4 camera = u_View * world;
-    fs_Position = camera;
-    gl_Position = u_Persp * camera;
+	v_pos = u_modelview * vec4( a_pos, 1.0 );
+	v_normal = vec3( u_normalMat * vec4(a_normal,0.0) );
+
+	v_texcoord = a_texcoord;
+
+	v_depth = ( gl_Position.z / gl_Position.w + 1.0 ) / 2.0;
 }

@@ -23,9 +23,6 @@ INTRODUCTION:
 
 In this project, you will get introduced to the basics of deferred shading. You will write GLSL and OpenGL code to perform various tasks in a deferred lighting pipeline such as creating and writing to a G-Buffer.
 
-NOTE : The Crytek-Sponza scene is still broken, and I will be pushing a fix for
-it soon.
-
 -------------------------------------------------------------------------------
 CONTENTS:
 -------------------------------------------------------------------------------
@@ -48,9 +45,8 @@ Stage 1 renders the scene geometry to the G-Buffer
 * pass.frag
 
 Stage 2 renders the lighting passes and accumulates to the P-Buffer
-* shade.vert
-* ambient.frag
-* point.frag
+* quad.vert
+* diffuse.frag
 * diagnostic.frag
 
 Stage 3 renders the post processing
@@ -59,16 +55,21 @@ Stage 3 renders the post processing
 
 The keyboard controls are as follows:
 WASDRF - Movement (along w the arrow keys)
-W - Zoom in
-S - Zoom out
-A - Left
-D - Right
-R - Up
-F - Down
-^ - Up
-v - Down
-< - Left
-> - Right
+* W - Zoom in
+* S - Zoom out
+* A - Left
+* D - Right
+* R - Up
+* F - Down
+* ^ - Up
+* v - Down
+* < - Left
+* > - Right
+* 1 - World Space Position
+* 2 - Normals
+* 3 - Color
+* 4 - Depth
+* 0 - Full deferred pipeline
 
 There are also mouse controls for camera rotation.
 
@@ -91,12 +92,11 @@ You are required to implement:
 * Either of the following effects
   * Bloom
   * "Toon" Shading (with basic silhouetting)
-* Point light sources
 * Screen Space Ambient Occlusion 
 
 **NOTE**: Implementing separable convolution will require another link in your pipeline and will count as an extra feature if you do performance analysis with a standard one-pass 2D convolution. The overhead of rendering and reading from a texture _may_ offset the extra computations for smaller 2D kernels.
 
-You must implement one of the following extras:
+You must implement two of the following extras:
 * The effect you did not choose above
 * Compare performance to a normal forward renderer with
   * No optimizations
@@ -190,8 +190,8 @@ THIRD PARTY CODE POLICY
 -------------------------------------------------------------------------------
 SELF-GRADING
 -------------------------------------------------------------------------------
-* On the submission date, email your grade, on a scale of 0 to 100, to Liam, 
-  liamboone@gmail.com, with a one paragraph explanation.  Be concise and 
+* On the submission date, email your grade, on a scale of 0 to 100, to Harmony,
+  harmoli+cis565@seas.upenn.edu, with a one paragraph explanation.  Be concise and 
   realistic.  Recall that we reserve 30 points as a sanity check to adjust your 
   grade.  Your actual grade will be (0.7 * your grade) + (0.3 * our grade).  We 
   hope to only use this in extreme cases when your grade does not realistically 
