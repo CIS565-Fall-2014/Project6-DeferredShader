@@ -4,6 +4,7 @@ precision highp float;
 #define DISPLAY_NORMAL 2
 #define DISPLAY_COLOR 3
 #define DISPLAY_DEPTH 4
+#define DISPLAY_TOON 5
 
 uniform sampler2D u_positionTex;
 uniform sampler2D u_normalTex;
@@ -13,6 +14,7 @@ uniform sampler2D u_depthTex;
 uniform float u_zFar;
 uniform float u_zNear;
 uniform int u_displayType;
+uniform vec3 u_lightpos;
 
 varying vec2 v_texcoord;
 
@@ -35,6 +37,38 @@ void main()
 	    gl_FragColor = color;
 	else if( u_displayType == DISPLAY_NORMAL )
 	    gl_FragColor = vec4( normal, 1 );
-	else
+	else if( u_displayType == DISPLAY_POS )
 	    gl_FragColor = vec4( position, 1 );
+	else if( u_displayType == DISPLAY_TOON )
+	{
+	    vec4 toonColor1 = vec4(1,1,0,1);
+		vec4 toonColor2 = vec4(1,0,0,1);
+		vec4 toonColor3 = vec4(0,1,0,1);
+		vec4 toonColor4 = vec4(0,0,1,1);
+		float intensity;
+        vec3 lightDir = normalize(u_lightpos - position);
+	    vec4 color;
+	    intensity = dot(lightDir,normal);
+
+        if(intensity>=0.9)
+            color = toonColor1;
+	    else if(intensity>=0.6 && intensity < 0.9)
+        {
+            float mixa = (intensity - 0.6) / 0.3;
+            color = mix(toonColor1,toonColor2,mixa);   
+        }
+        else if(intensity>=0.3 && intensity < 0.6)
+        {
+            float mixa = (intensity - 0.3) / 0.3;
+            color = mix(toonColor2,toonColor3,mixa);    
+        }
+		else if(intensity<0.3 && intensity>=0.0)
+        {
+            float mixa = intensity/ 0.3;
+            color = mix(toonColor3,toonColor4,mixa);    
+        }
+
+	    gl_FragColor = color;
+	}
+
 }

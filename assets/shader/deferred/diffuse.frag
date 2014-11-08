@@ -8,6 +8,7 @@ uniform sampler2D u_depthTex;
 uniform float u_zFar;
 uniform float u_zNear;
 uniform int u_displayType;
+uniform vec3 u_lightpos;
 
 varying vec2 v_texcoord;
 
