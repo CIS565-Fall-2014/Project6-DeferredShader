@@ -4,7 +4,6 @@ uniform sampler2D u_positionTex;
 uniform sampler2D u_normalTex;
 uniform sampler2D u_colorTex;
 uniform sampler2D u_depthTex;
-//uniform vec3 u_cameraPos;
 uniform mat4 u_modelview;
 
 uniform float u_zFar;
@@ -22,6 +21,7 @@ void main()
 	// Write a diffuse shader and a Blinn-Phong shader
 	// NOTE : You may need to add your own normals to fulfill the second's requirements
 
+	vec3 color = texture2D( u_colorTex, v_texcoord ).xyz;
 	vec3 normal = texture2D( u_normalTex, v_texcoord ).xyz;
 	vec3 position = texture2D(u_positionTex, v_texcoord).rgb;
 	float depth = texture2D(u_depthTex, v_texcoord).r;
@@ -44,11 +44,12 @@ void main()
 	//vec3 finalColor = diffuse * lightColor;
 	//vec3 finalColor = specular * lightColor;
 	//////////////////////////////////////////////////////////////////////
+	if(color.x == 1.0)
+		gl_FragColor = vec4(finalColor, 1.0);
+	else
+		gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 
-	gl_FragColor = vec4(finalColor, 1.0);
-
-
-  //gl_FragColor = vec4(texture2D(u_depthTex, v_texcoord).rgb, 1.0);
+	    //gl_FragColor = vec4( normal, 1 );
   
   
 }

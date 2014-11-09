@@ -241,17 +241,6 @@ var renderShade = function () {
   gl.uniform1f( shadeProg.uZFarLoc, zFar );
 
 
-  //var lightdir = vec3.create([1.0, 0.0, 1.0]);
-  //var lightdest = vec4.create();
-  //vec3.normalize(lightdir);
-  
-  //mat4.multiplyVec4(view, [lightdir[0], lightdir[1], lightdir[2], 0.0], lightdest);
-  //lightdir = vec3.createFrom(lightdest[0],lightdest[1],lightdest[2]);
-  //vec3.normalize(lightdir);
-  
-  //var lightdir = vec3.create([1.0, 0.0, 1.0]);
-  //gl.uniform3f( shadeProg.uCameraPositionLoc, camera.position[0], camera.position[1], camera.position[2] );
-
   drawQuad(shadeProg);
 
   // Unbind FBO
@@ -292,6 +281,7 @@ var renderDiagnostic = function () {
   gl.useProgram(diagProg.ref());
 
   gl.disable(gl.DEPTH_TEST);
+
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Bind necessary textures
@@ -370,6 +360,11 @@ var initCamera = function () {
       case 52://4
         isDiagnostic = true;
         texToDisplay = 4;
+        break;
+		
+	  case 56://8
+        isDiagnostic = false;
+        texToDisplay = 8;
         break;
 		
 	  case 57://9
@@ -506,7 +501,7 @@ var initShaders = function () {
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
     shadeProg.uDisplayTypeLoc = gl.getUniformLocation( shadeProg.ref(), "u_displayType" );
-	shadeProg.uCameraPositionLoc = gl.getUniformLocation( shadeProg.ref(), "u_cameraPos" );//Wei-Chien
+
 	
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, shadeProg); 
