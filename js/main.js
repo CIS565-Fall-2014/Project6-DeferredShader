@@ -233,9 +233,13 @@ var renderShade = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
   gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
 
+  //modelview
+  gl.uniformMatrix4fv(shadeProg.uModelViewLoc, false, camera.getViewTransform());
+  
   // Bind necessary uniforms 
   gl.uniform1f( shadeProg.uZNearLoc, zNear );
   gl.uniform1f( shadeProg.uZFarLoc, zFar );
+
 
   //var lightdir = vec3.create([1.0, 0.0, 1.0]);
   //var lightdest = vec4.create();
@@ -497,6 +501,7 @@ var initShaders = function () {
     shadeProg.uNormalSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_normalTex");
     shadeProg.uColorSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_colorTex");
     shadeProg.uDepthSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_depthTex");
+	shadeProg.uModelViewLoc = gl.getUniformLocation(shadeProg.ref(), "u_modelview");
 
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
@@ -517,6 +522,7 @@ var initShaders = function () {
     postProg.uNormalSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_normalTex");
     postProg.uColorSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_colorTex");
     postProg.uDepthSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_depthTex");
+	postProg.uModelViewLoc = gl.getUniformLocation(postProg.ref(), "u_modelview");
 	
 
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");

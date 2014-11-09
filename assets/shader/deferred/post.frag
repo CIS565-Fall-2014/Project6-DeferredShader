@@ -26,24 +26,38 @@ void main()
   //depth = linearizeDepth( depth, u_zNear, u_zFar );
   vec2 v_TexcoordOffsetRight = v_texcoord + vec2(1.0/960.0, 0.0);
   float depthOffestRight = texture2D(u_depthTex, v_TexcoordOffsetRight).r;
-  //vec3 normalOffestRight = texture2D( u_normalTex, v_TexcoordOffsetRight).rgb;  
-  //float angleWithRight = dot(normal, normalOffestRight);
+  vec3 normalOffestRight = texture2D( u_normalTex, v_TexcoordOffsetRight).rgb;  
+  float angleWithRight = dot(normal, normalOffestRight);
   
   
   vec2 v_TexcoordOffsetUp = v_texcoord + vec2(0.0, 1.0/540.0);
   float depthOffestUp = texture2D(u_depthTex, v_TexcoordOffsetUp).r;
-  //vec3 normalOffestUp = texture2D( u_normalTex, v_TexcoordOffsetUp).rgb; 
-  //float angleWithUp = dot(normal, normalOffestUp);
+  vec3 normalOffestUp = texture2D( u_normalTex, v_TexcoordOffsetUp).rgb; 
+  float angleWithUp = dot(normal, normalOffestUp);
   
-  float test = float(int(shade.r / 0.1));
+  //float test = float(int(shade.r / 0.1));
   float toonShadingR = 0.1 * float(int(shade.r / 0.1));
   
   float toonShadingG = 0.1 * float(int(shade.g / 0.1));
   float toonShadingB = 0.1 * float(int(shade.b / 0.1));
   vec3 toonShading = vec3(toonShadingR, toonShadingG, toonShadingB);
 
-  
-  
+  gl_FragColor = vec4(shade, 1.0);
+   /* if (u_displayType == 0){
+		if(color.x != 1.0){
+			gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); 
+	    }
+		else
+			gl_FragColor = vec4(shade, 1.0); 
+	}
+	else if(u_displayType == 9){
+		//if(angleWithRight < 1.0 || angleWithUp< 1.0)
+		if(abs(depth - depthOffestRight) > 0.05 || abs(depth - depthOffestUp) > 0.05)
+			gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+		else
+			gl_FragColor = vec4(toonShading, 1.0); 	
+	}*/
+  /*
   if(abs(depth - depthOffestRight) > 0.05 || abs(depth - depthOffestUp) > 0.05)
   //if(angleWithRight<1.0 || angleWithUp<1.0)
 	gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); 
@@ -55,7 +69,7 @@ void main()
 		gl_FragColor = vec4(shade, 1.0); 
 	else if(u_displayType == 9)
 		gl_FragColor = vec4(toonShading, 1.0); 
-  }
+  }*/
   
   
 }
