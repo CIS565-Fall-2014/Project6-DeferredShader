@@ -25,6 +25,7 @@ void main()
 	vec3 normal = texture2D( u_normalTex, v_texcoord ).xyz;
 	vec3 position = texture2D( u_positionTex, v_texcoord ).xyz;
 	vec4 color = texture2D( u_colorTex, v_texcoord );
+	//vec4 color = vec4(1.0,1.0,0.0,1.0);
 	float depth = texture2D( u_depthTex, v_texcoord ).x;
 
 	depth = linearizeDepth( depth, u_zNear, u_zFar );

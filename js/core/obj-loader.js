@@ -44,110 +44,123 @@ CIS565WEBGLCORE.createOBJLoader = function(){
 
 
     function load( gl, filename, mtl ){
-    	var loader;
+        var loader;
 
         var eventlistener = function(object){
             
-    		content = object;
-    		console.log(filename);
-        console.log("children count: " + object.children.length );
-    		
+            content = object;
+            console.log("load file: "+filename);
+            console.log("children count: " + object.children.length );
+            
         //Start parse vertices, normals, indices, and texcoords
-    		content.traverse( function(child){
-    			if( child instanceof THREE.Mesh ){
-    				var numVertices = child.geometry.vertices.length;
-    				var numFaces = child.geometry.faces.length;
-    				var numTexcoords = child.geometry.faceVertexUvs[0].length;
-            var meshVertexArray = []; //vertex data
-            var meshNormalArray = [];
-            var meshIndexArray = [];
-            var meshTexcoordArray = [];
-            var point = 0;
-
-            console.log("start traverse OBJ");
-    				if( numFaces != 0 ){
-              var texCount = textures.length;
-    					if( child.material.map !== null ){            
-                textures[texCount] = gl.createTexture();
-                textures[texCount].map = child.material.map;
-
-                textures[texCount].ready = false;                             
-    					}
-    					else{
-                textures[texCount] = null;
-    					}
-              //Array of texture coordinates of 1st layer texture 
-              var UVs = child.geometry.faceVertexUvs[0]; 
-
-    					//Extract faces info (UVs, normals, indices)
-    					for( var i = 0; i < numFaces;i++ ){
-
-    						//Extract vertices info per face
-                var offset = child.geometry.faces[i].a;
-                meshVertexArray.push( child.geometry.vertices[offset].x);
-                meshVertexArray.push( child.geometry.vertices[offset].y);
-                meshVertexArray.push( child.geometry.vertices[offset].z);
-                offset = child.geometry.faces[i].b;
-                meshVertexArray.push( child.geometry.vertices[offset].x);
-                meshVertexArray.push( child.geometry.vertices[offset].y);
-                meshVertexArray.push( child.geometry.vertices[offset].z);
-                offset = child.geometry.faces[i].c;
-                meshVertexArray.push( child.geometry.vertices[offset].x);
-                meshVertexArray.push( child.geometry.vertices[offset].y);
-                meshVertexArray.push( child.geometry.vertices[offset].z);
-
-                meshIndexArray.push( i*3 );
-                meshIndexArray.push( i*3+1 );
-                meshIndexArray.push( i*3+2 );
-         
-                var offset = 3*child.geometry.faces[i].a;
-    						meshNormalArray[ 9*i ] = child.geometry.faces[i].normal.x;
-    						meshNormalArray[ 9*i+1 ] = child.geometry.faces[i].normal.y;
-    						meshNormalArray[ 9*i+2 ] = child.geometry.faces[i].normal.z;
-                            
-                offset = 3*child.geometry.faces[i].b; 
-    						meshNormalArray[ 9*i+3 ] = child.geometry.faces[i].normal.x;
-    						meshNormalArray[ 9*i+4 ] = child.geometry.faces[i].normal.y;
-    						meshNormalArray[ 9*i+5 ] = child.geometry.faces[i].normal.z;
-    						
-                offset = 3*child.geometry.faces[i].c; 
-    						meshNormalArray[ 9*i+6 ] = child.geometry.faces[i].normal.x;
-    						meshNormalArray[ 9*i+7 ] = child.geometry.faces[i].normal.y;
-    						meshNormalArray[ 9*i+8 ] = child.geometry.faces[i].normal.z;
+            content.traverse( function(child){
+            if( child instanceof THREE.Mesh ){
+                    var numVertices = child.geometry.vertices.length;
+                    var numFaces = child.geometry.faces.length;
+                    var numTexcoords = child.geometry.faceVertexUvs[0].length;
+                    var meshVertexArray = []; //vertex data
+                    var meshNormalArray = [];
+                    var meshIndexArray = [];
+                    var meshTexcoordArray = [];
+                    var point = 0;
 
 
-                var uv = UVs[i];
-                offset = 2*child.geometry.faces[i].a;
-                meshTexcoordArray[ 6*i ]   = uv[0].x;
-                meshTexcoordArray[ 6*i+1 ] = 1.0 - uv[0].y;
+                    console.log("start traverse OBJ");
+                    if( numFaces != 0 ){
+                        var texCount = textures.length;
+                        console.log("texCount: " +texCount);
+                        if( child.material.map !== null ){ 
+                            console.log("child mat map ");
+                            textures[texCount] = gl.createTexture();
+                            textures[texCount].map = child.material.map;
+                            //textures[texCount].map.image.src = child.material.map.image.src;
+                            textures[texCount].ready = false;  
+                           /* var url = child.material.map.image.toDataURL("image/jpeg", 1.0);
+                            console.log("image url: "+url);
+                            initTexture(gl,url, texCount);*/
+                        
+                          /*  for(var j = 0; j < texCount; j++){
+                                console.log("child mat map src: " + child.material.map.image.src);
+                                initTexture( gl, textures[texCount].map.src , j);  
+                            }    */                     
+                        }
+                        else{
+                            textures[texCount] = null;
+                        }
+                          //Array of texture coordinates of 1st layer texture 
+                          var UVs = child.geometry.faceVertexUvs[0]; 
 
-                offset = 2*child.geometry.faces[i].b;
-                meshTexcoordArray[ 6*i+2 ]   = uv[1].x;
-                meshTexcoordArray[ 6*i+3 ] = 1.0 - uv[1].y;
+                        //Extract faces info (UVs, normals, indices)
+                        for( var i = 0; i < numFaces;i++ ){
 
-                offset = 2*child.geometry.faces[i].c;
-                meshTexcoordArray[ 6*i+4 ]   = uv[2].x;
-                meshTexcoordArray[ 6*i+5 ] = 1.0 - uv[2].y;
+                            //Extract vertices info per face
+                            var offset = child.geometry.faces[i].a;
+                            meshVertexArray.push( child.geometry.vertices[offset].x);
+                            meshVertexArray.push( child.geometry.vertices[offset].y);
+                            meshVertexArray.push( child.geometry.vertices[offset].z);
+                            offset = child.geometry.faces[i].b;
+                            meshVertexArray.push( child.geometry.vertices[offset].x);
+                            meshVertexArray.push( child.geometry.vertices[offset].y);
+                            meshVertexArray.push( child.geometry.vertices[offset].z);
+                            offset = child.geometry.faces[i].c;
+                            meshVertexArray.push( child.geometry.vertices[offset].x);
+                            meshVertexArray.push( child.geometry.vertices[offset].y);
+                            meshVertexArray.push( child.geometry.vertices[offset].z);
 
-    					}
-              console.log( 'num of faces '+numFaces);
+                            meshIndexArray.push( i*3 );
+                            meshIndexArray.push( i*3+1 );
+                            meshIndexArray.push( i*3+2 );
+                     
+                            var offset = 3*child.geometry.faces[i].a;
+                                        meshNormalArray[ 9*i ] = child.geometry.faces[i].normal.x;
+                                        meshNormalArray[ 9*i+1 ] = child.geometry.faces[i].normal.y;
+                                        meshNormalArray[ 9*i+2 ] = child.geometry.faces[i].normal.z;
+                                        
+                            offset = 3*child.geometry.faces[i].b; 
+                                        meshNormalArray[ 9*i+3 ] = child.geometry.faces[i].normal.x;
+                                        meshNormalArray[ 9*i+4 ] = child.geometry.faces[i].normal.y;
+                                        meshNormalArray[ 9*i+5 ] = child.geometry.faces[i].normal.z;
+                                        
+                            offset = 3*child.geometry.faces[i].c; 
+                                        meshNormalArray[ 9*i+6 ] = child.geometry.faces[i].normal.x;
+                                        meshNormalArray[ 9*i+7 ] = child.geometry.faces[i].normal.y;
+                                        meshNormalArray[ 9*i+8 ] = child.geometry.faces[i].normal.z;
 
-              vertexGroup.push( meshVertexArray );
-              normalGroup.push( meshNormalArray );
-              texcoordGroup.push( meshTexcoordArray );
-              indexGroup.push( meshIndexArray );
-    				}
-    			}
-    		});
+
+                            var uv = UVs[i];
+                            offset = 2*child.geometry.faces[i].a;
+                            meshTexcoordArray[ 6*i ]   = uv[0].x;
+                            meshTexcoordArray[ 6*i+1 ] = 1.0 - uv[0].y;
+
+                            offset = 2*child.geometry.faces[i].b;
+                            meshTexcoordArray[ 6*i+2 ]   = uv[1].x;
+                            meshTexcoordArray[ 6*i+3 ] = 1.0 - uv[1].y;
+
+                            offset = 2*child.geometry.faces[i].c;
+                            meshTexcoordArray[ 6*i+4 ]   = uv[2].x;
+                            meshTexcoordArray[ 6*i+5 ] = 1.0 - uv[2].y;
+
+                        }
+                     // console.log( 'num of faces '+numFaces);
+
+                      vertexGroup.push( meshVertexArray );
+                      normalGroup.push( meshNormalArray );
+                      texcoordGroup.push( meshTexcoordArray );
+                      indexGroup.push( meshIndexArray );
+                    }
+                }
+            });
             //Indicate the loading is completed
-    		ready = true;
-    	};
+            ready = true;
+        };
 
         if( mtl === null ){
+            console.log("no material: using obj THREE loader");
             loader = new THREE.OBJLoader();
             loader.load( filename, eventlistener );
         }
         else{
+            console.log("has material: using obj THREE mtl loader");
             loader = new THREE.OBJMTLLoader();
             loader.load(filename,mtl,eventlistener);
         }
@@ -156,25 +169,25 @@ CIS565WEBGLCORE.createOBJLoader = function(){
 
     return {
         ref: function(){
-        	return content;
+            return content;
         },
-        loadFromFile: function( gl, name,mtl){
-        	load( gl,name,mtl );
+        loadFromFile: function( gl, name, mtl){
+            load( gl,name,mtl );
         },
         numGroups: function(){
             return vertexGroup.length;
         },
         vertices: function(i){
-        	return vertexGroup[i];
+            return vertexGroup[i];
         },
         normals: function(i){
-        	return normalGroup[i];
+            return normalGroup[i];
         },
         indices: function(i){
-        	return indexGroup[i];
+            return indexGroup[i];
         },
         texcoords: function(i){
-        	return texcoordGroup[i];
+            return texcoordGroup[i];
         },
         numTextures: function(){
             return textures.length;
@@ -185,7 +198,7 @@ CIS565WEBGLCORE.createOBJLoader = function(){
         ///// The following 3 functions should be implemented for all objects
         ///// whose resources are retrieved asynchronously
         isReady: function(){
-        	var isReady = ready;
+            var isReady = ready;
             for( var i = 0; i < textures.length; ++i ){
                 if( textures[i] !== null && !textures[i].ready ){
 
@@ -197,7 +210,7 @@ CIS565WEBGLCORE.createOBJLoader = function(){
                 }
             }
 
-          console.log( isReady );
+          console.log( "obj textures ready? =" + isReady );
           return isReady;
         },
         addCallback: function( functor ){
@@ -219,6 +232,7 @@ var Model = function (gl, objLoader) {
   var vbo = [];
   var ibo = [];
   var nbo = [];
+  var tbo = [];
   var iboLength = [];
 
   for (var i = 0; i < numGroups; i++) {
@@ -226,7 +240,7 @@ var Model = function (gl, objLoader) {
     vbo[i] = gl.createBuffer();
     ibo[i] = gl.createBuffer();
     nbo[i] = gl.createBuffer();
-
+    tbo[i] = gl.createBuffer();
     // Add vbo, ibo, nbo and tbo
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo[i]);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(objLoader.vertices(i)), gl.STATIC_DRAW);
@@ -236,6 +250,10 @@ var Model = function (gl, objLoader) {
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo[i]);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(objLoader.indices(i)), gl.STATIC_DRAW);
+
+       gl.bindBuffer(gl.ARRAY_BUFFER, tbo[i]);
+   // console.log("texture coord number: " + objLoader.texcoords(i).length);
+    gl.bufferData(gl.ARRAY_BUFFER, new Uint32Array(objLoader.texcoords(i)), gl.STATIC_DRAW);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
@@ -253,6 +271,12 @@ var Model = function (gl, objLoader) {
     nbo: function(i) {
       return nbo[i];
     }, 
+    tbo: function(i){
+        return tbo[i];
+    },
+    texture: function(){
+        return objLoader.texture(i);
+    },
     numGroups: function() {
       return numGroups;
     },

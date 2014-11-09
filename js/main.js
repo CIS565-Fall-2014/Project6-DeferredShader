@@ -16,6 +16,7 @@ var quad = {};  // Empty object for full-screen quad
 // Framebuffer
 var fbo = null;
 
+
 // Shader programs
 var passProg;     // Shader program for G-Buffer
 var shadeProg;    // Shader program for P-Buffer
@@ -27,10 +28,12 @@ var posProg;
 var normProg;
 var colorProg;
 
-var isDiagnostic = true;
+var isDiagnostic = false;
 var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
+
+var testTex;
 
 var main = function (canvasId, messageId) {
   var canvas;
@@ -47,8 +50,10 @@ var main = function (canvasId, messageId) {
   // Set up models
   initObjs();
 
+
   // Set up shaders
   initShaders();
+
 
   // Register our render callbacks
   CIS565WEBGLCORE.render = render;
@@ -80,20 +85,55 @@ var render = function () {
   gl.useProgram(null);
 };
 
+function initializeTexture(texture, src) {
+  texture.image = new Image();
+  texture.image.onload = function() {
+    initLoadedTexture(texture);
+
+  }
+  texture.image.src = src;
+}
+
+
+
+function initLoadedTexture(texture){
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+  gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+
 var drawModel = function (program, mask) {
   // Bind attributes
   for(var i = 0; i < model.numGroups(); i++) {
-    if (mask & 0x1) {
+   // if (mask & 0x1) {
       gl.bindBuffer(gl.ARRAY_BUFFER, model.vbo(i));
       gl.vertexAttribPointer(program.aVertexPosLoc, 3, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(program.aVertexPosLoc);
-    }
+  //  }
 
-    if (mask & 0x2) {
+   // if (mask & 0x2) {
       gl.bindBuffer(gl.ARRAY_BUFFER, model.nbo(i));
       gl.vertexAttribPointer(program.aVertexNormalLoc, 3, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(program.aVertexNormalLoc);
-    }
+   // }
+
+    // if (mask & 0x3) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, model.tbo(i));
+      gl.vertexAttribPointer(program.aVertexTexcoordLoc, 2, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(program.aVertexTexcoordLoc);
+  //  }
+
+   /*  if (mask & 0x4) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, model.texture(i));
+      gl.vertexAttribPointer(program.aVertexTexcoordLoc, 2, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(program.aVertexTexcoordLoc);
+    }*/
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.ibo(i));
     gl.drawElements(gl.TRIANGLES, model.iboLength(i), gl.UNSIGNED_SHORT, 0);
@@ -101,7 +141,7 @@ var drawModel = function (program, mask) {
 
   if (mask & 0x1) gl.disableVertexAttribArray(program.aVertexPosLoc);
   if (mask & 0x2) gl.disableVertexAttribArray(program.aVertexNormalLoc);
-
+  if (mask & 0x3) gl.disableVertexAttribArray(program.aVertexTexcoordLoc);
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 };
@@ -133,19 +173,20 @@ var renderPass = function () {
   gl.enable(gl.DEPTH_TEST);
 
   gl.useProgram(passProg.ref());
-
-  //update the model-view matrix
   var mvpMat = mat4.create();
   mat4.multiply( mvpMat, persp, camera.getViewTransform() );
-
-  //update the normal matrix
   var nmlMat = mat4.create();
   mat4.invert( nmlMat, camera.getViewTransform() );
   mat4.transpose( nmlMat, nmlMat);
 
   gl.uniformMatrix4fv( passProg.uModelViewLoc, false, camera.getViewTransform());        
   gl.uniformMatrix4fv( passProg.uMVPLoc, false, mvpMat );        
-  gl.uniformMatrix4fv( passProg.uNormalMatLoc, false, nmlMat );       
+  gl.uniformMatrix4fv( passProg.uNormalMatLoc, false, nmlMat );  
+
+  gl.activeTexture( gl.TEXTURE5 );  //texture
+  //gl.bindTexture( gl.TEXTURE_2D, model.texture(0) );
+  gl.bindTexture(gl.TEXTURE_2D, testTex);
+  gl.uniform1i(passProg.uSamplerLoc, 5);     
 
   drawModel(passProg, 0x3);
 
@@ -176,7 +217,7 @@ var renderMulti = function () {
 
   fbo.bind(gl, FBO_GBUFFER_NORMAL);
   gl.clear(gl.COLOR_BUFFER_BIT);
-
+  gl.enable(gl.DEPTH_TEST);
   gl.useProgram(normProg.ref());
 
   //update the normal matrix
@@ -211,29 +252,35 @@ var renderShade = function () {
 
   // Bind FBO
   fbo.bind(gl, FBO_PBUFFER);
-
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Bind necessary textures
-  //gl.activeTexture( gl.TEXTURE0 );  //position
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
-  //gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
+  gl.activeTexture( gl.TEXTURE0 );  //position
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
+  gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
 
-  //gl.activeTexture( gl.TEXTURE1 );  //normal
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  //gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
+  gl.activeTexture( gl.TEXTURE1 );  //normal
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
+  gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
+
 
   gl.activeTexture( gl.TEXTURE2 );  //color
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( shadeProg.uColorSamplerLoc, 2 );
 
-  //gl.activeTexture( gl.TEXTURE3 );  //depth
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  //gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
+  gl.activeTexture( gl.TEXTURE3 );  //depth
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
+
+  /*gl.activeTexture( gl.TEXTURE4 );  //light
+  gl.bindTexture( gl.TEXTURE_2D, lightPosTex);
+  //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, lightPosArray.length/3, 1.0, 0, gl.RGB, gl.FLOAT, new Float32Array(lightPosition));
+  gl.uniform1i( shadeProg.uLightPosTexLoc, 4 );*/
+
 
   // Bind necessary uniforms 
-  //gl.uniform1f( shadeProg.uZNearLoc, zNear );
-  //gl.uniform1f( shadeProg.uZFarLoc, zFar );
+  gl.uniform1f( shadeProg.uZNearLoc, zNear );
+  gl.uniform1f( shadeProg.uZFarLoc, zFar );
   
   drawQuad(shadeProg);
 
@@ -272,6 +319,7 @@ var renderDiagnostic = function () {
   drawQuad(diagProg);
 };
 
+
 var renderPost = function () {
   gl.useProgram(postProg.ref());
 
@@ -305,35 +353,38 @@ var initGL = function (canvasId, messageId) {
   gl.depthFunc(gl.LESS);
 };
 
+
+
+
 var initCamera = function () {
   // Setup camera
   persp = mat4.create();
   mat4.perspective(persp, todeg(60), canvas.width / canvas.height, 0.1, 2000);
 
   camera = CIS565WEBGLCORE.createCamera(CAMERA_TRACKING_TYPE);
-  camera.goHome([0, 0, 4]);
+  camera.goHome([0, 0, 3]);
   interactor = CIS565WEBGLCORE.CameraInteractor(camera, canvas);
 
   // Add key-input controls
   window.onkeydown = function (e) {
     interactor.onKeyDown(e);
     switch(e.keyCode) {
-      case 48:
+      case 48:   //0
         isDiagnostic = false;
         break;
-      case 49:
+      case 49:    //1
         isDiagnostic = true;
         texToDisplay = 1;
         break;
-      case 50: 
+      case 50:     //2
         isDiagnostic = true;
         texToDisplay = 2;
         break;
-      case 51:
+      case 51:    //3
         isDiagnostic = true;
         texToDisplay = 3;
         break;
-      case 52:
+      case 52:  //4
         isDiagnostic = true;
         texToDisplay = 4;
         break;
@@ -346,12 +397,17 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
-
+  //objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+ // objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", "assets/models/crytek-sponza/sponza.mtl")
+//objloader.loadFromFile(gl, "assets/models/sphere/sphere.obj", "assets/models/sphere/sphere.mtl");
+objloader.loadFromFile(gl, "assets/models/sphere/sphere.obj", "assets/models/sphere/sphere.mtl");
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
     model = new Model(gl, objloader);
   });
+
+testTex = gl.createTexture();
+initializeTexture(testTex, "assets/models/sphere/sphere.jpg");
 
   // Register callback item
   CIS565WEBGLCORE.registerAsyncObj(gl, objloader);
@@ -407,7 +463,6 @@ var initShaders = function () {
       posProg.uModelViewLoc = gl.getUniformLocation(posProg.ref(), "u_modelview");
       posProg.uMVPLoc = gl.getUniformLocation(posProg.ref(), "u_mvp");
     });
-
     CIS565WEBGLCORE.registerAsyncObj(gl, posProg);
 
     normProg = CIS565WEBGLCORE.createShaderProgram();
@@ -419,7 +474,6 @@ var initShaders = function () {
       normProg.uMVPLoc = gl.getUniformLocation(normProg.ref(), "u_mvp");
       normProg.uNormalMatLoc = gl.getUniformLocation(normProg.ref(), "u_normalMat");
     });
-
     CIS565WEBGLCORE.registerAsyncObj(gl, normProg);
 
     colorProg = CIS565WEBGLCORE.createShaderProgram();
@@ -429,7 +483,6 @@ var initShaders = function () {
 
       colorProg.uMVPLoc = gl.getUniformLocation(colorProg.ref(), "u_mvp");
     });
-
     CIS565WEBGLCORE.registerAsyncObj(gl, colorProg);
   }
 
@@ -462,6 +515,7 @@ var initShaders = function () {
     shadeProg.uNormalSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_normalTex");
     shadeProg.uColorSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_colorTex");
     shadeProg.uDepthSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_depthTex");
+    shadeProg.uLightPosTexLoc = gl.getUniformLocation( shadeProg.ref(), "u_lightPosTex");
 
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );

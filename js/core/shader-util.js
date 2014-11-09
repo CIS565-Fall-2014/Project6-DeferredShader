@@ -22,7 +22,7 @@ CIS565WEBGLCORE.createShaderProgram = function(){
 	  // Register a callback function  
 		request.onreadystatechange = function(){
             
-		  if( request.readyState === 4 && request.status !== 404 ){
+		  if( request.readyState == 4 && request.status != 404 ){
 				onLoadShader( gl, request.responseText, shader );
 			}
 		}
@@ -33,13 +33,13 @@ CIS565WEBGLCORE.createShaderProgram = function(){
 
 	function onLoadShader( gl, fileString, type )
 	{
-		if( type === gl.VERTEX_SHADER ){
+		if( type == gl.VERTEX_SHADER ){
 			VERTEX_SHADER_SRC = fileString;
-      console.log( fileString );
+      //console.log( fileString );
 		}
-		else if( type === gl.FRAGMENT_SHADER ){
+		else if( type == gl.FRAGMENT_SHADER ){
 			FRAGMENT_SHADER_SRC = fileString;
-      console.log( fileString );
+      //console.log( fileString );
 		}
 
 		if( VERTEX_SHADER_SRC && FRAGMENT_SHADER_SRC ){
@@ -97,7 +97,7 @@ CIS565WEBGLCORE.createShaderProgram = function(){
 	function createShaderObj( gl, shader_type, shader_src ){
 		var status, error;
         var shader = gl.createShader( shader_type );
-        if( shader === null ){
+        if( shader == null ){
         	console.log( 'Create shader failed.' );
         	return null;
         }
