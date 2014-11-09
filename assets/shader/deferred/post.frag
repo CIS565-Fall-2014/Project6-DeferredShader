@@ -20,8 +20,8 @@ float rand(vec2 co){
   return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
-float hash( float n ) //Borrowed from voltage
-{
+//Generate -1~1
+float hash( float n ){ //Borrowed from voltage
     return fract(sin(n)*43758.5453);
 }
 
@@ -37,22 +37,22 @@ void main()
 	float depth = texture2D(u_depthTex, v_texcoord).r;
 	depth = linearizeDepth( depth, u_zNear, u_zFar );
 	
-	vec2 v_TexcoordOffsetRight = v_texcoord + vec2(1.0/960.0, 0.0);
+	vec2 v_TexcoordOffsetRight = v_texcoord + vec2(2.0/960.0, 0.0);
 	float depthOffestRight = texture2D(u_depthTex, v_TexcoordOffsetRight).r;
 	vec3 normalOffestRight = texture2D( u_normalTex, v_TexcoordOffsetRight).rgb;  
 	float angleWithRight = dot(normal, normalOffestRight);
 
 
-	vec2 v_TexcoordOffsetUp = v_texcoord + vec2(0.0, 1.0/540.0);
+	vec2 v_TexcoordOffsetUp = v_texcoord + vec2(0.0, 2.0/540.0);
 	float depthOffestUp = texture2D(u_depthTex, v_TexcoordOffsetUp).r;
 	vec3 normalOffestUp = texture2D( u_normalTex, v_TexcoordOffsetUp).rgb; 
 	float angleWithUp = dot(normal, normalOffestUp);
 
-	vec2 v_TexcoordOffsetLeft = v_texcoord - vec2(1.0/960.0, 0.0);
+	vec2 v_TexcoordOffsetLeft = v_texcoord - vec2(2.0/960.0, 0.0);
 	vec3 normalOffestLeft = texture2D( u_normalTex, v_TexcoordOffsetLeft).rgb; 
 	float angleWithLeft = dot(normal, normalOffestLeft);
 	
-	vec2 v_TexcoordOffsetDown = v_texcoord - vec2(0.0, 1.0/540.0);
+	vec2 v_TexcoordOffsetDown = v_texcoord - vec2(0.0, 2.0/540.0);
 	vec3 normalOffestDown = texture2D( u_normalTex, v_TexcoordOffsetDown).rgb; 
 	float angleWithDown = dot(normal, normalOffestDown);
 	float seg = 0.2;
@@ -86,22 +86,26 @@ void main()
 	}
 	else if(u_displayType == 8){
 		if(color.x == 1.0){
-			gl_FragColor = vec4( depth, depth, depth, 1.0 );	
+			//gl_FragColor = vec4( depth, depth, depth, 1.0 );	
 			int count = 0;
 			float radius = 0.01;
-			int kernelSize = 200;/*
-			for (int i = 0; i < kernelSize; ++i) {
-				vec3 ran = vec3(
-				random(-1.0f, 1.0f),
-				random(-1.0f, 1.0f),
-				random(0.0f, 1.0f));
-				ran = normalize(ran);
+			int kernelSize = 100;
+
+			for(int i = 0; i < 100; ++i){
+				vec3 rand = vec3(hash(float(i)),
+								 hash(float(i + 100)),
+								 hash(float(i + 2 * 100)));
+				rand = normalize(rand);
 				
 				float scale = float(i) / float(kernelSize);
-				scale = lerp(0.1f, 1.0f, scale * scale);
-				ran = ran * scale;
+				scale = mix(0.1, 1.0, scale * scale);
+				rand = rand * scale;
 			}
 			
+			vec3 normalFrag = texture2D(u_normalTex, v_texcoord).xyz * 2.0 - 1.0;
+			normalFrag = normalize(normalFrag);
+			
+			/*
 			float occlusion = 0.0;
 				for (int i = 0; i < uSampleKernelSize; ++i) {
 				// get sample position:
@@ -122,21 +126,6 @@ void main()
 				occlusion += (sampleDepth <= sample.z ? 1.0 : 0.0) * rangeCheck;
 			}*/
 			
-			/*for(int i = 0; i < 18; ++i){
-				for(int j = 0; j < 10; ++j){
-					float phi;
-					float theta;
-					float dis = float(j) / 10.0;
-					float disX = dis * cos(float(i) / 18.0 * 2.0 * 3.1415926);
-					float disY = dis * sin(float(i) / 18.0 * 2.0 * 3.1415926);	
-					float testDepth = depth + radius * sin(phi) * cos(theta);
-					vec2 v_TexcoordOffset = v_texcoord + vec2(disX, disY);
-					float depthOffest = texture2D(u_depthTex, v_TexcoordOffset).r;
-					
-					if(testDepth < depthOffest)
-						count++;
-				}
-			}*/
 			
 		}
 	}
@@ -144,9 +133,9 @@ void main()
 		int count =0;
 		for(int i = 0; i < 10; ++i){
 			for(int j = 0; j < 10; ++j){
-				vec3 colorExam = texture2D( u_colorTex, v_texcoord + vec2(float(i-5)/960.0, float(j-5)/540.0)).rgb; 
+				vec3 colorExam = texture2D( u_colorTex, v_texcoord + vec2(float(i*2-10)/960.0, float(j*2-10)/540.0)).rgb; 
 				if(colorExam.x != 1.0)
-					count++;
+					count += 2;
 			}
 		}
 		
