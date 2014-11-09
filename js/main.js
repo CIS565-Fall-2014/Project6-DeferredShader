@@ -248,33 +248,38 @@ var renderShade = function () {
 };
 
 var renderPost = function () {
-  gl.useProgram(postProg.ref());
+	gl.useProgram(postProg.ref());
 
-  gl.disable(gl.DEPTH_TEST);
-  gl.clear(gl.COLOR_BUFFER_BIT);
+	gl.disable(gl.DEPTH_TEST);
+	gl.clear(gl.COLOR_BUFFER_BIT);
 
-  gl.activeTexture( gl.TEXTURE0 );  //position
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
-  gl.uniform1i( postProg.uPosSamplerLoc, 0 );
-  
-  gl.activeTexture( gl.TEXTURE1 );  //normal
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  gl.uniform1i( postProg.uNormalSamplerLoc, 1 );
-  
-  // Bind necessary textures
-  gl.activeTexture( gl.TEXTURE2 );  //color
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
-  gl.uniform1i( postProg.uColorSamplerLoc, 2 );
-  
+	gl.activeTexture( gl.TEXTURE0 );  //position
+	gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
+	gl.uniform1i( postProg.uPosSamplerLoc, 0 );
 
-  
-  gl.activeTexture( gl.TEXTURE4 );
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
-  gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
+	gl.activeTexture( gl.TEXTURE1 );  //normal
+	gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
+	gl.uniform1i( postProg.uNormalSamplerLoc, 1 );
 
-  gl.uniform1i( postProg.uDisplayTypeLoc, texToDisplay ); 
+	// Bind necessary textures
+	gl.activeTexture( gl.TEXTURE2 );  //color
+	gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
+	gl.uniform1i( postProg.uColorSamplerLoc, 2 );
+	
+	gl.activeTexture( gl.TEXTURE3 );  //depth
+	gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+	gl.uniform1i( postProg.uDepthSamplerLoc, 3 ); 
+
+
+	gl.activeTexture( gl.TEXTURE4 );
+	gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
+	gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
+
+	gl.uniform1i( postProg.uDisplayTypeLoc, texToDisplay ); 
+	gl.uniform1f( postProg.uZNearLoc, zNear );
+	gl.uniform1f( postProg.uZFarLoc, zFar );
   
-  drawQuad(postProg);
+	drawQuad(postProg);
 };
 
 var renderDiagnostic = function () {
@@ -361,7 +366,12 @@ var initCamera = function () {
         isDiagnostic = true;
         texToDisplay = 4;
         break;
-		
+	
+	  case 55://7
+        isDiagnostic = false;
+        texToDisplay = 7;
+        break;
+	
 	  case 56://8
         isDiagnostic = false;
         texToDisplay = 8;
@@ -518,7 +528,8 @@ var initShaders = function () {
     postProg.uColorSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_colorTex");
     postProg.uDepthSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_depthTex");
 	postProg.uModelViewLoc = gl.getUniformLocation(postProg.ref(), "u_modelview");
-	
+	postProg.uZNearLoc = gl.getUniformLocation( postProg.ref(), "u_zNear" );
+    postProg.uZFarLoc = gl.getUniformLocation( postProg.ref(), "u_zFar" );
 
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
 	postProg.uDisplayTypeLoc = gl.getUniformLocation( postProg.ref(), "u_displayType" );

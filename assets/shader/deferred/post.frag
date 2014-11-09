@@ -7,10 +7,22 @@ uniform sampler2D u_colorTex;
 uniform sampler2D u_depthTex;
 uniform int u_displayType;
 
+uniform float u_zFar;
+uniform float u_zNear;
+
 varying vec2 v_texcoord;
 
 float linearizeDepth( float exp_depth, float near, float far ){
 	return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
+}
+
+float rand(vec2 co){
+  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+float hash( float n ) //Borrowed from voltage
+{
+    return fract(sin(n)*43758.5453);
 }
 
 void main()
@@ -23,7 +35,8 @@ void main()
 	vec3 color = texture2D( u_colorTex, v_texcoord).rgb; 
 	vec3 position = texture2D( u_positionTex, v_texcoord).rgb; 
 	float depth = texture2D(u_depthTex, v_texcoord).r;
-	//depth = linearizeDepth( depth, u_zNear, u_zFar );
+	depth = linearizeDepth( depth, u_zNear, u_zFar );
+	
 	vec2 v_TexcoordOffsetRight = v_texcoord + vec2(1.0/960.0, 0.0);
 	float depthOffestRight = texture2D(u_depthTex, v_TexcoordOffsetRight).r;
 	vec3 normalOffestRight = texture2D( u_normalTex, v_TexcoordOffsetRight).rgb;  
@@ -42,26 +55,27 @@ void main()
 	vec2 v_TexcoordOffsetDown = v_texcoord - vec2(0.0, 1.0/540.0);
 	vec3 normalOffestDown = texture2D( u_normalTex, v_TexcoordOffsetDown).rgb; 
 	float angleWithDown = dot(normal, normalOffestDown);
-
-	float toonShadingR = 0.1 * float(int(shade.r / 0.1));
-	float toonShadingG = 0.1 * float(int(shade.g / 0.1));
-	float toonShadingB = 0.1 * float(int(shade.b / 0.1));
+	float seg = 0.2;
+	float toonShadingR = seg * float(int(shade.r / seg));
+	float toonShadingG = seg * float(int(shade.g / seg));
+	float toonShadingB = seg * float(int(shade.b / seg));
 	vec3 toonShading = vec3(toonShadingR, toonShadingG, toonShadingB);
 
 	gl_FragColor = vec4(shade, 1.0);
 	float threshold = 0.5;
 	
+
+	
 	if (u_displayType == 0){
-		if(color.x != 1.0){
-			gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); 
-	    }
-		else
+		//if(color.x != 1.0){
+		//	gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); 
+	    //}
+		//else
 			gl_FragColor = vec4(shade, 1.0); 
 	}
 	else if(u_displayType == 9){//Toon shading
 		if(color.x == 1.0){
 			if(angleWithRight < threshold || angleWithUp < threshold || angleWithLeft < threshold || angleWithDown < threshold)
-			//if(abs(depth - depthOffestRight) > 0.05 || abs(depth - depthOffestUp) > 0.05)
 				gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 			else
 				gl_FragColor = vec4(toonShading, 1.0); 	
@@ -70,9 +84,77 @@ void main()
 			gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 		}
 	}
-	else ifu_displayType == 8){
-	
+	else if(u_displayType == 8){
+		if(color.x == 1.0){
+			gl_FragColor = vec4( depth, depth, depth, 1.0 );	
+			int count = 0;
+			float radius = 0.01;
+			int kernelSize = 200;/*
+			for (int i = 0; i < kernelSize; ++i) {
+				vec3 ran = vec3(
+				random(-1.0f, 1.0f),
+				random(-1.0f, 1.0f),
+				random(0.0f, 1.0f));
+				ran = normalize(ran);
+				
+				float scale = float(i) / float(kernelSize);
+				scale = lerp(0.1f, 1.0f, scale * scale);
+				ran = ran * scale;
+			}
+			
+			float occlusion = 0.0;
+				for (int i = 0; i < uSampleKernelSize; ++i) {
+				// get sample position:
+				vec3 sample = tbn * uSampleKernel[i];
+				sample = sample * uRadius + origin;
+
+				// project sample position:
+				vec4 offset = vec4(sample, 1.0);
+				offset = uProjectionMat * offset;
+				offset.xy /= offset.w;
+				offset.xy = offset.xy * 0.5 + 0.5;
+
+				// get sample depth:
+				float sampleDepth = texture(uTexLinearDepth, offset.xy).r;
+
+				// range check & accumulate:
+				float rangeCheck= abs(origin.z - sampleDepth) < uRadius ? 1.0 : 0.0;
+				occlusion += (sampleDepth <= sample.z ? 1.0 : 0.0) * rangeCheck;
+			}*/
+			
+			/*for(int i = 0; i < 18; ++i){
+				for(int j = 0; j < 10; ++j){
+					float phi;
+					float theta;
+					float dis = float(j) / 10.0;
+					float disX = dis * cos(float(i) / 18.0 * 2.0 * 3.1415926);
+					float disY = dis * sin(float(i) / 18.0 * 2.0 * 3.1415926);	
+					float testDepth = depth + radius * sin(phi) * cos(theta);
+					vec2 v_TexcoordOffset = v_texcoord + vec2(disX, disY);
+					float depthOffest = texture2D(u_depthTex, v_TexcoordOffset).r;
+					
+					if(testDepth < depthOffest)
+						count++;
+				}
+			}*/
+			
+		}
 	}
+	else if(u_displayType == 7){
+		int count =0;
+		for(int i = 0; i < 10; ++i){
+			for(int j = 0; j < 10; ++j){
+				vec3 colorExam = texture2D( u_colorTex, v_texcoord + vec2(float(i-5)/960.0, float(j-5)/540.0)).rgb; 
+				if(colorExam.x != 1.0)
+					count++;
+			}
+		}
+		
+		gl_FragColor = vec4(shade + vec3(float(count) / 100.0, float(count) / 100.0, float(count) / 100.0), 1.0);
+	}
+	
+	
+	
   /*
   if(abs(depth - depthOffestRight) > 0.05 || abs(depth - depthOffestUp) > 0.05)
   //if(angleWithRight<1.0 || angleWithUp<1.0)
