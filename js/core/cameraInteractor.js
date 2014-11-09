@@ -67,34 +67,34 @@ CIS565WEBGLCORE.CameraInteractor = function(camera,canvas){
 		ctrl = ev.ctrlKey;
 		
 		if (!ctrl){
-			if (key == 38){
+			if (key == 38){//Up
 				camera.changeElevation(10);
 			}
-			else if (key == 40){
+			else if (key == 40){//Down
 				camera.changeElevation(-10);
 			}
-			else if (key == 37){
+			else if (key == 37){//Left
 				camera.changeAzimuth(-10);
 			}
-			else if (key == 39){
+			else if (key == 39){//Right
 				camera.changeAzimuth(10);
 			}
-			else if( key == 87 ){
+			else if( key == 87 ){//Key W
 				camera.moveForward();
 			}
-			else if( key == 65){
+			else if( key == 65){//Key A
 				camera.moveLeft();
 			}
-			else if( key == 83 ){
+			else if( key == 83 ){//Key S
 				camera.moveBackward();
 			}
-			else if( key == 68 ){
+			else if( key == 68 ){//Key D
 				camera.moveRight();
 			}
-			else if( key == 82 ){
+			else if( key == 82 ){//Key R
 				camera.moveUp();
 			}
-			else if( key == 70 ){
+			else if( key == 70 ){//Key F
 				camera.moveDown();
 			}
 	
