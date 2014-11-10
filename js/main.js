@@ -300,7 +300,7 @@ var initGL = function (canvasId, messageId) {
 
   // Set up WebGL stuff
   gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.clearColor(0.3, 0.3, 0.3, 1.0);
+  gl.clearColor(0.0, 0.0, 0.0, 0.0);
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LESS);
 };
