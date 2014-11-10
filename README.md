@@ -66,20 +66,20 @@ FEATURES
 -------------------------------------------------------------------------------
 
 
-* Diffuse Shading  
+* **Diffuse Shading**  
 ![Lambert](/pics/lambert.png)
 
-* Blinn Shading  
+* **Blinn Shading**  
 ![Blinn](/pics/blinn.png)
 
-* Bloom  
+* **Bloom**  
 Bloom was done by 2 Guassian filters on color, one is 5x5, and the other one is 21x21.
 Two of them together creates nice blurring bloom effect.  
 ![Bloom](/pics/bloom1.png)  
 
 
 
-* Toon Shading + Sobel Filter Silhouette  
+* **Toon Shading + Sobel Filter Silhouette**  
 Toon shading was done by color quantization based on deffuse term, i.e. `dot(lightDir, normal)`.   
 Silhouette/outline was done by Sobel filter on illumination, i.e `0.3*r + 0.59*g + 0.11*b`.  
 A median filter or other anti-aliasing method could be useful to smooth out the toon shading.  
@@ -88,7 +88,7 @@ A median filter or other anti-aliasing method could be useful to smooth out the 
  
 
 
-* Screen Space Ambient Occlusion 
+* **Screen Space Ambient Occlusion** 
 
 You must implement two of the following extras:
 * The effect you did not choose above
@@ -99,7 +99,7 @@ You must implement two of the following extras:
 * Optimize g-buffer format, e.g., pack things together, quantize, reconstruct z from normal x and y (because it is normalized), etc.
   * Must be accompanied with a performance analysis to count
 * Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
-* Some Interesting Debugging Images
+* **Some Interesting Debugging Images**
 ![Normal](/pics/normal.png)
 
 RUNNING THE CODE
