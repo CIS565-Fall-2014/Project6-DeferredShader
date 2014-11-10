@@ -21,12 +21,10 @@ KEYBOARDS
 * D - Right
 * R - Up
 * F - Down
-
 * ^ - Up
 * v - Down
 * < - Left
 * > - Right
-
 * 1 - World Space Position
 * 2 - Normals
 * 3 - Color
