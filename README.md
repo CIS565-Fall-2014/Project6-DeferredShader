@@ -12,8 +12,7 @@ Please also ensure that you have below WebGL extensions, `OES_texture_float`, `O
 Recommendation is to use latest Firefox / Chrome running on GPU, and with D3D11.
 
 
--------------------------------------------------------------------------------
-KEYBOARDS:
+KEYBOARDS
 -------------------------------------------------------------------------------
 
 * W - Zoom in
@@ -38,8 +37,7 @@ KEYBOARDS:
 
 * mouse - camera rotation
 
--------------------------------------------------------------------------------
-PIPELINE:
+PIPELINE
 -------------------------------------------------------------------------------
 The deferred shader you will write will have the following stages:
 
@@ -65,20 +63,20 @@ Stage 3 renders the post processing
 * post.frag
 
 
--------------------------------------------------------------------------------
-FEATURES:
+
+FEATURES
 -------------------------------------------------------------------------------
 
 
-* Diffuse Shading
+* Diffuse Shading  
 ![Lambert](/pics/lambert.png)
 
-* Blinn Shading
+* Blinn Shading  
 ![Blinn](/pics/blinn.png)
 
-* Either of the following effects
-  * Bloom
-  * "Toon" Shading (with basic silhouetting)
+* Bloom  
+![Bloom](/pics/bloom1.png)
+* "Toon" Shading (with basic silhouetting)
 * Screen Space Ambient Occlusion 
 
 You must implement two of the following extras:
@@ -91,8 +89,8 @@ You must implement two of the following extras:
   * Must be accompanied with a performance analysis to count
 * Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
 
--------------------------------------------------------------------------------
-RUNNING THE CODE:
+
+RUNNING THE CODE
 -------------------------------------------------------------------------------
 
 Since the code attempts to access files that are local to your computer, you will either need to:
@@ -119,12 +117,10 @@ machine from the root directory of this repository with the following command:
 `python -m SimpleHTTPServer`
 
 
--------------------------------------------------------------------------------
 PERFORMANCE EVALUATION
 -------------------------------------------------------------------------------
 
 
--------------------------------------------------------------------------------
 REFERRENCES
 -------------------------------------------------------------------------------
 * Bloom : [GPU Gems](http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html) 

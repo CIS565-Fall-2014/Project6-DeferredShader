@@ -20,7 +20,7 @@ CIS565WEBGLCORE.createFBO = function(){
      var depthTex = null;
      var fbo = [];
 
-     var multipleTargets = false;
+     var multipleTargets = true;
 
      function init( gl, width, height ){
      	gl.getExtension( "OES_texture_float" );

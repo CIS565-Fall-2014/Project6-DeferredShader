@@ -13,6 +13,9 @@ uniform float u_zFar;
 uniform float u_zNear;
 uniform int u_displayType;
 
+//uniform float u_kernel[25];    //5*5 kernel
+//uniform float u_offset;     //texture coord offset
+
 varying vec2 v_texcoord;
 
 float linearizeDepth( float exp_depth, float near, float far ){
@@ -25,12 +28,13 @@ void main()
 	vec3 normal = texture2D(u_normalTex,v_texcoord).xyz;
 	vec3 color = texture2D(u_colorTex,v_texcoord).xyz;
 	float depth = texture2D(u_depthTex,v_texcoord).x;
-
+	depth = linearizeDepth(depth, u_zNear, u_zFar);
+	
 	float diffuseTerm = abs(dot( normal,  normalize(u_lightDir )));
 	diffuseTerm =  clamp(diffuseTerm, 0.0, 1.0) ;
 	  
 	if(u_displayType == 1){
-		gl_FragColor = vec4(color, 1.0);
+		gl_FragColor = vec4(depth,depth,depth, 1.0);
 	}
 	if(u_displayType == 5){  
 		gl_FragColor = vec4(0.6*diffuseTerm * u_lightColor * color , 1.0);
@@ -45,8 +49,10 @@ void main()
 		gl_FragColor = vec4((0.6*diffuseTerm + 0.4 * specularTerm )* u_lightColor * color , 1.0);
 	}
 	else if(u_displayType == 7){
-			gl_FragColor = vec4(color, depth);
-
+	
+		//gl_FragColor = vec4(color, depth);
+		gl_FragColor = vec4(0.6*diffuseTerm * u_lightColor * color ,depth);
+		
 	}
 		
 	//gl_FragColor = vec4(u_lightColor,1.0);

@@ -30,7 +30,7 @@ void main()
 
 	depth = linearizeDepth( depth, u_zNear, u_zFar );
 
-  if( u_displayType == DISPLAY_DEPTH )
+    if( u_displayType == DISPLAY_DEPTH )
 	    gl_FragColor = vec4( depth, depth, depth, 1 );
 	else if( u_displayType == DISPLAY_COLOR )
 	    gl_FragColor = color;
