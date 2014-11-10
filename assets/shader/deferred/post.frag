@@ -15,8 +15,21 @@ uniform int u_displayType;
 
 varying vec2 v_texcoord;
 
+float planeDistance(vec3 positionA, vec3 normalA, 
+                    vec3 positionB, vec3 normalB) {
+  vec3 positionDelta = positionB - positionA;
+  float planeDistanceDelta = max(abs(dot(positionDelta, normalA)), abs(dot(positionDelta, normalB)));
+  return planeDistanceDelta;
+}
+
+
+
 float linearizeDepth( float exp_depth, float near, float far ){
 	return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
+}
+
+float lum(vec4 col) {
+  return dot(col.xyz, vec3(0.3, 0.59, 0.11));
 }
 
 void main()
@@ -72,8 +85,25 @@ void main()
 		//	gl_FragColor = vec4(0.0,0.0,0.0,1.0);
 		//}
 		
+	  }
+	  else if(u_displayType == 8){
+		//obtain surrounding illumination
+		float t00 = lum(texture2D(u_shadeTex, v_texcoord + u_offset * vec2(-1, -1)));
+		float t10 = lum(texture2D(u_shadeTex, v_texcoord + u_offset * vec2( 0, -1)));
+		float t20 = lum(texture2D(u_shadeTex, v_texcoord + u_offset * vec2( 1, -1)));
+		float t01 = lum(texture2D(u_shadeTex, v_texcoord + u_offset * vec2(-1,  0)));
+		float t21 = lum(texture2D(u_shadeTex, v_texcoord + u_offset * vec2( 1,  0)));
+		float t02 = lum(texture2D(u_shadeTex, v_texcoord + u_offset * vec2(-1,  1)));
+		float t12 = lum(texture2D(u_shadeTex, v_texcoord + u_offset * vec2( 0,  1)));
+		float t22 = lum(texture2D(u_shadeTex, v_texcoord + u_offset * vec2( 1,  1)));
+		vec2 grad;
+		grad.x = t00 + 2.0*t01 + t02 - t20 - 2.0*t21 - t22;
+		grad.y = t00 + 2.0*t10 + t20 - t02 - 2.0*t12 - t22;
+		float len = length(grad);
+		vec3 edge = vec3(len,len,len);
+		gl_FragColor = vec4(edge + texture2D( u_shadeTex, v_texcoord).rgb, 1.0);
+
 		
-	
 	  }
   
 	

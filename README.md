@@ -55,7 +55,7 @@ Stage 2 renders the lighting passes and accumulates to the P-Buffer
 * quad.vert
 * diffuse.frag
 * diagnostic.frag
-
+illumation
 Stage 3 renders the post processing
 * quad.vert
 * post.frag
@@ -73,8 +73,16 @@ FEATURES
 ![Blinn](/pics/blinn.png)
 
 * Bloom  
-![Bloom](/pics/bloom1.png)
-* "Toon" Shading (with basic silhouetting)
+![Bloom](/pics/bloom1.png)  
+Bloom was done by 2 Guassian filters on color, one is 5x5, and the other one is 21x21.
+Two of them together creates nice blurring bloom effect.  
+
+
+* Toon Shading + Sobel Filter Silhouette  
+![Toon](/pics/toon.png)  
+Toon was done by Sobel filter on illumination.  
+
+
 * Screen Space Ambient Occlusion 
 
 You must implement two of the following extras:
@@ -125,6 +133,8 @@ REFERRENCES
 * Bloom: http://prideout.net/archive/bloom/
 * Screen Space Ambient Occlusion : [Floored Article](http://floored.com/blog/2013/ssao-screen-space-ambient-occlusion.html)
 * Toon Shader: http://www.lighthouse3d.com/tutorials/glsl-tutorial/toon-shader-version-ii/
-* Toon Sihlouette: http://prideout.net/blog/?p=54
+* Toon Silhouette: http://floored.com/blog/2014/sketch-rendering.html
+* Edge Detection: [Illumination Method]http://mewgen.com/webgl/s/sobel.html
+* Sobel Filter: [Sobel Filter Convolution] http://jabtunes.com/labs/3d/webgl_postprocessing2.html
 * Many thanks to Cheng-Tso Lin, whose framework for CIS700 we used for this assignment.
 * This project makes use of [three.js](http://www.threejs.org).

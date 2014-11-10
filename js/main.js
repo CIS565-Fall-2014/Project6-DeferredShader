@@ -551,6 +551,10 @@ var initCamera = function () {
         isDiagnostic = false;
         texToDisplay = 7;
         break;
+      case 56:  //8 = toon shading  + silhouette
+        isDiagnostic = false;
+        texToDisplay = 8;
+        break;
     }
   }
 };
