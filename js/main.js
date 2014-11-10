@@ -385,7 +385,7 @@ var renderPost = function () {
   gl.uniform1fv(postProg.uKernelLoc, kernel);   //pass in the 5*5 kernel
   gl.uniform1fv(postProg.uKernel2Loc, kernel2);   //pass in the 21*21 kernel
   gl.uniform1f(postProg.uOffsetLoc, 1.0 / canvas.width);
-
+  gl.uniform1f(postProg.uOffsetLoc2, 1.0 / canvas.height);
 
 /*  gl.activeTexture(gl.TEXTURE5);
   gl.bindTexture(gl.TEXTURE_2D, fbo2[i]);
@@ -565,9 +565,11 @@ var initObjs = function () {
 
   // Load the OBJ from file
   objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  //objloader.loadFromFile(gl, "assets/models/teapot/teapot.obj", null);
  // objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", "assets/models/crytek-sponza/sponza.mtl")
 //objloader.loadFromFile(gl, "assets/models/sphere/sphere.obj", "assets/models/sphere/sphere.mtl");
 //objloader.loadFromFile(gl, "assets/models/sphere/sphere.obj", "assets/models/sphere/sphere.mtl");
+
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
     model = new Model(gl, objloader);
@@ -714,6 +716,7 @@ var initShaders = function () {
     postProg.uKernelLoc = gl.getUniformLocation( postProg.ref(), "u_kernel");  // 25 * float 
     postProg.uKernel2Loc = gl.getUniformLocation( postProg.ref(), "u_kernel2");  // 21*21 * float 
     postProg.uOffsetLoc = gl.getUniformLocation( postProg.ref(), "u_offset");   //texture coord offset
+    postProg.uOffsetLoc2 = gl.getUniformLocation( postProg.ref(), "u_offset2");
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };
