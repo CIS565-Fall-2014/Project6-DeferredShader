@@ -32,6 +32,8 @@ KEYBOARDS:
 * 2 - Normals
 * 3 - Color
 * 4 - Depth
+* 5 - Diffuse Lambert Shading
+* 6 - Blinn Shading
 * 0 - Full deferred pipeline
 
 * mouse - camera rotation
@@ -45,38 +47,39 @@ Stage 1 renders the scene geometry to the G-Buffer
 * pass.vert
 * pass.frag
 
+Alternative Stage 1 (for devices that don't have Multiple Render Target)
+* posPass.vert
+* posPass.frag
+* normPass.vert
+* normPass.frag
+* colorPass.vert
+* colorPass.frag
+
 Stage 2 renders the lighting passes and accumulates to the P-Buffer
 * quad.vert
 * diffuse.frag
 * diagnostic.frag
 
 Stage 3 renders the post processing
-* post.vert
+* quad.vert
 * post.frag
 
 
 -------------------------------------------------------------------------------
-REQUIREMENTS:
+FEATURES:
 -------------------------------------------------------------------------------
 
-In this project, you are given code for:
-* Loading .obj file
-* Forward shading pipeline
 
-NOTE : The full deferred pipeline will be released on Friday.  If you set up
-your deferred pipeline for extra credit, please submit a pull request by Friday.
-If it is partially done, we will give partial extra credit.
+* Diffuse Shading
+![Lambert](/pics/lambert.png)
 
-The baseline OpenGL shaders for the rest of the pipeline have been provided to give you
-a sense of what will be neede in subsequent passes.
+* Blinn Shading
+![Blinn](/pics/blinn.png)
 
-You are required to implement:
 * Either of the following effects
   * Bloom
   * "Toon" Shading (with basic silhouetting)
 * Screen Space Ambient Occlusion 
-
-**NOTE**: Implementing separable convolution will require another link in your pipeline and will count as an extra feature if you do performance analysis with a standard one-pass 2D convolution. The overhead of rendering and reading from a texture _may_ offset the extra computations for smaller 2D kernels.
 
 You must implement two of the following extras:
 * The effect you did not choose above
@@ -125,7 +128,9 @@ PERFORMANCE EVALUATION
 REFERRENCES
 -------------------------------------------------------------------------------
 * Bloom : [GPU Gems](http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html) 
-* Screen Space Ambient Occlusion : [Floored
-  Article](http://floored.com/blog/2013/ssao-screen-space-ambient-occlusion.html)
+* Bloom: http://prideout.net/archive/bloom/
+* Screen Space Ambient Occlusion : [Floored Article](http://floored.com/blog/2013/ssao-screen-space-ambient-occlusion.html)
+* Toon Shader: http://www.lighthouse3d.com/tutorials/glsl-tutorial/toon-shader-version-ii/
+* Toon Sihlouette: http://prideout.net/blog/?p=54
 * Many thanks to Cheng-Tso Lin, whose framework for CIS700 we used for this assignment.
 * This project makes use of [three.js](http://www.threejs.org).

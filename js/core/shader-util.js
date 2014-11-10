@@ -35,11 +35,11 @@ CIS565WEBGLCORE.createShaderProgram = function(){
 	{
 		if( type == gl.VERTEX_SHADER ){
 			VERTEX_SHADER_SRC = fileString;
-      //console.log( fileString );
+            //console.log( fileString );
 		}
 		else if( type == gl.FRAGMENT_SHADER ){
 			FRAGMENT_SHADER_SRC = fileString;
-      //console.log( fileString );
+            //console.log( fileString );
 		}
 
 		if( VERTEX_SHADER_SRC && FRAGMENT_SHADER_SRC ){

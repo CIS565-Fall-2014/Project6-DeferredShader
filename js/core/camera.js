@@ -9,7 +9,7 @@ var CIS565WEBGLCORE = CIS565WEBGLCORE || {};
 var CAMERA_ORBIT_TYPE    = 1;
 var CAMERA_TRACKING_TYPE = 2;
 
-CIS565WEBGLCORE.createCamera = function(t){
+CIS565WEBGLCORE.createCamera = function(t) {
     var matrix     = mat4.create();
     var up         = vec3.create();
     var right      = vec3.create();
@@ -133,6 +133,9 @@ CIS565WEBGLCORE.createCamera = function(t){
         return m;
     };
 
+    getEyePosition = function(){
+        return position;
+    };
     moveForward = function(){ 
         vec3.scaleAndAdd( position, position, normal, -1.1 );
         update();
@@ -174,6 +177,7 @@ CIS565WEBGLCORE.createCamera = function(t){
     newObj.changeElevation = changeElevation;
     newObj.update = update;    
     newObj.getViewTransform = getViewTransform;
+    newObj.getEyePosition = getEyePosition;
     newObj.moveForward = moveForward; 
     newObj.moveBackward = moveBackward; 
     newObj.moveLeft = moveLeft;

@@ -34,6 +34,21 @@ var zFar = 2000;
 var texToDisplay = 1;
 
 var testTex;
+var lighting;
+var lightPositions = [];
+var lightColors = [];
+var lightcolor;
+var lightdir;
+
+var KERNEL_SIZE = 5;
+var FILTER_NUM = 4;
+var kernel = [
+    1, 4, 6, 4, 1,
+    4, 16, 24, 16, 4,
+    6, 24, 36, 24, 6,
+    4, 16, 24, 16, 4,
+    1, 4, 6, 4, 1,
+  ];
 
 var main = function (canvasId, messageId) {
   var canvas;
@@ -111,29 +126,24 @@ function initLoadedTexture(texture){
 var drawModel = function (program, mask) {
   // Bind attributes
   for(var i = 0; i < model.numGroups(); i++) {
-   // if (mask & 0x1) {
+    if (mask & 0x1) {
       gl.bindBuffer(gl.ARRAY_BUFFER, model.vbo(i));
       gl.vertexAttribPointer(program.aVertexPosLoc, 3, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(program.aVertexPosLoc);
-  //  }
+    }
 
-   // if (mask & 0x2) {
+    if (mask & 0x2) {
       gl.bindBuffer(gl.ARRAY_BUFFER, model.nbo(i));
       gl.vertexAttribPointer(program.aVertexNormalLoc, 3, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(program.aVertexNormalLoc);
-   // }
+    }
 
-    // if (mask & 0x3) {
-      gl.bindBuffer(gl.ARRAY_BUFFER, model.tbo(i));
-      gl.vertexAttribPointer(program.aVertexTexcoordLoc, 2, gl.FLOAT, false, 0, 0);
-      gl.enableVertexAttribArray(program.aVertexTexcoordLoc);
-  //  }
+     if (mask & 0x4) {
+    //  gl.bindBuffer(gl.ARRAY_BUFFER, model.tbo(i));
+    //  gl.vertexAttribPointer(program.aVertexTexcoordLoc, 2, gl.FLOAT, false, 0, 0);
+    //  gl.enableVertexAttribArray(program.aVertexTexcoordLoc);
+    }
 
-   /*  if (mask & 0x4) {
-      gl.bindBuffer(gl.ARRAY_BUFFER, model.texture(i));
-      gl.vertexAttribPointer(program.aVertexTexcoordLoc, 2, gl.FLOAT, false, 0, 0);
-      gl.enableVertexAttribArray(program.aVertexTexcoordLoc);
-    }*/
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.ibo(i));
     gl.drawElements(gl.TRIANGLES, model.iboLength(i), gl.UNSIGNED_SHORT, 0);
@@ -141,7 +151,7 @@ var drawModel = function (program, mask) {
 
   if (mask & 0x1) gl.disableVertexAttribArray(program.aVertexPosLoc);
   if (mask & 0x2) gl.disableVertexAttribArray(program.aVertexNormalLoc);
-  if (mask & 0x3) gl.disableVertexAttribArray(program.aVertexTexcoordLoc);
+  if (mask & 0x4) gl.disableVertexAttribArray(program.aVertexTexcoordLoc);
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 };
@@ -216,7 +226,7 @@ var renderMulti = function () {
   gl.useProgram(null);
 
   fbo.bind(gl, FBO_GBUFFER_NORMAL);
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.enable(gl.DEPTH_TEST);
   gl.useProgram(normProg.ref());
 
@@ -281,6 +291,24 @@ var renderShade = function () {
   // Bind necessary uniforms 
   gl.uniform1f( shadeProg.uZNearLoc, zNear );
   gl.uniform1f( shadeProg.uZFarLoc, zFar );
+  gl.uniform1i( shadeProg.uDisplayTypeLoc, texToDisplay ); 
+
+  //lighting = Lighting(DIRECTIONAL_LIGHT);
+  //lightPositions = Lighting(DIRECTIONAL_LIGHT);
+  lightdir = vec3.fromValues(1.0,1.0,1.0);
+  //lightdir = vec3.create();
+  //vec3.random(lightdir);
+  vec3.normalize(lightdir, lightdir);
+  vec3.transformMat4 (lightdir, lightdir, camera.getViewTransform());
+  vec3.normalize(lightdir, lightdir);
+//  console.log(lightdir);
+  gl.uniform3fv(shadeProg.uLightDirLoc,lightdir);
+
+  //lightcolor = vec3.fromValues(Math.random(),Math.random(),Math.random());
+  lightcolor = vec3.fromValues(1.0,1.0,1.0);
+  gl.uniform3fv(shadeProg.uLightColorLoc, lightcolor);
+
+  gl.uniform3fv(shadeProg.uEyePosLoc, camera.getEyePosition());
   
   drawQuad(shadeProg);
 
@@ -330,6 +358,14 @@ var renderPost = function () {
   gl.activeTexture( gl.TEXTURE4 );
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
+  gl.uniform1i( postProg.uDisplayTypeLoc, texToDisplay ); 
+
+  gl.uniform1f(postProg.uKernelLoc, KERNEL_SIZE * KERNEL_SIZE, kernel);   //pass in the 5*5 kernel
+  for(var i=0; i< FILTER_NUM; i++ ){
+    gl.uniform1f(postProg.uOffsetLoc, 1.0 / canvas.width );   //pass in the texture coord offset
+  }
+
+
 
   drawQuad(postProg);
 };
@@ -369,24 +405,37 @@ var initCamera = function () {
   window.onkeydown = function (e) {
     interactor.onKeyDown(e);
     switch(e.keyCode) {
-      case 48:   //0
+      case 48:   //0  = shade + post effects
         isDiagnostic = false;
+        texToDisplay = 5;
         break;
-      case 49:    //1
+      case 49:    //1   =  position shading
         isDiagnostic = true;
         texToDisplay = 1;
         break;
-      case 50:     //2
+      case 50:     //2  = normal shading
         isDiagnostic = true;
         texToDisplay = 2;
         break;
-      case 51:    //3
+      case 51:    //3 = color shading
         isDiagnostic = true;
         texToDisplay = 3;
         break;
-      case 52:  //4
+      case 52:  //4 = depth shading
         isDiagnostic = true;
         texToDisplay = 4;
+        break;
+      case 53:  //5 = diffuse shading
+        isDiagnostic = false;
+        texToDisplay = 5;
+        break;
+      case 54:  //6  = blinn shading
+        isDiagnostic = false;
+        texToDisplay = 6;
+        break;
+      case 55:  //7 = bloom shading
+        isDiagnostic = false;
+        texToDisplay = 7;
         break;
     }
   }
@@ -397,10 +446,10 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  //objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
  // objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", "assets/models/crytek-sponza/sponza.mtl")
 //objloader.loadFromFile(gl, "assets/models/sphere/sphere.obj", "assets/models/sphere/sphere.mtl");
-objloader.loadFromFile(gl, "assets/models/sphere/sphere.obj", "assets/models/sphere/sphere.mtl");
+//objloader.loadFromFile(gl, "assets/models/sphere/sphere.obj", "assets/models/sphere/sphere.mtl");
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
     model = new Model(gl, objloader);
@@ -515,13 +564,16 @@ var initShaders = function () {
     shadeProg.uNormalSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_normalTex");
     shadeProg.uColorSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_colorTex");
     shadeProg.uDepthSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_depthTex");
-    shadeProg.uLightPosTexLoc = gl.getUniformLocation( shadeProg.ref(), "u_lightPosTex");
+    shadeProg.uLightDirLoc = gl.getUniformLocation( shadeProg.ref(),"u_lightDir");
+    shadeProg.uLightColorLoc = gl.getUniformLocation( shadeProg.ref(),"u_lightColor");
+    shadeProg.uEyePosLoc = gl.getUniformLocation( shadeProg.ref(),"u_eyePos");
 
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
     shadeProg.uDisplayTypeLoc = gl.getUniformLocation( shadeProg.ref(), "u_displayType" );
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, shadeProg); 
+
 
   // Create shader program for post-process
   postProg = CIS565WEBGLCORE.createShaderProgram();
@@ -531,6 +583,9 @@ var initShaders = function () {
     postProg.aVertexTexcoordLoc = gl.getAttribLocation( postProg.ref(), "a_texcoord" );
 
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
+    postProg.uKernelLoc = gl.getUniformLocation( postProg.ref(), "u_kernel");  // 25 * float 
+    postProg.uOffsetLoc = gl.getUniformLocation( postProg.ref(), "u_offset");   //texture coord offset
+    postProg.uDisplayTypeLoc = gl.getUniformLocation( postProg.ref(), "u_displayType" );
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };

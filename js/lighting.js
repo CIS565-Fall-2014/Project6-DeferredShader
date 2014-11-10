@@ -1,13 +1,31 @@
-var Lighting = function (type) {};
 
 var LIGHTING_ARRAY = 1;
 var LIGHTING_RANDOM = 2;
+var DIRECTIONAL_LIGHT = 0;
+var SPOT_LIGHT = 1;
+var POINT_LIGHT = 2;
 var MAX_LOCATION = 500.0;
+var lightDir;
 var lightPosArray = {};
 var lightColArray = {};
 var randomTimer = 0;
 var randomMove = 0.1;
 var lightPosTex;
+
+var Lighting = function (type) {
+  if(type == DIRECTIONAL_LIGHT){
+      lightDir[0] = getRandomArbitrary(-MAX_LOCATION, MAX_LOCATION);
+      lightDir[1] = getRandomArbitrary(-MAX_LOCATION, MAX_LOCATION);
+      lightDir[2] = getRandomArbitrary(-MAX_LOCATION, MAX_LOCATION);
+
+  }
+  else if(type == SPOT_LIGHT){
+
+  }
+
+};
+
+
 
 Lighting.prototype = {
   constructor: Lighting,
@@ -27,13 +45,4 @@ Lighting.prototype = {
   	}
   }
 
-  function initLightsFBO(){
-  /*	lightPosTex = gl.createTexture();
-     	gl.bindTexture( gl.TEXTURE_2D, lightPosTex);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, width, height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);*/
-  }
 };
