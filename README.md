@@ -79,20 +79,15 @@ REQUIREMENTS:
 
 In this project, you are given code for:
 * Loading .obj file
-* Forward shading pipeline
-
-NOTE : The full deferred pipeline will be released on Friday.  If you set up
-your deferred pipeline for extra credit, please submit a pull request by Friday.
-If it is partially done, we will give partial extra credit.
-
-The baseline OpenGL shaders for the rest of the pipeline have been provided to give you
-a sense of what will be neede in subsequent passes.
+* Deferred shading pipeline
+* GBuffer pass
 
 You are required to implement:
 * Either of the following effects
   * Bloom
   * "Toon" Shading (with basic silhouetting)
-* Screen Space Ambient Occlusion 
+* Screen Space Ambient Occlusion
+* Diffuse and Blinn-Phong shading
 
 **NOTE**: Implementing separable convolution will require another link in your pipeline and will count as an extra feature if you do performance analysis with a standard one-pass 2D convolution. The overhead of rendering and reading from a texture _may_ offset the extra computations for smaller 2D kernels.
 
