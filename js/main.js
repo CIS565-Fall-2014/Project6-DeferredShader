@@ -283,6 +283,8 @@ var renderPost = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
 
+  gl.uniform2f(postProg.uResolutionLoc, canvas.width, canvas.height);
+
   drawQuad(postProg);
 };
 
@@ -477,6 +479,7 @@ var initShaders = function () {
     postProg.aVertexTexcoordLoc = gl.getAttribLocation( postProg.ref(), "a_texcoord" );
 
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
+    postProg.uResolutionLoc = gl.getUniformLocation(postProg.ref(), "u_resolution");
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };

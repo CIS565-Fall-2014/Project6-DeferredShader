@@ -13,7 +13,7 @@ varying vec2 v_texcoord;
 
 const vec3 matcol = vec3(1, 1, 1);
 const vec3 lamppos = vec3(2, 2, 2);
-const vec3 lampcol = vec3(20, 25, 30);
+const vec3 lampcol = vec3(30, 35, 40);
 
 float linearizeDepth( float exp_depth, float near, float far ){
 	return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
