@@ -5,6 +5,8 @@ Fall 2014
 
 Author: Dave Kotfis
 
+[Click Here For A Demo](http://dkotfis.github.io/Project6-DeferredShader/index.html)
+
 ##Overview
 
 This project features special rendering effects that can be performed efficiently through a deferred shading pipeline using WebGL. Effects include Toon Shading, Bloom Shading, and Screen Space Ambient Occlusion.
