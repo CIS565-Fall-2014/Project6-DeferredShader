@@ -22,7 +22,8 @@ var passProg;     // Shader program for G-Buffer
 var shadeProg;    // Shader program for P-Buffer
 var diagProg;     // Shader program from diagnostic 
 var postProg;     // Shader for post-process effects
-var bloomProg;
+var bloom1Prog;
+var bloom2Prog;
 
 // Multi-Pass programs
 var posProg;
@@ -75,7 +76,10 @@ var render = function () {
   if (!isDiagnostic) {
     renderShade();
     renderPost();
-	renderBloom();
+	if(texToDisplay == 7){
+		renderBloomStep1();
+		renderBloomStep2();
+	}
   } else {
     renderDiagnostic();
   }
@@ -255,7 +259,8 @@ var renderPost = function () {
 	gl.disable(gl.DEPTH_TEST);
 	
 	// Bind FBO
-	fbo2.bind(gl, FBO_PBUFFER);
+	if(texToDisplay == 7)
+		fbo2.bind(gl, FBO_PBUFFER);
 	
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -291,27 +296,49 @@ var renderPost = function () {
   
 	drawQuad(postProg);
 	// Unbind FBO
-    fbo2.unbind(gl);
+	if(texToDisplay == 7)
+		fbo2.unbind(gl);
 };
 
-var renderBloom = function () {
-	gl.useProgram(bloomProg.ref());
+var renderBloomStep1 = function () {
+	gl.useProgram(bloom1prog.ref());
+
+	gl.disable(gl.DEPTH_TEST);
+	if(texToDisplay == 7)
+		fbo2.bind(gl, FBO_GBUFFER_COLOR);
+	
+	gl.clear(gl.COLOR_BUFFER_BIT);
+	
+	
+	gl.activeTexture( gl.TEXTURE1 );
+	gl.bindTexture( gl.TEXTURE_2D, fbo2.texture(4) );
+	gl.uniform1i(bloom1prog.uPostSamplerLoc, 1 );
+	
+	drawQuad(bloom1prog);
+	
+	// Unbind FBO
+	if(texToDisplay == 7)
+		fbo2.unbind(gl);
+};
+
+var renderBloomStep2 = function () {
+	gl.useProgram(bloom2prog.ref());
 
 	gl.disable(gl.DEPTH_TEST);
 	gl.clear(gl.COLOR_BUFFER_BIT);
+
+	gl.activeTexture( gl.TEXTURE1 );
+	gl.bindTexture( gl.TEXTURE_2D, fbo2.texture(2) );
+	gl.uniform1i(bloom2prog.uColorSamplerLoc, 1 );
 	
-	gl.activeTexture( gl.TEXTURE0 );  //normal
-	gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-	gl.uniform1i( bloomProg.uNormalSamplerLoc, 0 );
+	gl.activeTexture( gl.TEXTURE2 );
+	gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
+	gl.uniform1i(bloom2prog.uShadeSamplerLoc, 2 );
 	
-	gl.activeTexture( gl.TEXTURE4 );
-	gl.bindTexture( gl.TEXTURE_2D, fbo2.texture(4) );
-	gl.uniform1i(bloomProg.uPostSamplerLoc, 4 );
 	
-	gl.uniform1i(bloomProg.uDisplayTypeLoc, texToDisplay ); 
-	
-	drawQuad(bloomProg);
-};
+	drawQuad(bloom2prog);
+}
+
 
 var renderDiagnostic = function () {
 	gl.useProgram(diagProg.ref());
@@ -568,21 +595,31 @@ var initShaders = function () {
 	});
 	CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 	
-	// Create shader program for bloom-process
-	bloomProg = CIS565WEBGLCORE.createShaderProgram();
-	bloomProg.loadShader(gl, "assets/shader/deferred/quad.vert", "assets/shader/deferred/bloom.frag");
-	bloomProg.addCallback( function() { 
-		bloomProg.aVertexPosLoc = gl.getAttribLocation( bloomProg.ref(), "a_pos" );
-		bloomProg.aVertexTexcoordLoc = gl.getAttribLocation( bloomProg.ref(), "a_texcoord" );
+	// Create shader program for bloom1-process
+	bloom1prog = CIS565WEBGLCORE.createShaderProgram();
+	bloom1prog.loadShader(gl, "assets/shader/deferred/quad.vert", "assets/shader/deferred/bloom1.frag");
+	bloom1prog.addCallback( function() { 
+		bloom1prog.aVertexPosLoc = gl.getAttribLocation( bloom1prog.ref(), "a_pos" );
+		bloom1prog.aVertexTexcoordLoc = gl.getAttribLocation( bloom1prog.ref(), "a_texcoord" );
 		
-		bloomProg.uPosSamplerLoc = gl.getUniformLocation( bloomProg.ref(), "u_positionTex");
-		bloomProg.uNormalSamplerLoc = gl.getUniformLocation( bloomProg.ref(), "u_normalTex");
-		bloomProg.uColorSamplerLoc = gl.getUniformLocation( bloomProg.ref(), "u_colorTex");
-		
-		bloomProg.uPostSamplerLoc = gl.getUniformLocation(bloomProg.ref(), "u_postTex");
-		bloomProg.uDisplayTypeLoc = gl.getUniformLocation(bloomProg.ref(), "u_displayType" );
+		bloom1prog.uPostSamplerLoc = gl.getUniformLocation(bloom1prog.ref(), "u_postTex");
+
 	});
-	CIS565WEBGLCORE.registerAsyncObj(gl, bloomProg); 
+	CIS565WEBGLCORE.registerAsyncObj(gl, bloom1prog); 
+	
+	// Create shader program for bloom2-process
+	bloom2prog = CIS565WEBGLCORE.createShaderProgram();
+	bloom2prog.loadShader(gl, "assets/shader/deferred/quad.vert", "assets/shader/deferred/bloom2.frag");
+	bloom2prog.addCallback( function() { 
+		bloom2prog.aVertexPosLoc = gl.getAttribLocation( bloom2prog.ref(), "a_pos" );
+		bloom2prog.aVertexTexcoordLoc = gl.getAttribLocation( bloom2prog.ref(), "a_texcoord" );
+		
+		bloom2prog.uColorSamplerLoc = gl.getUniformLocation(bloom2prog.ref(), "u_colorTex");
+		bloom2prog.uShadeSamplerLoc = gl.getUniformLocation(bloom2prog.ref(), "u_shadeTex");
+	});
+	CIS565WEBGLCORE.registerAsyncObj(gl, bloom2prog); 
+	
+
 };
 
 var initFramebuffer = function () {
