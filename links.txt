@@ -1,1 +1,4 @@
 http://zach.in.tu-clausthal.de/teaching/cg_literatur/glsl_tutorial/
+http://prideout.net/archive/bloom/
+http://stackoverflow.com/questions/3727104/programatically-fill-a-nxn-matrix-with-a-gaussian-filter-in-c
+http://www.programming-techniques.com/2013/02/gaussian-filter-generation-using-cc.html
