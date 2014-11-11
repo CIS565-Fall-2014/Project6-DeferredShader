@@ -20,7 +20,7 @@ float linearizeDepth( float exp_depth, float near, float far ){
 void main()
 {
    //lights
-   vec3 lightPos = vec3(0.0,5.0,15.0);
+   vec3 lightPos = vec3(0.0,8.0,5.0);
    lightPos = (u_modelview * vec4(lightPos,1.0)).xyz;
    vec3 lightCol = vec3(1.0,1.0,1.0);
    
@@ -33,7 +33,7 @@ void main()
    float diffuse = clamp(dot(L,vNormal),0.0,1.0);
    float specular = pow(clamp(dot(-V,R),0.0,1.0),8.0);
 
-   vec3 finalColor =  0.6 * diffuse *texture2D(u_colorTex, v_texcoord).rgb * lightCol + 0.4 * specular * lightCol;
+   vec3 finalColor =  0.8 * diffuse *texture2D(u_colorTex, v_texcoord).rgb * lightCol + 0.2 * specular * lightCol;
 
    gl_FragColor = vec4(finalColor, 1.0);
 }
