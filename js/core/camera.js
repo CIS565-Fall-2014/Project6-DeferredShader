@@ -163,6 +163,11 @@ CIS565WEBGLCORE.createCamera = function(t){
         update();
     };
 
+    //Added
+    getEyePos = function () {
+        return position;
+    };
+
     var newObj = {};
     newObj.setType = setType;
     newObj.goHome = goHome;
@@ -180,6 +185,9 @@ CIS565WEBGLCORE.createCamera = function(t){
     newObj.moveRight = moveRight; 
     newObj.moveUp = moveUp;
     newObj.moveDown = moveDown;
+
+    //Added
+    newObj.getEyePos = getEyePos;
 
     return newObj;
 };
