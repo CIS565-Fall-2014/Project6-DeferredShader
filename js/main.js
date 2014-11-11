@@ -34,10 +34,11 @@ var isDiagnostic = true;
 var zNear = 0.1;
 var zFar = 2000;
 var texToDisplay = 1;
+var stats;
 
 var main = function (canvasId, messageId) {
   var canvas;
-
+	
   // Initialize WebGL
   initGL(canvasId, messageId);
 
@@ -52,7 +53,8 @@ var main = function (canvasId, messageId) {
 
   // Set up shaders
   initShaders();
-
+  
+  stats = initStats();
   // Register our render callbacks
   CIS565WEBGLCORE.render = render;
   CIS565WEBGLCORE.renderLoop = renderLoop;
@@ -67,6 +69,8 @@ var renderLoop = function () {
 };
 
 var render = function () {
+	if(stats != undefined)
+		stats.update();
   if (fbo.isMultipleTargets()) {
     renderPass();
   } else {
@@ -449,7 +453,7 @@ var initObjs = function () {
 
   // Load the OBJ from file
   objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
-	//objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", "assets/models/crytek-sponza/sponza.mtl");
+  //objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", "assets/models/crytek-sponza/sponza.mtl");
   
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
@@ -635,3 +639,18 @@ var initFramebuffer = function () {
     return;
   }
 };
+
+function initStats() {
+	stats = new Stats();
+	stats.setMode(0); // 0: fps, 1: ms
+
+	// Align top-left
+	stats.domElement.style.position = 'absolute';
+	stats.domElement.style.left = '0px';
+	stats.domElement.style.top = '0px';
+
+	document.body.appendChild( stats.domElement );
+
+
+	return stats;
+}
