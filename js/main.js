@@ -80,7 +80,7 @@ var render = function () {
   if (!isDiagnostic) {
     renderShade();
     renderPost();
-	if(texToDisplay == 7){
+	if(texToDisplay == 7 || texToDisplay == 6){//Bloom with/without convolution 
 		renderBloomStep1();
 		renderBloomStep2();
 	}
@@ -263,7 +263,7 @@ var renderPost = function () {
 	gl.disable(gl.DEPTH_TEST);
 	
 	// Bind FBO
-	if(texToDisplay == 7)
+	if(texToDisplay == 7 || texToDisplay == 6)
 		fbo2.bind(gl, FBO_PBUFFER);
 	
 	gl.clear(gl.COLOR_BUFFER_BIT);
@@ -300,7 +300,7 @@ var renderPost = function () {
   
 	drawQuad(postProg);
 	// Unbind FBO
-	if(texToDisplay == 7)
+	if(texToDisplay == 7 || texToDisplay == 6)
 		fbo2.unbind(gl);
 };
 
@@ -308,20 +308,26 @@ var renderBloomStep1 = function () {
 	gl.useProgram(bloom1prog.ref());
 
 	gl.disable(gl.DEPTH_TEST);
-	if(texToDisplay == 7)
+	//if(texToDisplay == 7)
 		fbo2.bind(gl, FBO_GBUFFER_COLOR);
 	
 	gl.clear(gl.COLOR_BUFFER_BIT);
 	
 	
 	gl.activeTexture( gl.TEXTURE1 );
+	gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
+	gl.uniform1i(bloom1prog.uShadeSamplerLoc, 1 );
+	
+	gl.activeTexture( gl.TEXTURE2 );
 	gl.bindTexture( gl.TEXTURE_2D, fbo2.texture(4) );
-	gl.uniform1i(bloom1prog.uPostSamplerLoc, 1 );
+	gl.uniform1i(bloom1prog.uPostSamplerLoc, 2 );
+	
+	gl.uniform1i(bloom1prog.uDisplayTypeLoc, texToDisplay ); 
 	
 	drawQuad(bloom1prog);
 	
 	// Unbind FBO
-	if(texToDisplay == 7)
+	//if(texToDisplay == 7)
 		fbo2.unbind(gl);
 };
 
@@ -339,6 +345,7 @@ var renderBloomStep2 = function () {
 	gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
 	gl.uniform1i(bloom2prog.uShadeSamplerLoc, 2 );
 	
+	gl.uniform1i(bloom2prog.uDisplayTypeLoc, texToDisplay ); 
 	
 	drawQuad(bloom2prog);
 }
@@ -428,7 +435,12 @@ var initCamera = function () {
         isDiagnostic = true;
         texToDisplay = 4;
         break;
-	
+
+
+	  case 54://6
+        isDiagnostic = false;
+        texToDisplay = 6;
+        break;		
 	  case 55://7
         isDiagnostic = false;
         texToDisplay = 7;
@@ -607,6 +619,8 @@ var initShaders = function () {
 		bloom1prog.aVertexTexcoordLoc = gl.getAttribLocation( bloom1prog.ref(), "a_texcoord" );
 		
 		bloom1prog.uPostSamplerLoc = gl.getUniformLocation(bloom1prog.ref(), "u_postTex");
+		bloom1prog.uShadeSamplerLoc = gl.getUniformLocation(bloom1prog.ref(), "u_shadeTex");
+		bloom1prog.uDisplayTypeLoc = gl.getUniformLocation(bloom1prog.ref(), "u_displayType" );
 
 	});
 	CIS565WEBGLCORE.registerAsyncObj(gl, bloom1prog); 
@@ -620,6 +634,7 @@ var initShaders = function () {
 		
 		bloom2prog.uColorSamplerLoc = gl.getUniformLocation(bloom2prog.ref(), "u_colorTex");
 		bloom2prog.uShadeSamplerLoc = gl.getUniformLocation(bloom2prog.ref(), "u_shadeTex");
+		bloom2prog.uDisplayTypeLoc = gl.getUniformLocation(bloom2prog.ref(), "u_displayType" );
 	});
 	CIS565WEBGLCORE.registerAsyncObj(gl, bloom2prog); 
 	

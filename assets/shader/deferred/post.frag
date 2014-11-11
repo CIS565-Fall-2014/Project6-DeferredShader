@@ -47,9 +47,6 @@ bool isSilhouet(vec3 normal, float threshold){
 
 void main()
 {
-	// Currently acts as a pass filter that immmediately renders the shaded texture
-	// Fill in post-processing as necessary HERE
-	// NOTE : You may choose to use a key-controlled switch system to display one feature at a time
 	vec3 shade = texture2D( u_shadeTex, v_texcoord).rgb;
 	vec3 normal = texture2D( u_normalTex, v_texcoord).rgb;  
 	vec3 color = texture2D( u_colorTex, v_texcoord).rgb; 
@@ -149,11 +146,15 @@ void main()
 			
 		}
 	}
-	else if(u_displayType == 7){		
-		if(isSilhouet(normal, threshold))
-			gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+	else if(u_displayType == 7 || u_displayType == 6){		
+		if(color.x == 1.0){
+			if(isSilhouet(normal, threshold))
+				gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+			else
+				gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+		}
 		else
-			gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+		gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 	}
 }
 
