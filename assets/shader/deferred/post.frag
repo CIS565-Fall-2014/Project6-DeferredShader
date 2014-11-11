@@ -22,19 +22,7 @@ float hash( float n ){ //Borrowed from voltage
     return fract(sin(n)*43758.5453);
 }
 
-void main()
-{
-	// Currently acts as a pass filter that immmediately renders the shaded texture
-	// Fill in post-processing as necessary HERE
-	// NOTE : You may choose to use a key-controlled switch system to display one feature at a time
-	vec3 shade = texture2D( u_shadeTex, v_texcoord).rgb;
-	vec3 normal = texture2D( u_normalTex, v_texcoord).rgb;  
-	normal = normalize(normal);
-	vec3 color = texture2D( u_colorTex, v_texcoord).rgb; 
-	vec3 position = texture2D( u_positionTex, v_texcoord).rgb; 
-	float depth = texture2D(u_depthTex, v_texcoord).r;
-	depth = linearizeDepth( depth, u_zNear, u_zFar );
-	
+bool isSilhouet(vec3 normal, float threshold){
 	vec2 v_TexcoordOffsetRight = v_texcoord + vec2(2.0/960.0, 0.0);
 	vec3 normalOffestRight = texture2D( u_normalTex, v_TexcoordOffsetRight).rgb;  
 	float angleWithRight = dot(normal, normalOffestRight);
@@ -50,10 +38,27 @@ void main()
 	vec2 v_TexcoordOffsetDown = v_texcoord - vec2(0.0, 2.0/540.0);
 	vec3 normalOffestDown = texture2D( u_normalTex, v_TexcoordOffsetDown).rgb; 
 	float angleWithDown = dot(normal, normalOffestDown);
+	
+	if(angleWithRight < threshold || angleWithUp < threshold || angleWithLeft < threshold || angleWithDown < threshold)
+		return true;
+	else 
+		return false;
+}
 
+void main()
+{
+	// Currently acts as a pass filter that immmediately renders the shaded texture
+	// Fill in post-processing as necessary HERE
+	// NOTE : You may choose to use a key-controlled switch system to display one feature at a time
+	vec3 shade = texture2D( u_shadeTex, v_texcoord).rgb;
+	vec3 normal = texture2D( u_normalTex, v_texcoord).rgb;  
+	vec3 color = texture2D( u_colorTex, v_texcoord).rgb; 
+	vec3 position = texture2D( u_positionTex, v_texcoord).rgb; 
+	float depth = texture2D(u_depthTex, v_texcoord).r;
+	depth = linearizeDepth( depth, u_zNear, u_zFar );
+	
 
-
-	gl_FragColor = vec4(shade, 1.0);
+	
 	float threshold = 0.5;
 	
 
@@ -64,7 +69,7 @@ void main()
 	else if(u_displayType == 9){//Toon shading
 		if(color.x == 1.0){
 			
-			if(angleWithRight < threshold || angleWithUp < threshold || angleWithLeft < threshold || angleWithDown < threshold)
+			if(isSilhouet(normal, threshold))
 				gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 			else{
 				float seg = 0.2;
@@ -76,18 +81,15 @@ void main()
 			}
 		}
 		else{
-			gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+			gl_FragColor = vec4(shade, 1.0);
 		}
 	}
 	else if(u_displayType == 8){
 		if(color.x == 1.0){
-			//gl_FragColor = vec4( depth, depth, depth, 1.0 );
-
 			float radius = 0.1;
 			int kernelSize = 100;
 			float occlusion = 0.0;
 			
-			//vec3 origin = position * depth;
 			vec3 origin = vec3(position.x, position.y, depth);
 
 			
@@ -147,25 +149,12 @@ void main()
 			
 		}
 	}
-	else if(u_displayType == 7){
-		/*int count =0;
-		for(int i = 0; i < 10; ++i){
-			for(int j = 0; j < 10; ++j){
-				vec3 colorExam = texture2D( u_colorTex, v_texcoord + vec2(float(i*2-10)/960.0, float(j*2-10)/540.0)).rgb; 
-				if(colorExam.x != 1.0)
-					count += 2;
-			}
-		}
-		gl_FragColor = vec4(shade + vec3(float(count) / 100.0, float(count) / 100.0, float(count) / 100.0), 1.0);*/
-		
-		if(angleWithRight < threshold || angleWithUp < threshold || angleWithLeft < threshold || angleWithDown < threshold)
+	else if(u_displayType == 7){		
+		if(isSilhouet(normal, threshold))
 			gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 		else
 			gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
 	}
-	
-	
-	
-  
-  
 }
+
+
