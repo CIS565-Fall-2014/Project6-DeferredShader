@@ -224,7 +224,6 @@ var renderShade = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
   gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
 
-
   gl.activeTexture( gl.TEXTURE1 );  //normal
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
   gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
@@ -308,6 +307,8 @@ var renderBloom = function () {
 	gl.activeTexture( gl.TEXTURE4 );
 	gl.bindTexture( gl.TEXTURE_2D, fbo2.texture(4) );
 	gl.uniform1i(bloomProg.uPostSamplerLoc, 4 );
+	
+	gl.uniform1i(bloomProg.uDisplayTypeLoc, texToDisplay ); 
 	
 	drawQuad(bloomProg);
 };
@@ -579,6 +580,7 @@ var initShaders = function () {
 		bloomProg.uColorSamplerLoc = gl.getUniformLocation( bloomProg.ref(), "u_colorTex");
 		
 		bloomProg.uPostSamplerLoc = gl.getUniformLocation(bloomProg.ref(), "u_postTex");
+		bloomProg.uDisplayTypeLoc = gl.getUniformLocation(bloomProg.ref(), "u_displayType" );
 	});
 	CIS565WEBGLCORE.registerAsyncObj(gl, bloomProg); 
 };
