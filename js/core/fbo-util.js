@@ -97,13 +97,14 @@ CIS565WEBGLCORE.createFBO = function(){
             console.log("PBuffer FBO incomplete! Initialization failed!");
             return false;
           }
-        } else {
+        } 
+		else {//*****************************Laptop without drawbuffers******************************
           fbo[FBO_GBUFFER_POSITION] = gl.createFramebuffer();
           
           // Set up GBuffer Position
           gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[FBO_GBUFFER_POSITION]);
           gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTex, 0);
-          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[0], 0);
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[0], 0);//textures[0] 指定給position?
 
           var FBOstatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
           if (FBOstatus !== gl.FRAMEBUFFER_COMPLETE) {
