@@ -21,8 +21,8 @@ void main()
     // NOTE : You may need to add your own normals to fulfill the second's requirements
     //gl_FragColor = vec4(texture2D(u_colorTex, v_texcoord).rgb, 1.0);
 
-    vec3 light_pos = vec3( 10.0, 0.0, -10.0 );
-    float light_intensity = 0.2;
+    vec3 light_pos = vec3( 10.0, 0.0, 10.0 );
+    float light_intensity = 1.0;
 
     vec3 normal = texture2D( u_normalTex, v_texcoord ).xyz;
     vec3 position = texture2D( u_positionTex, v_texcoord ).xyz;
@@ -33,5 +33,7 @@ void main()
 
     // TODO: Blinn-Phong.
 
-    // TODO: Define light position and intensity.
+    // TODO: Make light position and intensity uniforms.
+
+    // TODO: Add material specularity as a uniform.
 }
