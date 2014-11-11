@@ -19,7 +19,8 @@ void main()
   vec2 R = vec2(pixW,0.0);
   vec2 U = vec2(0.0,pixH );
   
-  vec4 color = texture2D( u_shadeTex, v_texcoord); 
+  vec4 color = texture2D( u_shadeTex, v_texcoord);
+
   //blur stuff
   if(false)
   {

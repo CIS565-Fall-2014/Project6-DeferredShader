@@ -32,6 +32,8 @@ var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
 
+var projectionMatix;
+
 var main = function (canvasId, messageId) {
   var canvas;
 
@@ -233,7 +235,7 @@ var renderShade = function () {
 
   //modelview
   gl.uniformMatrix4fv(shadeProg.uModelViewLoc, false, camera.getViewTransform());
-
+  gl.uniformMatrix4fv(shadeProg.uProjectionLoc, false, projectionMatix);
   //Bind necessary uniforms 
   gl.uniform1f( shadeProg.uZNearLoc, zNear );
   gl.uniform1f( shadeProg.uZFarLoc, zFar );
@@ -312,6 +314,7 @@ var initCamera = function () {
   // Setup camera
   persp = mat4.create();
   mat4.perspective(persp, todeg(60), canvas.width / canvas.height, 0.1, 2000);
+  projectionMatix = persp;
 
   camera = CIS565WEBGLCORE.createCamera(CAMERA_TRACKING_TYPE);
   camera.goHome([0, 0, 4]);
@@ -349,7 +352,7 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  objloader.loadFromFile(gl, "assets/models/simple.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
@@ -466,6 +469,7 @@ var initShaders = function () {
     shadeProg.uColorSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_colorTex");
     shadeProg.uDepthSamplerLoc = gl.getUniformLocation(shadeProg.ref(), "u_depthTex");
     shadeProg.uModelViewLoc = gl.getUniformLocation(shadeProg.ref(), "u_modelview");
+    shadeProg.uProjectionLoc = gl.getUniformLocation(shadeProg.ref(), "u_projection");
 
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
