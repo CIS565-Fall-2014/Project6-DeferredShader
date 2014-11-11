@@ -16,12 +16,32 @@ float linearizeDepth( float exp_depth, float near, float far ){
 
 void main()
 {
+  // Currently acts as a pass filter that immmediately renders the shaded texture
+  // Fill in post-processing as necessary HERE
+  // NOTE : You may choose to use a key-controlled switch system to display one feature at a time
+  
   vec2 onePixel = vec2(1.0, 1.0) / u_textureSize;
   vec2 coord = v_texcoord;
   
   vec3 color = vec3(0,0,0);//texture2D( u_shadeTex, v_texcoord).rgb;
   vec3 bloom = vec3(0,0,0);
-  /*
+  
+/*
+  int gausIDX = 0;
+  //can't iterate through loop
+  for(int x = -2; x <= 2; x ++){
+    for(int y = -2; y <= 2; y++){
+      coord = v_texcoord + onePixel * vec2(float(x), float(y));
+      bloom = texture2D( u_shadeTex, coord).rgb;
+      float intensity = max(bloom.x, max(bloom.y, bloom.z));
+      if(intensity > thresh){
+        color += bloom * u_gaussKernel[13] / 273.0;
+      }
+      gausIDX ++;
+    }
+  }
+  */
+  
   //top Row
   float intensity;
   bloom = texture2D( u_shadeTex, v_texcoord + onePixel * vec2(-2,-2)).rgb;
@@ -183,8 +203,17 @@ void main()
   if(intensity < thresh){
     currentColor += color;
   }
+  
+  
+  /*
+  vec3 otherColor;
+  for (int i = 0; i < 5; i ++){
+    coord = coord +  vec2(onePixel.x, onePixel.y);
+    otherColor = texture2D( u_shadeTex, coord ).rgb;
+    color = color + otherColor;
+  }
   */
-  color = texture2D( u_shadeTex, v_texcoord).rgb;
-  gl_FragColor = vec4(color, 1.0); 
+  
+  gl_FragColor = vec4(currentColor, 1.0); 
   //gl_FragColor = vec4(texture2D( u_shadeTex, v_texcoord).rgb, 1.0); 
 }

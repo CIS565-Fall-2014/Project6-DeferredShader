@@ -32,6 +32,17 @@ var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
 
+///////////////////////////////////////gaussian kernel//////////////////////////////////
+var gaussian5x5 = [
+    1.0, 4.0,  7.0,  4.0,  1.0,
+    4.0, 16.0, 26.0, 16.0, 4.0,
+    7.0, 26.0, 41.0, 26.0, 7.0,
+    4.0, 16.0, 26.0, 16.0, 4.0,
+    1.0, 4.0,  7.0,  4.0,  1.0
+  ];
+var randArray = [];
+
+
 var main = function (canvasId, messageId) {
   var canvas;
 
@@ -215,26 +226,34 @@ var renderShade = function () {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Bind necessary textures
-  //gl.activeTexture( gl.TEXTURE0 );  //position
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
-  //gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
+  gl.activeTexture( gl.TEXTURE0 );  //position
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
+  gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
 
-  //gl.activeTexture( gl.TEXTURE1 );  //normal
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  //gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
+  gl.activeTexture( gl.TEXTURE1 );  //normal
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
+  gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
 
   gl.activeTexture( gl.TEXTURE2 );  //color
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( shadeProg.uColorSamplerLoc, 2 );
 
-  //gl.activeTexture( gl.TEXTURE3 );  //depth
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  //gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
+  gl.activeTexture( gl.TEXTURE3 );  //depth
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
 
   // Bind necessary uniforms 
-  //gl.uniform1f( shadeProg.uZNearLoc, zNear );
-  //gl.uniform1f( shadeProg.uZFarLoc, zFar );
+  gl.uniform1f( shadeProg.uZNearLoc, zNear );
+  gl.uniform1f( shadeProg.uZFarLoc, zFar );
   
+  gl.uniform2f(shadeProg.uTexSizeLoc, canvas.width, canvas.height)////////add texture size
+  var randomNum = Math.random();
+  randArray = [];
+  for (var i = 0; i < 64; i ++){
+    randArray.push(randomNum);
+    randomNum = Math.random();
+  }
+  gl.uniform1fv(shadeProg.uRandNoiseLoc , randArray);//randomNoise
   drawQuad(shadeProg);
 
   // Unbind FBO
@@ -282,7 +301,9 @@ var renderPost = function () {
   gl.activeTexture( gl.TEXTURE4 );
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
-
+  //////////////////////////////////////////////////////////////////////NEW POST PROCESSING///////////////////////
+  gl.uniform1fv(postProg.uGaussKern , gaussian5x5 );
+  gl.uniform2f(postProg.uTexSizeLoc, canvas.width, canvas.height)////////add texture size
   drawQuad(postProg);
 };
 
@@ -347,6 +368,7 @@ var initObjs = function () {
 
   // Load the OBJ from file
   objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  //objloader.loadFromFile(gl, "assets/models/Trex.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
@@ -466,6 +488,9 @@ var initShaders = function () {
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
     shadeProg.uDisplayTypeLoc = gl.getUniformLocation( shadeProg.ref(), "u_displayType" );
+    ////////////////////////////////////////////////////////////////////////////////////////new stuff
+    shadeProg.uTexSizeLoc = gl.getUniformLocation( shadeProg.ref(), "u_textureSize");
+    shadeProg.uRandNoiseLoc = gl.getUniformLocation( postProg.ref(), "u_randomNoise");//randomNoise
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, shadeProg); 
 
@@ -477,6 +502,9 @@ var initShaders = function () {
     postProg.aVertexTexcoordLoc = gl.getAttribLocation( postProg.ref(), "a_texcoord" );
 
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
+    ////////////////////////////////////////////////////////////////////////////////////////new stuff
+    postProg.uGaussKern = gl.getUniformLocation( postProg.ref(), "u_gaussKernel");//gaussian
+    postProg.uTexSizeLoc = gl.getUniformLocation( postProg.ref(), "u_textureSize");
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };
