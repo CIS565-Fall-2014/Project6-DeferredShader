@@ -1,10 +1,11 @@
 precision highp float;
 
 uniform sampler2D u_positionTex;
-uniform sampler2D u_shadeTex;
 uniform sampler2D u_normalTex;
 uniform sampler2D u_colorTex;
 uniform sampler2D u_depthTex;
+uniform mat4 u_modelview;
+uniform sampler2D u_shadeTex;
 uniform int u_displayType;
 
 uniform float u_zFar;
@@ -14,10 +15,6 @@ varying vec2 v_texcoord;
 
 float linearizeDepth( float exp_depth, float near, float far ){
 	return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
-}
-
-float rand(vec2 co){
-  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
 //Generate -1~1
@@ -32,6 +29,7 @@ void main()
 	// NOTE : You may choose to use a key-controlled switch system to display one feature at a time
 	vec3 shade = texture2D( u_shadeTex, v_texcoord).rgb;
 	vec3 normal = texture2D( u_normalTex, v_texcoord).rgb;  
+	normal = normalize(normal);
 	vec3 color = texture2D( u_colorTex, v_texcoord).rgb; 
 	vec3 position = texture2D( u_positionTex, v_texcoord).rgb; 
 	float depth = texture2D(u_depthTex, v_texcoord).r;
@@ -41,7 +39,6 @@ void main()
 	float depthOffestRight = texture2D(u_depthTex, v_TexcoordOffsetRight).r;
 	vec3 normalOffestRight = texture2D( u_normalTex, v_TexcoordOffsetRight).rgb;  
 	float angleWithRight = dot(normal, normalOffestRight);
-
 
 	vec2 v_TexcoordOffsetUp = v_texcoord + vec2(0.0, 2.0/540.0);
 	float depthOffestUp = texture2D(u_depthTex, v_TexcoordOffsetUp).r;
@@ -86,45 +83,68 @@ void main()
 	}
 	else if(u_displayType == 8){
 		if(color.x == 1.0){
-			//gl_FragColor = vec4( depth, depth, depth, 1.0 );	
-			int count = 0;
-			float radius = 0.01;
-			int kernelSize = 100;
+			//gl_FragColor = vec4( depth, depth, depth, 1.0 );
 
+			float radius = 0.1;
+			int kernelSize = 100;
+			float occlusion = 0.0;
+			
+			//vec3 origin = position * depth;
+			vec3 origin = vec3(position.x, position.y, depth);
+
+			
 			for(int i = 0; i < 100; ++i){
-				vec3 rand = vec3(hash(float(i)),
-								 hash(float(i + 100)),
-								 hash(float(i + 2 * 100)));
-				rand = normalize(rand);
-				
+				vec3 randVector = vec3(hash(position.x + float(i)*0.1357),
+								  hash(position.y + float(i)*0.2468),
+								  (hash(position.z + float(i)*0.1479)+1.0) / 2.0);
+				//vec3 randVector = vec3(0.0, 0.0, 1.0);
+								  
+				randVector = normalize(randVector);
+
 				float scale = float(i) / float(kernelSize);
 				scale = mix(0.1, 1.0, scale * scale);
-				rand = rand * scale;
+				randVector = randVector * scale ;
+
+				/*
+				vec3 directionNotNormal;
+				if (abs(normal.x) < 0.57735) {
+				  directionNotNormal = vec3(1, 0, 0);
+				} else if (abs(normal.y) < 0.57735) {
+				  directionNotNormal = vec3(0, 1, 0);
+				} else {
+				  directionNotNormal = vec3(0, 0, 1);
+				}
+				
+				vec3 perpendicularDirection1 = normalize(cross(normal, directionNotNormal));
+				vec3 perpendicularDirection2 = normalize(cross(normal, perpendicularDirection1));
+				vec3 temp =( randVector.z * normal ) + ( randVector.x * perpendicularDirection1 ) + ( randVector.y * perpendicularDirection2 );
+				vec3 sampleVector = normalize(temp);*/
+				
+				vec3 rvec = normalize(vec3(hash(position.x + float(i)*0.1234), 
+										   hash(position.y + float(i)*0.5678), 
+										   0.0));
+
+				
+				
+				vec3 tangent = normalize(rvec - normal * dot(rvec, normal));
+				vec3 bitangent = cross(normal, tangent);
+				mat3 tbn = mat3(tangent, bitangent, normal);
+
+				vec3 sampleVector = tbn * randVector;
+				
+				vec3 sample = origin + vec3((sampleVector * radius).x, (sampleVector * radius).y, -(sampleVector * radius).z / 2.0);
+						
+									
+				float sampleDepth = texture2D(u_depthTex, v_texcoord + (sampleVector * radius).xy ).r;
+				sampleDepth = linearizeDepth( sampleDepth, u_zNear, u_zFar );
+	
+				if(sampleDepth <= sample.z)
+					occlusion += 1.0;
+				
 			}
 			
-			vec3 normalFrag = texture2D(u_normalTex, v_texcoord).xyz * 2.0 - 1.0;
-			normalFrag = normalize(normalFrag);
-			
-			/*
-			float occlusion = 0.0;
-				for (int i = 0; i < uSampleKernelSize; ++i) {
-				// get sample position:
-				vec3 sample = tbn * uSampleKernel[i];
-				sample = sample * uRadius + origin;
+			gl_FragColor = vec4(1.0 - occlusion/100.0, 1.0 - occlusion/100.0, 1.0 - occlusion/100.0, 1.0);
 
-				// project sample position:
-				vec4 offset = vec4(sample, 1.0);
-				offset = uProjectionMat * offset;
-				offset.xy /= offset.w;
-				offset.xy = offset.xy * 0.5 + 0.5;
-
-				// get sample depth:
-				float sampleDepth = texture(uTexLinearDepth, offset.xy).r;
-
-				// range check & accumulate:
-				float rangeCheck= abs(origin.z - sampleDepth) < uRadius ? 1.0 : 0.0;
-				occlusion += (sampleDepth <= sample.z ? 1.0 : 0.0) * rangeCheck;
-			}*/
 			
 			
 		}
