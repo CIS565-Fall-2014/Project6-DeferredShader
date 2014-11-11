@@ -28,7 +28,7 @@ void main()
     float factor = 1.0/float(totalPix);
    
     color *=factor;  
-    for(float i = 1.0;i<= 6.0; i+=1.0)
+    for(float i = 1.0;i<= float(blurRange); i+=1.0)
     {
         color += factor * texture2D( u_shadeTex, v_texcoord + i * R);
         color += factor * texture2D( u_shadeTex, v_texcoord - i * R);

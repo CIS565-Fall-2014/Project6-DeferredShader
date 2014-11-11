@@ -349,7 +349,7 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/simple.obj", null);
+  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
