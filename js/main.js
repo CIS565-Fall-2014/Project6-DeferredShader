@@ -32,6 +32,10 @@ var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
 
+var lastTime = 0;
+var elapsedTime = 0;
+var frameCount = 0;
+
 var main = function (canvasId, messageId) {
   var canvas;
 
@@ -60,7 +64,11 @@ var main = function (canvasId, messageId) {
 
 var renderLoop = function () {
   window.requestAnimationFrame(renderLoop);
+  var now = new Date().getTime();
   render();
+  var nowAgain = new Date().getTime();
+  var test = nowAgain - now;
+  document.title = test;
 };
 
 var render = function () {
@@ -170,12 +178,13 @@ var renderMulti = function () {
 
   drawModel(posProg, 1);
 
-  gl.disable(gl.DEPTH_TEST);
+//  gl.disable(gl.DEPTH_TEST);
   fbo.unbind(gl);
   gl.useProgram(null);
 
   fbo.bind(gl, FBO_GBUFFER_NORMAL);
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST);
 
   gl.useProgram(normProg.ref());
 
@@ -193,7 +202,8 @@ var renderMulti = function () {
   fbo.unbind(gl);
 
   fbo.bind(gl, FBO_GBUFFER_COLOR);
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST);
 
   gl.useProgram(colorProg.ref());
 
@@ -208,32 +218,36 @@ var renderMulti = function () {
 var renderShade = function () {
   gl.useProgram(shadeProg.ref());
   gl.disable(gl.DEPTH_TEST);
-
+  
   // Bind FBO
   fbo.bind(gl, FBO_PBUFFER);
 
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Bind necessary textures
-  //gl.activeTexture( gl.TEXTURE0 );  //position
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
-  //gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
+  gl.activeTexture( gl.TEXTURE0 );  //position
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
+  gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
 
-  //gl.activeTexture( gl.TEXTURE1 );  //normal
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  //gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
+  gl.activeTexture( gl.TEXTURE1 );  //normal
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
+  gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
 
   gl.activeTexture( gl.TEXTURE2 );  //color
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( shadeProg.uColorSamplerLoc, 2 );
 
-  //gl.activeTexture( gl.TEXTURE3 );  //depth
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  //gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
+  gl.activeTexture( gl.TEXTURE3 );  //depth
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
 
   // Bind necessary uniforms 
-  //gl.uniform1f( shadeProg.uZNearLoc, zNear );
-  //gl.uniform1f( shadeProg.uZFarLoc, zFar );
+  gl.uniform1f( shadeProg.uZNearLoc, zNear );
+  gl.uniform1f( shadeProg.uZFarLoc, zFar );
+  
+  gl.uniform1f( shadeProg.uWidthLoc, canvas.width );
+  gl.uniform1f( shadeProg.uHeightLoc, canvas.height );
+  
   
   drawQuad(shadeProg);
 
@@ -282,6 +296,8 @@ var renderPost = function () {
   gl.activeTexture( gl.TEXTURE4 );
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
+  gl.uniform1f( postProg.uWidthLoc, canvas.width );
+  gl.uniform1f( postProg.uHeightLoc, canvas.height );
 
   drawQuad(postProg);
 };
@@ -465,6 +481,8 @@ var initShaders = function () {
 
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
+	shadeProg.uWidthLoc = gl.getUniformLocation( shadeProg.ref(), "u_width" );
+	shadeProg.uHeightLoc = gl.getUniformLocation( shadeProg.ref(), "u_height" );
     shadeProg.uDisplayTypeLoc = gl.getUniformLocation( shadeProg.ref(), "u_displayType" );
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, shadeProg); 
@@ -477,6 +495,8 @@ var initShaders = function () {
     postProg.aVertexTexcoordLoc = gl.getAttribLocation( postProg.ref(), "a_texcoord" );
 
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
+	postProg.uWidthLoc = gl.getUniformLocation( postProg.ref(), "u_width" );
+	postProg.uHeightLoc = gl.getUniformLocation( postProg.ref(), "u_height" );
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };
