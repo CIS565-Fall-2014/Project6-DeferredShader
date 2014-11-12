@@ -27,6 +27,7 @@ void main()
     vec3 position = texture2D( u_positionTex, v_texcoord ).xyz;
     vec3 color = texture2D( u_colorTex, v_texcoord ).rgb;
 
+    // Apply simple Lambertian shading.
     float diffuse = max( dot( normal, normalize( light_pos - position ) ), 0.0 );
     gl_FragColor = vec4( diffuse * color * light_intensity, 1.0 );
 

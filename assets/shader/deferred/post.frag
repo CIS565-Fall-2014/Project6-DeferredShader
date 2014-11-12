@@ -24,6 +24,21 @@ const float STEP_SIZE = 0.001;
 // Math constants.
 const float PI = 3.1415926535;
 
+// Light constants.
+const vec3 light_pos = vec3( 10.0, 0.0, 10.0 );
+
+// Image dimensions.
+const float WIDTH = 960.0;
+const float HEIGHT = 540.0;
+
+// Pixel step sizes.
+const float HORIZONTAL_STEP = 1.0 / WIDTH;
+const float VERTICAL_STEP = 1.0 / HEIGHT;
+
+// Edge detection constants.
+float EDGE_DETECTION_THRESHOLD = 0.6;
+vec3 EDGE_COLOR = vec3( 0.0, 0.0, 0.0 );
+
 float linearizeDepth( float exp_depth, float near, float far ){
     return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
 }
@@ -34,6 +49,7 @@ void main()
     //gl_FragColor = vec4(texture2D( u_shadeTex, v_texcoord).rgb, 1.0);
 
     // Get fragment data.
+    vec3 position = texture2D( u_positionTex, v_texcoord ).xyz;
     vec3 normal = texture2D( u_normalTex, v_texcoord ).xyz;
     float base_exp_depth = texture2D( u_depthTex, v_texcoord ).r;
     float base_depth = linearizeDepth( base_exp_depth, u_zNear, u_zFar );
@@ -41,6 +57,7 @@ void main()
 
     /*********** IMAGE-SPACE HORIZON-BASED AMBIENT OCCLUSION ***********/
     // Implementation inspired by: http://developer.download.nvidia.com/presentations/2008/SIGGRAPH/HBAO_SIG08b.pdf
+    // Also inspired by: http://artis.inrialpes.fr/Membres/Olivier.Hoel/ssao/nVidiaHSAO/2317-abstract.pdf
 
     // Define base angle from current fragment coordinates.
     float base_angle_deg = v_texcoord.s * v_texcoord.t;
@@ -107,14 +124,50 @@ void main()
 
 
     /*********** TOON SHADER ***********/
+    // Implementation inspired by: http://www.lighthouse3d.com/tutorials/glsl-tutorial/toon-shader-version-ii/
 
-    // TODO: Toon shader.
+    // Compute angle between fragment normal and light.
+    float intensity = dot( normalize( light_pos - position ), normalize( normal ) );
 
-    // DEBUG - Pass color through.
-    gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb, 1.0 );
+    // Get normals of neighboring fragments.
+    vec3 neighbor_norm_1 = texture2D( u_normalTex, vec2( v_texcoord.s - HORIZONTAL_STEP, v_texcoord.t ) ).xyz;  // Edge detection - Left.
+    vec3 neighbor_norm_2 = texture2D( u_normalTex, vec2( v_texcoord.s + HORIZONTAL_STEP, v_texcoord.t ) ).xyz;  // Edge detection - Right.
+    vec3 neighbor_norm_3 = texture2D( u_normalTex, vec2( v_texcoord.s, v_texcoord.t - VERTICAL_STEP ) ).xyz;    // Edge detection - Down.
+    vec3 neighbor_norm_4 = texture2D( u_normalTex, vec2( v_texcoord.s, v_texcoord.t + VERTICAL_STEP ) ).xyz;    // Edge detection - Up.
+
+    // Check for edges.
+    if ( dot( normal, neighbor_norm_1 ) < EDGE_DETECTION_THRESHOLD ||
+         dot( normal, neighbor_norm_2 ) < EDGE_DETECTION_THRESHOLD ||
+         dot( normal, neighbor_norm_3 ) < EDGE_DETECTION_THRESHOLD ||
+         dot( normal, neighbor_norm_4 ) < EDGE_DETECTION_THRESHOLD )
+    {
+        intensity = 0.0;
+    }
+    else {
+
+        // Put colors into "buckets" based on intensity of light.
+        if ( intensity > 0.95 ) {
+            intensity = 1.0;
+        }
+        else if ( intensity > 0.5 ) {
+            intensity = 0.95;
+        }
+        else if ( intensity > 0.25 ) {
+            intensity = 0.5;
+        }
+        else {
+            intensity = 0.25;
+        }
+    }
+
+    // Set fragement color.
+    //gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb * intensity, 1.0 );
 
 
     /*********** BLOOM ***********/
 
-    // TODO: Bloom.    
+    // TODO: Bloom.
+
+    // DEBUG - Pass color through.
+    gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb, 1.0 );
 }
