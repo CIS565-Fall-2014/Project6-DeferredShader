@@ -164,15 +164,15 @@ CIS565WEBGLCORE.createFBO = function(){
           // Set up GBuffer EXTRA/////////////////////////////////
           fbo[FBO_EXTRA] = gl.createFramebuffer();
           gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[FBO_EXTRA]);
-          /*
-          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[2], 0);
+          
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[5], 0);
 
           FBOstatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
           if (FBOstatus !== gl.FRAMEBUFFER_COMPLETE) {
             console.log("GBuffer Color FBO incomplete! Init failed!");
             return false;
           }
-          */
+          
         }
 
         gl.bindFramebuffer( gl.FRAMEBUFFER, null );

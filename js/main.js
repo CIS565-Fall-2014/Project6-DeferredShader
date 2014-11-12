@@ -249,7 +249,7 @@ var renderShade = function () {
 /////////////////////////////////////////////////////////////
   gl.activeTexture( gl.TEXTURE5 );  //occlusion
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(5) );
-  gl.uniform1i( shadeProg.uExtraLoc, 5 );///////////////////////////////////
+  gl.uniform1i( shadeProg.uExtraLoc, 5 );
 ////////////////////////////////////////////////////////////
 
   // Bind necessary uniforms 

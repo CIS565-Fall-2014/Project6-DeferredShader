@@ -91,5 +91,5 @@ void main()
   //gl_FragColor = vec4(texture2D(u_colorTex, v_texcoord).rgb, 1.0);
   gl_FragColor = vec4(diffCol + specular , 1.0);
   //gl_FragColor = vec4((1.0 - accumulatedAO) * (diffCol + specular) , 1.0);
-  gl_FragColor = vec4(texture2D(u_extraTex, v_texcoord).rgb, 1.0);
+  //gl_FragColor = vec4(texture2D(u_extraTex, v_texcoord).rgb, 1.0);
 }
