@@ -27,7 +27,7 @@ void main()
 	vec4 color = texture2D( u_colorTex, v_texcoord );
 	float depth = texture2D( u_depthTex, v_texcoord ).x;
 
-	depth = linearizeDepth( depth, u_zNear, u_zFar );
+	depth = 1.0 - linearizeDepth( depth, u_zNear, u_zFar );
 
   if( u_displayType == DISPLAY_DEPTH )
 	    gl_FragColor = vec4( depth, depth, depth, 1 );
