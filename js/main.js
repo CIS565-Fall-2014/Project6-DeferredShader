@@ -308,7 +308,7 @@ var renderShade = function () {
   gl.uniform1fv(shadeProg.uKernelLoc3, kernel3);
   gl.uniform1f(shadeProg.uOffsetLoc, 1.0 / canvas.width);
   gl.uniform1f(shadeProg.uOffsetLoc2, 1.0 / canvas.height);
-  gl.uniformMatrix4fv( shadeProg.uPerspMatLoc, false, mvpMat);
+  gl.uniformMatrix4fv( shadeProg.uPerspMatLoc, false, persp);
 
 
   // Bind necessary uniforms 
@@ -323,6 +323,7 @@ var renderShade = function () {
 
   gl.uniform3fv(shadeProg.uLightColorLoc, lightcolor);
   gl.uniform3fv(shadeProg.uEyePosLoc, camera.getEyePosition());
+  gl.uniform3fv(shadeProg.uViewDirLoc, camera.getViewDirection());
 
   drawQuad(shadeProg);
 
@@ -692,11 +693,14 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
-  //objloader.loadFromFile(gl, "assets/models/teapot/teapot.obj", null);
- // objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", "assets/models/crytek-sponza/sponza.mtl")
+  //objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  //objloader.loadFromFile(gl, "assets/models/teapot/hteapot.obj", null);
+  //objloader.loadFromFile(gl, "assets/models/myScene.obj",null);
+  objloader.loadFromFile(gl, "assets/models/myScene2.obj",null);
+ // objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj",null);
+//  objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", "assets/models/crytek-sponza/sponza.mtl")
 //objloader.loadFromFile(gl, "assets/models/sphere/sphere.obj", "assets/models/sphere/sphere.mtl");
-//objloader.loadFromFile(gl, "assets/models/sphere/sphere.obj", "assets/models/sphere/sphere.mtl");
+
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
@@ -819,6 +823,7 @@ var initShaders = function () {
     shadeProg.uLightDirLoc = gl.getUniformLocation( shadeProg.ref(),"u_lightDir");
     shadeProg.uLightColorLoc = gl.getUniformLocation( shadeProg.ref(),"u_lightColor");
     shadeProg.uEyePosLoc = gl.getUniformLocation( shadeProg.ref(),"u_eyePos");
+    shadeProg.uViewDirLoc = gl.getUniformLocation( shadeProg.ref(), "u_viewDirection");
 
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );

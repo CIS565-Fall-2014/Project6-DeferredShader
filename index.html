@@ -10,6 +10,7 @@
     </style>
 
     <h1>WebGL Deferred Shader</h1>
+    <div id="loader">(Some Assets may take long to load, keep waiting, and don't kill the program) <strong>Loading...</strong></div>
    <table>
       <tr>
           <td>
@@ -18,7 +19,7 @@
                   WebGL unavailable.
                 </canvas>
                 <script src="js/ext/math/gl-matrix.js" type="text/javascript"></script>
-                <script src="js/ext/threejs/three.js" tyoe="text/javascript"></script>
+                <script src="js/ext/threejs/three.js" type="text/javascript"></script>
                 <script src="js/ext/threejs/OBJLoader.js" type="text/javascript"></script>
                 <script src="js/ext/threejs/MTLLoader.js" type="text/javascript"></script>
                 <script src="js/ext/threejs/OBJMTLLoader.js"type="text/javascript"></script>
@@ -35,8 +36,13 @@
                 <script src="js/constants.js" type="text/javascript"></script>
                 <script src="js/screenQuad.js" type="text/javascript"></script>
                 <script src="js/main.js" type="text/javascript"></script>
+                <script src="js/ext/jquery-1.11.1.min.js" type="text/javascript"></script>
 
                 <script>
+                /*$(document).ready(function(){
+
+                  $('#loader').html("Loading Complete.");
+                });*/
                 //update();
                   /*  // the fps timer
                   var stats = new Stats();

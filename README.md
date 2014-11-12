@@ -92,9 +92,13 @@ A median filter or other anti-aliasing method could be useful to smooth out the 
 
 
 * **Screen Space Ambient Occlusion** 
+SSAO was done based on hemisphere sampling, followed by a simple blur.
+First, randomly sample a position in the hemisphere oriented in normal direction. 
+Then project the sample position back into screen space, to find its texture coord and hence its depth on depth buffer.
+If the depth buffer is actually smaller than sample position's z, then occlusion accumulates.  
+![AO](/pics/AO2.png)
 
-You must implement two of the following extras:
-* The effect you did not choose above
+
 * Compare performance to a normal forward renderer with
   * No optimizations
   * Coarse sort geometry front-to-back for early-z
@@ -102,8 +106,10 @@ You must implement two of the following extras:
 * Optimize g-buffer format, e.g., pack things together, quantize, reconstruct z from normal x and y (because it is normalized), etc.
   * Must be accompanied with a performance analysis to count
 * Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
+
 * **Some Interesting Debugging Images**
-![Normal](/pics/normal.png)
+![Normal](/pics/normal2.png)
+![Sample Bug](/pics/bug2.png)
 
 RUNNING THE CODE
 -------------------------------------------------------------------------------

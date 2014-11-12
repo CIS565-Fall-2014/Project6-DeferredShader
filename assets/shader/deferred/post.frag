@@ -45,6 +45,7 @@ void main()
 	  // NOTE : You may choose to use a key-controlled switch system to display one feature at a time
 	  
 	  vec2 texcoord = v_texcoord;
+	  vec2 offset = vec2(u_offset, u_offset2);
 	  
 	  if(u_displayType==1 || u_displayType == 5 || u_displayType ==6){
 		gl_FragColor = vec4(texture2D( u_shadeTex, texcoord).rgb, 1.0); 
@@ -96,7 +97,6 @@ void main()
 	  }
 	  else if(u_displayType == 8){
 		// smooth toon shader
-		vec2 offset = vec2(u_offset, u_offset2);
 		vec3 toon;
 		float diffuse = texture2D(u_shadeTex, texcoord ).a;
 		//vec3 diffusecolor = texture2D(u_shadeTex, texcoord ).rgb;
@@ -111,7 +111,7 @@ void main()
 			toon = vec3(0.4,0.2,0.2);
 		else if (diffuse > 0.01)    //cos(90)
 			toon = vec3(0.2,0.1,0.1);
-	
+		
 		//obtain surrounding illumination
 		float t00 = lum(texture2D(u_shadeTex, texcoord + offset * vec2(-1, -1)));
 		float t10 = lum(texture2D(u_shadeTex, texcoord + offset * vec2( 0, -1)));
@@ -128,7 +128,7 @@ void main()
 		vec3 edge = vec3(len,len,len);
 		gl_FragColor = vec4(toon + edge, 1.0);
 
-		
+		//gl_FragColor = vec4(texture2D( u_shadeTex, texcoord).rgb, 1.0);
 	}
 	else if(u_displayType == 9){
 		
@@ -138,7 +138,6 @@ void main()
 		float depth_i;
 		vec3 pos = texture2D(u_shadeTex, texcoord ).rgb;
 		vec3 pos_i;
-		vec2 offset = vec2(u_offset, u_offset2);
 		
 		//4x4 sampling
 		for(float i = -2.0; i <= 2.0; i++){
@@ -156,21 +155,19 @@ void main()
 		gl_FragColor = vec4(AO,AO,AO, 1.0);*/
 		
 		gl_FragColor = vec4(texture2D( u_shadeTex, texcoord).rgb, 1.0);
-		vec2 texel = vec2(u_offset, u_offset2);
-		float result = 0.0;
+		
+		//blurring
+	/*	float result = 0.0;
 		vec2 hlim = vec2(float(-4.0) * 0.5 + 0.5);
-	   
 	   //4x4 blurring
 	   for (int i = 0; i < 4; i++) {
 		  for (int j = 0; j < 4; j++) {
-			 vec2 offset = ( hlim + vec2(float(i), float(j))) * texel;
+			 vec2 offset = ( hlim + vec2(float(i), float(j))) * offset;
 			 result += texture2D(u_shadeTex, texcoord + offset).r;
 		  }
 	   }
-	 
 	   result /= 16.0;
-	   
-	   gl_FragColor = vec4(result,result,result,1.0);
+	   gl_FragColor = vec4(result,result,result,1.0);*/
 	
 	}
 	else if(u_displayType == 10){   //for fun

@@ -152,6 +152,7 @@ CIS565WEBGLCORE.createOBJLoader = function(){
             });
             //Indicate the loading is completed
             ready = true;
+            $('#loader').html("Loading Complete. Enjoy!");
         };
 
         if( mtl === null ){
@@ -285,3 +286,6 @@ var Model = function (gl, objLoader) {
     }
   }
 };
+
+
+  

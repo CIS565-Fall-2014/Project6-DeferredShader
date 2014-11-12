@@ -133,6 +133,12 @@ CIS565WEBGLCORE.createCamera = function(t) {
         return m;
     };
 
+    getViewDirection = function(){
+        var v = vec3.create();
+        vec3.cross( v, up, right);
+        return v;
+    };
+
     getEyePosition = function(){
         return position;
     };
@@ -177,6 +183,7 @@ CIS565WEBGLCORE.createCamera = function(t) {
     newObj.changeElevation = changeElevation;
     newObj.update = update;    
     newObj.getViewTransform = getViewTransform;
+    newObj.getViewDirection = getViewDirection;
     newObj.getEyePosition = getEyePosition;
     newObj.moveForward = moveForward; 
     newObj.moveBackward = moveBackward; 
