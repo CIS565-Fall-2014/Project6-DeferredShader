@@ -30,7 +30,7 @@ To do Toon Shader, I just assign different color to screen points according to t
 ![Alt text](https://github.com/wulinjiansheng/Project6-DeferredShader/blob/master/Pics/Toon%20Right.bmp)<br />
 
 ### 4)Screen Space Ambient Occlusion
-Ambient occlusion is an approximation of the amount by which a point on a surface is occluded by the surrounding geometry, which affects the accessibility of that point by incoming light. To do this, I generates 100 direction samples in the hemisphere of the normal for each screen point. I use the samples to check whether the incoming rays occluded. And then I use the occlusion factor(the percentage of the rays that are occluded) as rgb for the point's color. Besides, I also use rangeCheck to prevent erroneous occlusion between large depth discontinuities.<br />
+Ambient occlusion is an approximation of the amount by which a point on a surface is occluded by the surrounding geometry, which affects the accessibility of that point by incoming light. To do this, I generates 100 direction samples in the hemisphere of the normal for each screen point. I use the samples to check whether the incoming rays are occluded. And then I use the occlusion factor(the percentage of the rays that are occluded) as rgb for the point's color. Besides, I also use rangeCheck to prevent erroneous occlusion between large depth discontinuities.<br />
 * Reference Link: http://john-chapman-graphics.blogspot.co.uk/2013/01/ssao-tutorial.html<br /><br />
 * Here is the result of SSAO(without rangeCheck):<br />
 ![Alt text](https://github.com/wulinjiansheng/Project6-DeferredShader/blob/master/Pics/WithoutRangeCheck.bmp)
