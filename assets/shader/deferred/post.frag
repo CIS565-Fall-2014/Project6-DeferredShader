@@ -51,6 +51,7 @@ void main()
     // Get fragment data.
     vec3 position = texture2D( u_positionTex, v_texcoord ).xyz;
     vec3 normal = texture2D( u_normalTex, v_texcoord ).xyz;
+    vec3 color = texture2D( u_colorTex, v_texcoord ).rgb;
     float base_exp_depth = texture2D( u_depthTex, v_texcoord ).r;
     float base_depth = linearizeDepth( base_exp_depth, u_zNear, u_zFar );
 
@@ -123,11 +124,20 @@ void main()
     vec3 ao_contribution = vec3( 1.0 - ao, 1.0 - ao, 1.0 - ao );
 
 
+    /*********** SCREEN-SPACE AMBIENT OCCLUSION ***********/
+    // Implementation inspired by: http://john-chapman-graphics.blogspot.co.uk/2013/01/ssao-tutorial.html
+
+    // TODO: Implement this.
+
+
     /*********** TOON SHADER ***********/
     // Implementation inspired by: http://www.lighthouse3d.com/tutorials/glsl-tutorial/toon-shader-version-ii/
 
     // Compute angle between fragment normal and light.
     float intensity = dot( normalize( light_pos - position ), normalize( normal ) );
+
+    // Get passed-in color.
+    vec3 toon_color = color;
 
     // Get normals of neighboring fragments.
     vec3 neighbor_norm_1 = texture2D( u_normalTex, vec2( v_texcoord.s - HORIZONTAL_STEP, v_texcoord.t ) ).xyz;  // Edge detection - Left.
@@ -141,32 +151,39 @@ void main()
          dot( normal, neighbor_norm_3 ) < EDGE_DETECTION_THRESHOLD ||
          dot( normal, neighbor_norm_4 ) < EDGE_DETECTION_THRESHOLD )
     {
-        intensity = 0.0;
+        intensity = 1.0;
+        toon_color = EDGE_COLOR;
     }
     else {
 
         // Put colors into "buckets" based on intensity of light.
         if ( intensity > 0.95 ) {
             intensity = 1.0;
+            //toon_color = vec3( 1.0, 0.5, 0.5 );
         }
         else if ( intensity > 0.5 ) {
             intensity = 0.95;
+            //toon_color = vec3( 0.6, 0.3, 0.3 );
         }
         else if ( intensity > 0.25 ) {
             intensity = 0.5;
+            //toon_color = vec3( 0.4, 0.2, 0.2 );
         }
         else {
             intensity = 0.25;
+            //toon_color = vec3( 0.2, 0.1, 0.1 );
         }
     }
 
     // Set fragement color.
-    //gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb * intensity, 1.0 );
+    //gl_FragColor = vec4( toon_color * intensity, 1.0 );
 
 
     /*********** BLOOM ***********/
 
     // TODO: Bloom.
+
+    // TODO: Apply a fake glow on object edges to avoid having to import a glow texture.
 
     // DEBUG - Pass color through.
     gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb, 1.0 );
