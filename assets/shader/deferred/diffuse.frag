@@ -42,6 +42,7 @@ void main()
 {
   // Write a diffuse shader and a Blinn-Phong shader
   // NOTE : You may need to add your own normals to fulfill the second's requirements
+  gl_FragColor = vec4(vec3(0,0,0) , 1.0);
   
   vec3 position  = texture2D(u_positionTex, v_texcoord).rgb;
   vec3 normal    = texture2D(u_normalTex,   v_texcoord).rgb;
@@ -90,4 +91,5 @@ void main()
   //gl_FragColor = vec4(texture2D(u_colorTex, v_texcoord).rgb, 1.0);
   gl_FragColor = vec4(diffCol + specular , 1.0);
   //gl_FragColor = vec4((1.0 - accumulatedAO) * (diffCol + specular) , 1.0);
+  gl_FragColor = vec4(texture2D(u_extraTex, v_texcoord).rgb, 1.0);
 }

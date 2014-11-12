@@ -249,7 +249,7 @@ var renderShade = function () {
 /////////////////////////////////////////////////////////////
   gl.activeTexture( gl.TEXTURE5 );  //occlusion
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(5) );
-  gl.uniform1i( shadeProg.uExtraLoc, 4 );///////////////////////////////////
+  gl.uniform1i( shadeProg.uExtraLoc, 5 );///////////////////////////////////
 ////////////////////////////////////////////////////////////
 
   // Bind necessary uniforms 
@@ -317,7 +317,7 @@ var renderAmbient = function () {
     randomNum = Math.random();
   }
   gl.uniform1fv(ambientProg.uRandNoiseLoc , randArray);//randomNoise
-  drawModel(ambientProg,3);
+  drawQuad(ambientProg);
   gl.useProgram(null);
 
   // Unbind FBO

@@ -51,6 +51,7 @@ CIS565WEBGLCORE.createFBO = function(){
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, width, height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
 
 //////////Create Occlusion texture //////////////////////////////////////////////
+/*
       occlusionTex = gl.createTexture();
       gl.bindTexture( gl.TEXTURE_2D, occlusionTex );
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -58,7 +59,7 @@ CIS565WEBGLCORE.createFBO = function(){
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.FLOAT, null);
-
+*/
         // Create textures for FBO attachment 
         for( var i = 0; i < 6; ++i ){  //ADDED TEXTURE!!!
           textures[i] = gl.createTexture()
@@ -163,6 +164,7 @@ CIS565WEBGLCORE.createFBO = function(){
           // Set up GBuffer EXTRA/////////////////////////////////
           fbo[FBO_EXTRA] = gl.createFramebuffer();
           gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[FBO_EXTRA]);
+          /*
           gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[2], 0);
 
           FBOstatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
@@ -170,6 +172,7 @@ CIS565WEBGLCORE.createFBO = function(){
             console.log("GBuffer Color FBO incomplete! Init failed!");
             return false;
           }
+          */
         }
 
         gl.bindFramebuffer( gl.FRAMEBUFFER, null );
@@ -201,9 +204,9 @@ CIS565WEBGLCORE.createFBO = function(){
           return multipleTargets;
         },
         /////////NEW///////////
-        occlusionTexture: function(){
-            return occlusionTex; 
-        },
+        //occlusionTexture: function(){
+        //    return occlusionTex; 
+        //},
         ///// The following 3 functions should be implemented for all objects
         ///// whose resources are retrieved asynchronously
         isReady: function(){
