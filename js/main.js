@@ -35,10 +35,16 @@ var texToDisplay = 1;
 //Added
 var lightpos = vec3.fromValues(0.0, 0.0, 15.0);
 var lightcolor = vec3.fromValues(1.0, 1.0, 1.0);
+var samplekernel = [];
+var kernelSize = 100;
+var ProjectionMat;
+var BlurRadius = 0.1;
+var stats;
+
 
 var main = function (canvasId, messageId) {
     var canvas;
-
+    stats = initStats();
     // Initialize WebGL
     initGL(canvasId, messageId);
 
@@ -47,6 +53,9 @@ var main = function (canvasId, messageId) {
 
     // Set up FBOs
     initFramebuffer();
+
+    //Added to generate Sample Kernel
+    initKernel();
 
     // Set up models
     initObjs();
@@ -68,6 +77,8 @@ var renderLoop = function () {
 };
 
 var render = function () {
+    if (stats)
+        stats.update();
   if (fbo.isMultipleTargets()) {
     renderPass();
   } else {
@@ -174,13 +185,13 @@ var renderMulti = function () {
 
   drawModel(posProg, 1);
 
-  gl.disable(gl.DEPTH_TEST);
+  //gl.disable(gl.DEPTH_TEST);
   fbo.unbind(gl);
   gl.useProgram(null);
 
   fbo.bind(gl, FBO_GBUFFER_NORMAL);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST);
   gl.useProgram(normProg.ref());
 
   //update the normal matrix
@@ -197,8 +208,8 @@ var renderMulti = function () {
   fbo.unbind(gl);
 
   fbo.bind(gl, FBO_GBUFFER_COLOR);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST);
   gl.useProgram(colorProg.ref());
 
   gl.uniformMatrix4fv(colorProg.uMVPLoc, false, mvpMat);
@@ -286,6 +297,17 @@ var renderDiagnostic = function () {
   drawQuad(diagProg);
 };
 
+//Generate SampleKernel
+var initKernel = function () {
+    for (var i = 0; i < kernelSize; i++) {
+        var x = Math.random() * 2.0 - 1.0;
+        var y = Math.random() * 2.0 - 1.0;
+        var z = Math.random();
+
+        samplekernel[i] = [Math.random() * x, Math.random() * y, Math.random() * z];
+    }
+};
+
 var renderPost = function () {
     gl.useProgram(postProg.ref());
 
@@ -318,8 +340,12 @@ var renderPost = function () {
     gl.uniform1f(postProg.uZNearLoc, zNear);
     gl.uniform1f(postProg.uZFarLoc, zFar);
     gl.uniform1i(postProg.uDisplayTypeLoc, texToDisplay);
-    gl.uniform1f(postProg.uScreenWidthLoc, canvas.width)
-    gl.uniform1f(postProg.uScreenHeightLoc, canvas.height)
+    gl.uniform1f(postProg.uScreenWidthLoc, canvas.width);
+    gl.uniform1f(postProg.uScreenHeightLoc, canvas.height);
+
+    gl.uniform1f(postProg.uBlurRLoc, BlurRadius);
+    gl.uniform3fv(postProg.uSamplekernelLoc, samplekernel);
+    gl.uniformMatrix4fv(postProg.uPerspLoc, false, ProjectionMat);
 
     drawQuad(postProg);
 };
@@ -348,6 +374,8 @@ var initCamera = function () {
   persp = mat4.create();
   mat4.perspective(persp, todeg(60), canvas.width / canvas.height, 0.1, 2000);
 
+  ProjectionMat = persp;
+
   camera = CIS565WEBGLCORE.createCamera(CAMERA_TRACKING_TYPE);
   camera.goHome([0, 0, 4]);
   interactor = CIS565WEBGLCORE.CameraInteractor(camera, canvas);
@@ -357,7 +385,8 @@ var initCamera = function () {
     interactor.onKeyDown(e);
     switch(e.keyCode) {
       case 48:
-        isDiagnostic = false;
+          isDiagnostic = false;
+          texToDisplay = 7;
         break;
       case 49:
         isDiagnostic = true;
@@ -387,6 +416,14 @@ var initCamera = function () {
       case 55:   //Blinn-Phong
         isDiagnostic = false;
         texToDisplay = 7;
+        break;
+      case 56:   //SSAO
+        isDiagnostic = false;
+        texToDisplay = 8;
+        break;
+      case 57:   //Blur
+        isDiagnostic = false;
+        texToDisplay = 9;
         break;
     }
   }
@@ -548,6 +585,10 @@ var initShaders = function () {
     postProg.uZFarLoc = gl.getUniformLocation(postProg.ref(), "u_zFar");
     postProg.uScreenWidthLoc = gl.getUniformLocation(postProg.ref(), "u_ScreenWidth");
     postProg.uScreenHeightLoc = gl.getUniformLocation(postProg.ref(), "u_ScreenHeight");
+
+    postProg.uSamplekernelLoc = gl.getUniformLocation(postProg.ref(), "u_samplekernel");
+    postProg.uPerspLoc = gl.getUniformLocation(postProg.ref(), "u_projection");
+    postProg.uBlurRLoc = gl.getUniformLocation(postProg.ref(), "u_radius");
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };
@@ -559,4 +600,20 @@ var initFramebuffer = function () {
     return;
   }
 };
+
+//Added
+function initStats() {
+    stats = new Stats();
+    stats.setMode(0); // 0: fps, 1: ms
+
+    // Align top-left
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+
+    document.body.appendChild(stats.domElement);
+
+
+    return stats;
+}
 

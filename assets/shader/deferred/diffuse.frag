@@ -2,6 +2,8 @@ precision highp float;
 #define DISPLAY_TOON 5
 #define DISPLAY_BLOOM 6
 #define DISPLAY_BLINN 7
+#define DISPLAY_SSAO 8
+#define DISPLAY_BLUR 9
 
 uniform sampler2D u_positionTex;
 uniform sampler2D u_normalTex;
@@ -42,12 +44,12 @@ void main()
 	vec3 position = texture2D( u_positionTex, v_texcoord ).xyz;
 	vec4 color = texture2D( u_colorTex, v_texcoord );
 	float depth = texture2D( u_depthTex, v_texcoord ).x;
-
+	depth = linearizeDepth(depth, u_zNear, u_zFar);
 
 	vec3 lightpos = vec3 (u_mvp * vec4(u_lightpos, 1.0 ));
   // Write a diffuse shader and a Blinn-Phong shader
   // NOTE : You may need to add your own normals to fulfill the second's requirements
-  if( u_displayType == DISPLAY_BLINN || u_displayType == DISPLAY_BLOOM )
+  if( u_displayType == DISPLAY_BLINN || u_displayType == DISPLAY_BLOOM || u_displayType == DISPLAY_SSAO || u_displayType == DISPLAY_BLUR)
   {		
 	vec3 L = GetNormal(lightpos-position);
 	vec3 N = GetNormal(normal);
@@ -127,6 +129,7 @@ void main()
 	}
  
  
+
 	if (depth > 0.99) 
 	       gl_FragColor = vec4(0.8,0.8,0.8,1.0);
 }
