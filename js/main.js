@@ -338,6 +338,7 @@ var initCamera = function () {
     switch(e.keyCode) {
       case 48:
         isDiagnostic = false;
+        effect = 0;
         break;
       case 49:
         isDiagnostic = true;
@@ -356,16 +357,16 @@ var initCamera = function () {
         texToDisplay = 4;
         break;
       case 54:
-        effect = 0;
+        effect ^= 1;
         break;
       case 55:
-        effect = 1;
+        effect ^= 2;
         break;
       case 56:
-        effect = 2;
+        effect ^= 4;
         break;
       case 57:
-        effect = 3;
+        effect ^= 8;
         break;
     }
   }

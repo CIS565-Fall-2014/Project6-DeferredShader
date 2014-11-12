@@ -14,11 +14,21 @@ float linearizeDepth( float exp_depth, float near, float far ){
 	return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
 }
 
+bool flagged(int v, int f) {
+    for (int i = 0; i < 4; ++i) {
+        if (i == f && (v / 2) * 2 != v) {
+            return true;
+        }
+        v /= 2;
+    }
+    return false;
+}
+
 void main()
 {
     vec3 sum = texture2D(u_shadeTex, v_texcoord).rgb;
 
-    if (u_effect == 1) {
+    if (flagged(u_effect, 1)) {
         // Bloom
         if (bloom_rad > 0.0) {
             for (float x = -bloom_rad; x <= bloom_rad; ++x) {
@@ -31,8 +41,6 @@ void main()
                 }
             }
         }
-    } else if (u_effect == 2) {
-        // Toon shading
     }
 
     gl_FragColor = vec4(sum, 1.0);

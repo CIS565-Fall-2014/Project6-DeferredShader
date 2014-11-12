@@ -30,6 +30,16 @@ float rand(vec2 co) {
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
+bool flagged(int v, int f) {
+    for (int i = 0; i < 4; ++i) {
+        if (i == f && (v / 2) * 2 != v) {
+            return true;
+        }
+        v /= 2;
+    }
+    return false;
+}
+
 void main()
 {
     vec3  n = texture2D(u_normalTex  , v_texcoord).rgb;
@@ -43,38 +53,39 @@ void main()
     }
 
     // SSAO
-    vec3 tang = cross(vec3(0, 1, 0), n);
-    vec3 bitang = cross(n, tang);
     float aofact = 1.0;
-    for (float i = 0.0; i < SSAO_SAMPLES; ++i) {
-        vec3 hemi = normalize(vec3(
-            rand(p.xy * vec2(i, 2)) * 2.0 - 1.0,
-            rand(p.xy * vec2(i, 3)) * 2.0 - 1.0,
-            rand(p.xy * vec2(i, 5))
-            )) * SSAO_RAD;
-        float scale = i / SSAO_SAMPLES;
-        hemi *= mix(0.1, 1.0, scale * scale);
-        vec3 samppos = mat3(tang, bitang, n) * hemi;
-        vec2 sampcoord = v_texcoord + samppos.xy;
-        if (samppos.z < texture2D(u_depthTex, sampcoord).r) {
-            aofact += 1.0;
+    if (!flagged(u_effect, 3)) {
+        aofact = 0.0;
+        vec3 tang = cross(vec3(0, 1, 0), n);
+        vec3 bitang = cross(n, tang);
+        for (float i = 0.0; i < SSAO_SAMPLES; ++i) {
+            vec3 hemi = normalize(vec3(
+                rand(p.xy * vec2(i, 2)) * 2.0 - 1.0,
+                rand(p.xy * vec2(i, 3)) * 2.0 - 1.0,
+                rand(p.xy * vec2(i, 5))
+                )) * SSAO_RAD;
+            float scale = i / SSAO_SAMPLES;
+            hemi *= mix(0.1, 1.0, scale * scale);
+            vec3 samppos = mat3(tang, bitang, n) * hemi;
+            vec2 sampcoord = v_texcoord + samppos.xy;
+            if (samppos.z < texture2D(u_depthTex, sampcoord).r) {
+                aofact += 1.0;
+            }
         }
-    }
-    aofact /= SSAO_SAMPLES;
-    aofact = 1.0 - aofact;
-
-    if (u_effect == 3) {
-        // SSAO only
-        gl_FragColor = vec4(aofact, aofact, aofact, 1.0);
-        return;
+        aofact /= SSAO_SAMPLES;
+        aofact = 1.0 - aofact;
     }
 
-    // Diffuse/specular
-    vec3 lampdir = normalize(u_lamppos - p);
-    float difffact = max(0.0, dot(lampdir, n));
-    float specfact = pow(max(0.0, dot(n, lampdir)), specexp);
+    float difffact = 1.0;
+    float specfact = 0.0;
+    if (!flagged(u_effect, 0)) {
+        // Diffuse/specular
+        vec3 lampdir = normalize(u_lamppos - p);
+        difffact = max(0.0, dot(lampdir, n));
+        specfact = pow(max(0.0, dot(n, lampdir)), specexp);
+    }
 
-    if (u_effect == 2) {
+    if (flagged(u_effect, 2)) {
         // Toon shading
         difffact = mix(0.0, 0.2, clamp((difffact - 0.1) * 50.0, 0.0, 1.0))
                  + mix(0.0, 0.5, clamp((difffact - 0.6) * 50.0, 0.0, 1.0));
@@ -83,7 +94,7 @@ void main()
 
     vec3 color = (aofact * (ambfact + difffact + specfact)) * lampcol * c;
 
-    if (u_effect == 2) {
+    if (flagged(u_effect, 2)) {
         // Toon shading outline
         if (n.z < 0.6) {
             color = vec3(0.0);
