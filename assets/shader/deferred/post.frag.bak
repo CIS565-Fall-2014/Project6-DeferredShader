@@ -113,6 +113,6 @@ void main()
   if(u_displayType == DISPLAY_TOON)
     gl_FragColor = toonShader(color, 3); 
   if(u_displayType == DISPLAY_SSAO)
-    gl_FragColor = SSAO(color); 
+    gl_FragColor = SSAO; 
     
 }

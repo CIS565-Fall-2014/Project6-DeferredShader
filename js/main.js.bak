@@ -373,7 +373,7 @@ var initCamera = function () {
         break;
       case 53:
         isDiagnostic = false;
-        texToDisplay = 5;//bloom
+        texToDisplay = 5;
         break;
       case 54:
         isDiagnostic = false;
