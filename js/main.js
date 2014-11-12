@@ -31,10 +31,15 @@ var isDiagnostic = true;
 var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
+var stats = new Stats();
 
 var main = function (canvasId, messageId) {
   var canvas;
 
+  stats.setMode(1);
+  stats.domElement.style.position = 'absolute';
+  stats.domElement.style.top = '10px';
+  document.body.appendChild( stats.domElement );
   // Initialize WebGL
   initGL(canvasId, messageId);
 
@@ -59,7 +64,9 @@ var main = function (canvasId, messageId) {
 };
 
 var renderLoop = function () {
+
   window.requestAnimationFrame(renderLoop);
+  stats.update();
   render();
 };
 
@@ -217,26 +224,27 @@ var renderShade = function () {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Bind necessary textures
-  //gl.activeTexture( gl.TEXTURE0 );  //position
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
-  //gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
+  gl.activeTexture( gl.TEXTURE0 );  //position
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
+  gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
 
-  //gl.activeTexture( gl.TEXTURE1 );  //normal
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  //gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
+  gl.activeTexture( gl.TEXTURE1 );  //normal
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
+  gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
 
   gl.activeTexture( gl.TEXTURE2 );  //color
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( shadeProg.uColorSamplerLoc, 2 );
 
-  //gl.activeTexture( gl.TEXTURE3 );  //depth
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  //gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
+  gl.activeTexture( gl.TEXTURE3 );  //depth
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
 
   // Bind necessary uniforms 
-  //gl.uniform1f( shadeProg.uZNearLoc, zNear );
-  //gl.uniform1f( shadeProg.uZFarLoc, zFar );
-  
+  gl.uniform1f( shadeProg.uZNearLoc, zNear );
+  gl.uniform1f( shadeProg.uZFarLoc, zFar );
+  gl.uniform1i( shadeProg.uDisplayTypeLoc, texToDisplay );
+
   drawQuad(shadeProg);
 
   // Unbind FBO
@@ -272,6 +280,7 @@ var renderDiagnostic = function () {
   gl.uniform1i( diagProg.uDisplayTypeLoc, texToDisplay ); 
   
   drawQuad(diagProg);
+
 };
 
 var renderPost = function () {
@@ -285,7 +294,21 @@ var renderPost = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
 
+  gl.activeTexture( gl.TEXTURE5 );
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(5) );
+  gl.uniform1i(postProg.uNoise, 5 );
+
+  gl.activeTexture( gl.TEXTURE3 );  //depth
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( postProg.uDepthSamplerLoc, 3 );
+
+  // Bind necessary uniforms
+  gl.uniform1f( postProg.uZNearLoc, zNear );
+  gl.uniform1f( postProg.uZFarLoc, zFar );
+  gl.uniform1i( postProg.uDisplayTypeLoc, texToDisplay );
+
   drawQuad(postProg);
+  //fbo.unbind(gl);
 };
 
 var initGL = function (canvasId, messageId) {
@@ -322,6 +345,7 @@ var initCamera = function () {
     switch(e.keyCode) {
       case 48:
         isDiagnostic = false;
+        texToDisplay = 0;
         break;
       case 49:
         isDiagnostic = true;
@@ -339,6 +363,26 @@ var initCamera = function () {
         isDiagnostic = true;
         texToDisplay = 4;
         break;
+      case 53:
+        isDiagnostic = false;
+        texToDisplay = 5;
+        break;
+      case 54:
+        isDiagnostic = false;
+        texToDisplay = 6;
+        break;
+      case 55:
+        isDiagnostic = false;
+        texToDisplay = 7;
+        break;
+      case 56:
+        isDiagnostic = false;
+        texToDisplay = 8;
+        break;
+      case 57:
+        isDiagnostic = false;
+        texToDisplay = 9;
+        break;
     }
   }
 };
@@ -348,7 +392,9 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  //objloader.loadFromFile(gl, "assets/models/donut.obj", null);
+  //objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  objloader.loadFromFile(gl, "assets/models/cat2.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
@@ -478,7 +524,13 @@ var initShaders = function () {
     postProg.aVertexPosLoc = gl.getAttribLocation( postProg.ref(), "a_pos" );
     postProg.aVertexTexcoordLoc = gl.getAttribLocation( postProg.ref(), "a_texcoord" );
 
+
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
+    postProg.uDepthSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_depthTex");
+    postProg.uZNearLoc = gl.getUniformLocation( postProg.ref(), "u_zNear" );
+    postProg.uZFarLoc = gl.getUniformLocation( postProg.ref(), "u_zFar" );
+    postProg.uDisplayTypeLoc = gl.getUniformLocation( postProg.ref(), "u_displayType" );
+    postProg.uNoise = gl.getUniformLocation( postProg.ref(), "u_Noise" );
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };
