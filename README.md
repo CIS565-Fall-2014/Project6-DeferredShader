@@ -1,93 +1,35 @@
-------------------------------------------------------------------------------
+======================================
 CIS565: Project 6 -- Deferred Shader
--------------------------------------------------------------------------------
-Fall 2014
--------------------------------------------------------------------------------
-Due Wed, 11/12/2014 at Noon
--------------------------------------------------------------------------------
+======================================
+Fall 2014 <br />
+Bo Zhang<br />
 
--------------------------------------------------------------------------------
-NOTE:
--------------------------------------------------------------------------------
-This project requires any graphics card with support for a modern OpenGL 
-pipeline. Any AMD, NVIDIA, or Intel card from the past few years should work 
-fine, and every machine in the SIG Lab and Moore 100 is capable of running 
-this project.
+##OVERVIEW:
+This is a WebGL project based on implementation of deferred shader.
 
-This project also requires a WebGL capable browser. The project is known to 
-have issues with Chrome on windows, but Firefox seems to run it fine.
+##Result:
+### 1)Diffuse and Blinn-Phong shading<br />
+This part is simple as I have finished Blinn-Phong shader in project4.<br />
+* Reference Link: http://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model<br />
+* Here is the result of Diffuse and Blinn-Phong shading:<br />
+![Alt text](https://github.com/wulinjiansheng/Project6-DeferredShader/blob/master/Pics/BlinnPhong.bmp)
 
--------------------------------------------------------------------------------
-INTRODUCTION:
--------------------------------------------------------------------------------
+### 2)Bloom<br />
+Bloom shading makes objects appear to glow. To do this, I use the Blinn-Phong shader color as orginal color and then used a gaussian convolution to add glow on it.<br />
+* Reference Link: http://prideout.net/archive/bloom/<br />
+* Here is the result of Bloom shading:<br />
+![Alt text](https://github.com/wulinjiansheng/Project6-DeferredShader/blob/master/Pics/Bloom.bmp)
 
-In this project, you will get introduced to the basics of deferred shading. You will write GLSL and OpenGL code to perform various tasks in a deferred lighting pipeline such as creating and writing to a G-Buffer.
+### 3)"Toon" Shading (with basic silhouetting)
+To do Toon Shader, I just assign different color to screen points according to the dot product of light direction and screen point normal. And to add silhouette, I tried two different methonds. The first one is to compare the screen point's normal to nearby normals. If the dot product of point's normal and nearby normal is close to 1, I assign edge color(black) to this screen point. And the second one is to compare depth. If the screen point is near to background, I assigh edge color to it.
+* Reference Link: http://www.lighthouse3d.com/tutorials/glsl-tutorial/toon-shader-version-ii/<br />
+* Here is the result of Toon shading(with buggy silhouetting):<br />
+![Alt text](https://github.com/wulinjiansheng/Project6-DeferredShader/blob/master/Pics/ToonBuggy.bmp)
+<br />
+* Here is the result of Toon shading(with right silhouetting):<br />
+![Alt text](https://github.com/wulinjiansheng/Project6-DeferredShader/blob/master/Pics/Toon%20Right.bmp)<br />
 
--------------------------------------------------------------------------------
-CONTENTS:
--------------------------------------------------------------------------------
-The Project5 root directory contains the following subdirectories:
-	
-* js/ contains the javascript files, including external libraries, necessary.
-* assets/ contains the textures that will be used in the second half of the
-  assignment.
-* resources/ contains the screenshots found in this readme file.
-
- This Readme file edited as described above in the README section.
-
--------------------------------------------------------------------------------
-OVERVIEW:
--------------------------------------------------------------------------------
-The deferred shader you will write will have the following stages:
-
-Stage 1 renders the scene geometry to the G-Buffer
-* pass.vert
-* pass.frag
-
-Stage 2 renders the lighting passes and accumulates to the P-Buffer
-* quad.vert
-* diffuse.frag
-* diagnostic.frag
-
-Stage 3 renders the post processing
-* post.vert
-* post.frag
-
-The keyboard controls are as follows:
-WASDRF - Movement (along w the arrow keys)
-* W - Zoom in
-* S - Zoom out
-* A - Left
-* D - Right
-* R - Up
-* F - Down
-* ^ - Up
-* v - Down
-* < - Left
-* > - Right
-* 1 - World Space Position
-* 2 - Normals
-* 3 - Color
-* 4 - Depth
-* 0 - Full deferred pipeline
-
-There are also mouse controls for camera rotation.
-
--------------------------------------------------------------------------------
-REQUIREMENTS:
--------------------------------------------------------------------------------
-
-In this project, you are given code for:
-* Loading .obj file
-* Deferred shading pipeline
-* GBuffer pass
-
-You are required to implement:
-* Either of the following effects
-  * Bloom
-  * "Toon" Shading (with basic silhouetting)
-* Screen Space Ambient Occlusion
-* Diffuse and Blinn-Phong shading
+### 4)Screen Space Ambient Occlusion
 
 **NOTE**: Implementing separable convolution will require another link in your pipeline and will count as an extra feature if you do performance analysis with a standard one-pass 2D convolution. The overhead of rendering and reading from a texture _may_ offset the extra computations for smaller 2D kernels.
 
@@ -197,28 +139,21 @@ SELF-GRADING
   based on the size of each project.
 
 
----
-SUBMISSION
----
-As with the previous projects, you should fork this project and work inside of
-your fork. Upon completion, commit your finished project back to your fork, and
-make a pull request to the master repository.  You should include a README.md
-file in the root directory detailing the following
-
-* A brief description of the project and specific features you implemented
-* At least one screenshot of your project running.
-* A link to a video of your project running.
-* Instructions for building and running your project if they differ from the
-  base code.
-* A performance writeup as detailed above.
-* A list of all third-party code used.
-* This Readme file edited as described above in the README section.
-
----
-ACKNOWLEDGEMENTS
----
-
-Many thanks to Cheng-Tso Lin, whose framework for CIS700 we used for this
-assignment.
-
-This project makes use of [three.js](http://www.threejs.org).
+The keyboard controls are as follows:
+WASDRF - Movement (along w the arrow keys)
+* W - Zoom in
+* S - Zoom out
+* A - Left
+* D - Right
+* R - Up
+* F - Down
+* ^ - Up
+* v - Down
+* < - Left
+* > - Right
+* 1 - World Space Position
+* 2 - Normals
+* 3 - Color
+* 4 - Depth
+* 0 - Full deferred pipeline
+There are also mouse controls for camera rotation.
