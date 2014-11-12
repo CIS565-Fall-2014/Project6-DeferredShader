@@ -28,6 +28,7 @@ var normProg;
 var colorProg;
 
 var isDiagnostic = true;
+var effect = 0;
 var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
@@ -241,7 +242,7 @@ var renderShade = function () {
   gl.uniform1f( shadeProg.uZFarLoc, zFar );
   var lrot = mat4.create();
   mat4.rotateY(lrot, lrot, time);
-  time += 0.02;
+  time += 0.04;
   vec3.transformMat4(lamppos, lamppos_w, lrot);
   vec3.transformMat4(lamppos, lamppos, camera.getViewTransform());
   gl.uniform3f( shadeProg.uLamppos, lamppos[0], lamppos[1], lamppos[2] );
@@ -295,6 +296,7 @@ var renderPost = function () {
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
 
   gl.uniform2f(postProg.uResolutionLoc, canvas.width, canvas.height);
+  gl.uniform1i(postProg.uEffectLoc, effect);
 
   drawQuad(postProg);
 };
@@ -349,6 +351,15 @@ var initCamera = function () {
       case 52:
         isDiagnostic = true;
         texToDisplay = 4;
+        break;
+      case 55:
+        effect = 0;
+        break;
+      case 56:
+        effect = 1;
+        break;
+      case 57:
+        effect = 2;
         break;
     }
   }
@@ -492,6 +503,7 @@ var initShaders = function () {
 
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
     postProg.uResolutionLoc = gl.getUniformLocation(postProg.ref(), "u_resolution");
+    postProg.uEffectLoc = gl.getUniformLocation(postProg.ref(), "u_effect");
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };
