@@ -4,7 +4,7 @@ CIS565: Project 6 -- Deferred Shader
 Fall 2014 <br />
 Bo Zhang<br />
 
-##OVERVIEW:
+##Overview:
 This is a WebGL project based on implementation of deferred shader.
 
 ##Result:
@@ -44,7 +44,11 @@ I implement this as an additional post processing effects. I implement a simple 
 ![Alt text](https://github.com/wulinjiansheng/Project6-DeferredShader/blob/master/Pics/Blur.bmp)<br />
 ![Alt text](https://github.com/wulinjiansheng/Project6-DeferredShader/blob/master/Pics/Blur2.bmp)<br />
 
-##PERFORMANCE EVALUATION
+##Some Other Buggy Images
+Here is the result I get when I pass wrong random kernels for SSAO:<br />
+![Alt text](https://github.com/wulinjiansheng/Project6-DeferredShader/blob/master/Pics/wrong.bmp)<br />
+
+##Performance Evaluation
 Feature | FPS
 ----- | ----- 
 Blinn-Phong | 6 FPS 
