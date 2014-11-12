@@ -10,12 +10,17 @@ var FBO_GBUFFER_NORMAL = 1;
 var FBO_GBUFFER_COLOR = 2;
 var FBO_GBUFFER_DEPTH = 3;
 var FBO_GBUFFER_TEXCOORD = 4;
+///////////////extra buffer//////
+var FBO_EXTRA = 5;
+
+
 
 CIS565WEBGLCORE.createFBO = function(){
     "use strict"
 
      var textures = [];
      var depthTex = null;
+     var occlusionTex = null;
      var fbo = [];
 
      var multipleTargets = false;//Change this?
@@ -37,16 +42,25 @@ CIS565WEBGLCORE.createFBO = function(){
      	}
 
      	//Create depth texture 
-     	depthTex = gl.createTexture();
-     	gl.bindTexture( gl.TEXTURE_2D, depthTex );
+      depthTex = gl.createTexture();
+      gl.bindTexture( gl.TEXTURE_2D, depthTex );
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, width, height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
 
+//////////Create Occlusion texture //////////////////////////////////////////////
+      occlusionTex = gl.createTexture();
+      gl.bindTexture( gl.TEXTURE_2D, occlusionTex );
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.FLOAT, null);
+
         // Create textures for FBO attachment 
-        for( var i = 0; i < 5; ++i ){
+        for( var i = 0; i < 6; ++i ){  //ADDED TEXTURE!!!
           textures[i] = gl.createTexture()
           gl.bindTexture( gl.TEXTURE_2D,  textures[i] );
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -145,6 +159,17 @@ CIS565WEBGLCORE.createFBO = function(){
             console.log("GBuffer Color FBO incomplete! Init failed!");
             return false;
           }
+          
+          // Set up GBuffer EXTRA/////////////////////////////////
+          fbo[FBO_EXTRA] = gl.createFramebuffer();
+          gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[FBO_EXTRA]);
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[2], 0);
+
+          FBOstatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+          if (FBOstatus !== gl.FRAMEBUFFER_COMPLETE) {
+            console.log("GBuffer Color FBO incomplete! Init failed!");
+            return false;
+          }
         }
 
         gl.bindFramebuffer( gl.FRAMEBUFFER, null );
@@ -174,6 +199,10 @@ CIS565WEBGLCORE.createFBO = function(){
         },
         isMultipleTargets: function(){
           return multipleTargets;
+        },
+        /////////NEW///////////
+        occlusionTexture: function(){
+            return occlusionTex; 
         },
         ///// The following 3 functions should be implemented for all objects
         ///// whose resources are retrieved asynchronously

@@ -38,24 +38,30 @@ float ambientOcclusion( float myDepth, vec2 sampleCoord, float multiplier, float
   
 }
 
+vec2 rotatePoint(vec2 position, float theta){
+  float cs = cos(theta);
+  float sn = sin(theta);
+  vec2 newPos;
+  newPos.x = position.x * cs - position.y * sn;
+  newPos.y = position.x * sn + position.y * cs;
+  return newPos;
+}
+
 void main()
 {
-  // Write a diffuse shader and a Blinn-Phong shader
-  // NOTE : You may need to add your own normals to fulfill the second's requirements
-  
-  vec3 position  = texture2D(u_positionTex, v_texcoord).rgb;
-  vec3 normal    = texture2D(u_normalTex,   v_texcoord).rgb;
+  //vec3 position  = texture2D(u_positionTex, v_texcoord).rgb;
+  //vec3 normal    = texture2D(u_normalTex,   v_texcoord).rgb;
   vec3 color     = texture2D(u_colorTex, v_texcoord).rgb;
-  vec3 lightDir  = normalize(lightPos - position);
-  float diffuse  = max(dot(lightDir, normal), 0.0);
-  vec3  diffCol  = diffuse * color;
+  //vec3 lightDir  = normalize(lightPos - position);
+  //float diffuse  = max(dot(lightDir, normal), 0.0);
+  //vec3  diffCol  = diffuse * color;
   
-  vec3 reflect    = reflect(-lightDir, normal); 
-  float specAngle = max(dot(reflect, normalize(- position)), 0.0);
-  float specular  = pow(specAngle, specExp);
-  specular        = specular * diffuse;
-  vec3  specCol   = specular * color;
-  /*
+  //vec3 reflect    = reflect(-lightDir, normal); 
+  //float specAngle = max(dot(reflect, normalize(- position)), 0.0);
+  //float specular  = pow(specAngle, specExp);
+  //specular        = specular * diffuse;
+  //vec3  specCol   = specular * color;
+  
   //begin screen space ambient occlusion
   float depth = texture2D( u_depthTex, v_texcoord ).x;
   vec2 onePixel = vec2(1.0, 1.0) / u_textureSize;
@@ -63,10 +69,23 @@ void main()
   color = vec3(depth,depth,depth);
   
 
+  
+  vec2 left  = vec2(-1, 0);
+  vec2 right = vec2(1 , 0);
+  vec2 up    = vec2(0, 1);
+  vec2 down  = vec2(0, -1);
+  //left  = rotatePoint(left, float(v_texcoord.x * v_texcoord.y));
+  //right = rotatePoint(left, float(v_texcoord.x * v_texcoord.y));
+  //up    = rotatePoint(left, float(v_texcoord.x * v_texcoord.y));
+  //down  = rotatePoint(left, float(v_texcoord.x * v_texcoord.y));
+/*
+  float rand = 1.0;
+  float y = 1.0 - (rand * rand);
   vec2 left  = normalize(vec2(-rand, y));
   vec2 right = normalize(vec2(rand , y));
   vec2 up    = normalize(vec2(y, rand));
   vec2 down  = normalize(vec2(y, -rand));
+  */
   
   float distance = 1.0;
   vec2 sampleCoord;
@@ -83,11 +102,18 @@ void main()
     accumulatedAO += ambientOcclusion( depth, sampleCoord, aoMultiplier, distance);
     //update distance
     distance += float(i + 1);
+    /*
+    left  = rotatePoint(left, float((v_texcoord.x + float(i)) * v_texcoord.y));
+    right = rotatePoint(left, float((v_texcoord.x + float(i)) * v_texcoord.y));
+    up    = rotatePoint(left, float((v_texcoord.x + float(i)) * v_texcoord.y));
+    down  = rotatePoint(left, float((v_texcoord.x + float(i)) * v_texcoord.y));
+    */
   }
   accumulatedAO = accumulatedAO / (4.0 * float(LOOPS));
+  
+  
   gl_FragColor = vec4(1.0 - accumulatedAO);
-  */
   //gl_FragColor = vec4(texture2D(u_colorTex, v_texcoord).rgb, 1.0);
-  gl_FragColor = vec4(diffCol + specular , 1.0);
+  //gl_FragColor = vec4(diffCol + specular , 1.0);
   //gl_FragColor = vec4((1.0 - accumulatedAO) * (diffCol + specular) , 1.0);
 }

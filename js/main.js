@@ -12,6 +12,7 @@ var objloader;  // OBJ loader
 // Models 
 var model;      // Model object
 var quad = {};  // Empty object for full-screen quad
+var quad2 = {}; //second quad?
 
 // Framebuffer
 var fbo = null;
@@ -82,6 +83,7 @@ var render = function () {
   }
 
   if (!isDiagnostic) {
+    renderAmbient();// Calculate Ambient Occlusion Before next rendering step!
     renderShade();
     renderPost();
   } else {
@@ -122,7 +124,7 @@ var drawQuad = function (program) {
   gl.vertexAttribPointer(program.aVertexPosLoc, 3, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(program.aVertexPosLoc);
 
-  gl.bindBuffer(gl.ARRAY_BUFFER, quad.tbo);
+  gl.bindBuffer(gl.ARRAY_BUFFER, quad.tbo);//this?
   gl.vertexAttribPointer(program.aVertexTexcoordLoc, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(program.aVertexTexcoordLoc);
 
@@ -190,7 +192,7 @@ var renderMulti = function () {
 
   gl.useProgram(normProg.ref());
 
-  //update the normal matrix
+  //update the normal matrix////////////////////////////////////////////////////////////////////////
   var nmlMat = mat4.create();
   mat4.invert( nmlMat, camera.getViewTransform() );
   mat4.transpose( nmlMat, nmlMat);
@@ -202,7 +204,7 @@ var renderMulti = function () {
 
   gl.useProgram(null);
   fbo.unbind(gl);
-
+////////////////////////////////////////////////////////////////////
   fbo.bind(gl, FBO_GBUFFER_COLOR);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -214,6 +216,7 @@ var renderMulti = function () {
 
   gl.useProgram(null);
   fbo.unbind(gl);
+  //////////////////////////////////////////////////////////////////
 };
 
 var renderShade = function () {
@@ -222,6 +225,7 @@ var renderShade = function () {
 
   // Bind FBO
   fbo.bind(gl, FBO_PBUFFER);
+  
 
   gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -242,6 +246,12 @@ var renderShade = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
   gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
 
+/////////////////////////////////////////////////////////////
+  gl.activeTexture( gl.TEXTURE5 );  //occlusion
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(5) );
+  gl.uniform1i( shadeProg.uExtraLoc, 4 );///////////////////////////////////
+////////////////////////////////////////////////////////////
+
   // Bind necessary uniforms 
   gl.uniform1f( shadeProg.uZNearLoc, zNear );
   gl.uniform1f( shadeProg.uZFarLoc, zFar );
@@ -255,6 +265,60 @@ var renderShade = function () {
   }
   gl.uniform1fv(shadeProg.uRandNoiseLoc , randArray);//randomNoise
   drawQuad(shadeProg);
+
+  // Unbind FBO
+  fbo.unbind(gl);
+};
+////////////////////////////////////////////////////////////////////////////////////////
+// NEW PIPELINE STAGE!!!
+///////////////////////////////////////////////////////////////////////////////////////
+var renderAmbient = function () {
+  gl.useProgram(ambientProg.ref());
+  gl.disable(gl.DEPTH_TEST);
+
+  // Bind FBO
+  //fbo.bind(gl, FBO_PBUFFER);
+  fbo.bind(gl, FBO_EXTRA);
+
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // Bind necessary textures
+  gl.activeTexture( gl.TEXTURE0 );  //position
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
+  gl.uniform1i( ambientProg.uPosSamplerLoc, 0 );
+
+  gl.activeTexture( gl.TEXTURE1 );  //normal
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
+  gl.uniform1i( ambientProg.uNormalSamplerLoc, 1 );
+
+  gl.activeTexture( gl.TEXTURE2 );  //color
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
+  gl.uniform1i( ambientProg.uColorSamplerLoc, 2 );
+
+  gl.activeTexture( gl.TEXTURE3 );  //depth
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( ambientProg.uDepthSamplerLoc, 3 );
+
+/////////////////////////////////////////////////////////////
+//  gl.activeTexture( gl.TEXTURE5 );  //occlusion
+//  gl.bindTexture( gl.TEXTURE_2D, fbo.occlusionTexture() );
+//  gl.uniform1i( ambientProg.uExtraLoc, 4 );///////////////////////////////////
+////////////////////////////////////////////////////////////
+
+  // Bind necessary uniforms 
+  gl.uniform1f( ambientProg.uZNearLoc, zNear );
+  gl.uniform1f( ambientProg.uZFarLoc, zFar );
+  
+  gl.uniform2f(ambientProg.uTexSizeLoc, canvas.width, canvas.height)////////add texture size
+  var randomNum = Math.random();
+  randArray = [];
+  for (var i = 0; i < 64; i ++){
+    randArray.push(randomNum);
+    randomNum = Math.random();
+  }
+  gl.uniform1fv(ambientProg.uRandNoiseLoc , randArray);//randomNoise
+  drawModel(ambientProg,3);
+  gl.useProgram(null);
 
   // Unbind FBO
   fbo.unbind(gl);
@@ -444,6 +508,7 @@ var initShaders = function () {
 
     CIS565WEBGLCORE.registerAsyncObj(gl, normProg);
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     colorProg = CIS565WEBGLCORE.createShaderProgram();
     colorProg.loadShader(gl, "assets/shader/deferred/colorPass.vert", "assets/shader/deferred/colorPass.frag");
     colorProg.addCallback(function(){
@@ -453,6 +518,7 @@ var initShaders = function () {
     });
 
     CIS565WEBGLCORE.registerAsyncObj(gl, colorProg);
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   }
 
   // Create shader program for diagnostic
@@ -480,10 +546,11 @@ var initShaders = function () {
     shadeProg.aVertexPosLoc = gl.getAttribLocation( shadeProg.ref(), "a_pos" );
     shadeProg.aVertexTexcoordLoc = gl.getAttribLocation( shadeProg.ref(), "a_texcoord" );
 
-    shadeProg.uPosSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_positionTex");
+    shadeProg.uPosSamplerLoc    = gl.getUniformLocation( shadeProg.ref(), "u_positionTex");
     shadeProg.uNormalSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_normalTex");
-    shadeProg.uColorSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_colorTex");
-    shadeProg.uDepthSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_depthTex");
+    shadeProg.uColorSamplerLoc  = gl.getUniformLocation( shadeProg.ref(), "u_colorTex");
+    shadeProg.uDepthSamplerLoc  = gl.getUniformLocation( shadeProg.ref(), "u_depthTex");
+    shadeProg.uExtraLoc         = gl.getUniformLocation( shadeProg.ref(), "u_extraTex");
 
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
@@ -493,6 +560,28 @@ var initShaders = function () {
     shadeProg.uRandNoiseLoc = gl.getUniformLocation( postProg.ref(), "u_randomNoise");//randomNoise
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, shadeProg); 
+  
+  // Create shader program for AMBIENT OCCLUSION
+  ambientProg = CIS565WEBGLCORE.createShaderProgram();
+  ambientProg.loadShader(gl, "assets/shader/deferred/quad.vert", "assets/shader/deferred/ambient.frag");
+  ambientProg.addCallback( function() { 
+    ambientProg.aVertexPosLoc = gl.getAttribLocation( ambientProg.ref(), "a_pos" );
+    ambientProg.aVertexTexcoordLoc = gl.getAttribLocation( ambientProg.ref(), "a_texcoord" );
+
+    ambientProg.uPosSamplerLoc    = gl.getUniformLocation( ambientProg.ref(), "u_positionTex");
+    ambientProg.uNormalSamplerLoc = gl.getUniformLocation( ambientProg.ref(), "u_normalTex");
+    ambientProg.uColorSamplerLoc  = gl.getUniformLocation( ambientProg.ref(), "u_colorTex");
+    ambientProg.uDepthSamplerLoc  = gl.getUniformLocation( ambientProg.ref(), "u_depthTex");
+    //ambientProg.uExtraLoc         = gl.getUniformLocation( ambientProg.ref(), "u_extraTex");
+
+    ambientProg.uZNearLoc = gl.getUniformLocation( ambientProg.ref(), "u_zNear" );
+    ambientProg.uZFarLoc = gl.getUniformLocation( ambientProg.ref(), "u_zFar" );
+    ambientProg.uDisplayTypeLoc = gl.getUniformLocation( ambientProg.ref(), "u_displayType" );
+    ////////////////////////////////////////////////////////////////////////////////////////new stuff
+    ambientProg.uTexSizeLoc = gl.getUniformLocation( ambientProg.ref(), "u_textureSize");
+    ambientProg.uRandNoiseLoc = gl.getUniformLocation( postProg.ref(), "u_randomNoise");//randomNoise
+  });
+  CIS565WEBGLCORE.registerAsyncObj(gl, ambientProg); 
 
   // Create shader program for post-process
   postProg = CIS565WEBGLCORE.createShaderProgram();
