@@ -70,7 +70,6 @@ vec4 SSAO() {
 	vec3 position = texture2D(u_positionTex, v_texcoord).xyz;
 	float depth = texture2D(u_depthTex, v_texcoord).r;
 	depth = linearizeDepth( depth, u_zNear, u_zFar );
-	float radius = u_radius;
 	float occlusion = 0.0;
 	vec3 origin = vec3(position.x, position.y, depth);	
 		

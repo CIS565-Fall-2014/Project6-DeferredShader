@@ -38,7 +38,7 @@ var lightcolor = vec3.fromValues(1.0, 1.0, 1.0);
 var samplekernel = [];
 var kernelSize = 100;
 var ProjectionMat;
-var BlurRadius = 0.1;
+var BlurRadius = 0.05;
 var stats;
 
 
@@ -434,7 +434,7 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/suzanne_Smooth.obj", null);
+  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
