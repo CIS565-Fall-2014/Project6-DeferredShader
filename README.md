@@ -41,7 +41,7 @@ Extra features:
 -------------------------------------------------------------------------------
 RESULTS
 -------------------------------------------------------------------------------
-Basic:
+Basic image
 ![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/normal_cat.jpg)
 
 
@@ -59,7 +59,10 @@ SSAO which use the method of sampling in sphere
 ![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/ao3.jpg)
 ![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/cat.jpg)
 
+-------------------------------------------------------------------------------
 Art Pieces during the works
+-------------------------------------------------------------------------------
+
 ![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/ao.jpg)
 ![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/AO2.jpg)
 ![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/funny2.jpg)
@@ -72,8 +75,15 @@ Art Pieces during the works
 -------------------------------------------------------------------------------
 PERFORMANCE EVALUATION
 -------------------------------------------------------------------------------
-For this project, since the obj loader can not load extremely large obj files. The running speed of the is always 60 FPS, until I increase the light to 1000.
+For this project, since the obj loader can not load extremely large obj files. The running speed of the is always 60 FPS, until I increase the light from 450 to 1000. The FPS drops almost to half when light number is 1000.
 
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/FPS.jpg)
+
+The major reason of this drop is because the light data is genereated within the shader and stored in the data. So it should increase dramatiscally if I change light data into uniform data and bind it to the shader programs. 
+
+There are other optimizations could be done for this project. For example, we can reorganize the FragData by eliminating the Z component for normals. Then we could replace it with depth data so that we could save 1/4 spaces by eliminating one whole buffer. 
+
+Another optimization is for the ambient occlusion. Right now, I generated my 100 samples in the shader. If we want more samples, then it would decrease the performance. To avoid this, we could generate our samples outside the shader and make it a uniform data.
 
 
 ---

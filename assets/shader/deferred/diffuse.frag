@@ -72,7 +72,7 @@ void main()
   vec3 lightsC[10];
   vec3 lightsDir[10];
 
-  for(int i = 0; i < 6; ++i)
+  for(int i = 0; i < 1; ++i)
   {
      lightsP[i] = vec3(0.0, 5.0, float(i-3)*3.0);
 	 lightsC[i] = vec3(1.0, 1.0, 1.0);
@@ -88,7 +88,7 @@ void main()
 
   vec3 diffuseColor = vec3(0.0, 0.0, 0.0);
   vec3 specularColor = vec3(0.0);
-  for(int i = 0; i < 6; ++i)
+  for(int i = 0; i < 1; ++i)
   {
      float NdotL = clamp(dot(normal, lightsDir[i]), 0.0, 1.0);
 	 diffuseColor += NdotL * lightsC[i];
