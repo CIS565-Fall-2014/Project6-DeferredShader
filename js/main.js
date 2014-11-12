@@ -31,6 +31,9 @@ var isDiagnostic = true;
 var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
+var lamppos_w = vec3.create();
+vec3.set(lamppos_w, 0, 2, 4);
+var lamppos = vec3.create();
 
 var main = function (canvasId, messageId) {
   var canvas;
@@ -205,6 +208,8 @@ var renderMulti = function () {
   fbo.unbind(gl);
 };
 
+var time = 0.0;
+
 var renderShade = function () {
   gl.useProgram(shadeProg.ref());
   gl.disable(gl.DEPTH_TEST);
@@ -234,7 +239,13 @@ var renderShade = function () {
   // Bind necessary uniforms 
   gl.uniform1f( shadeProg.uZNearLoc, zNear );
   gl.uniform1f( shadeProg.uZFarLoc, zFar );
-  
+  var lrot = mat4.create();
+  mat4.rotateY(lrot, lrot, time);
+  time += 0.02;
+  vec3.transformMat4(lamppos, lamppos_w, lrot);
+  vec3.transformMat4(lamppos, lamppos, camera.getViewTransform());
+  gl.uniform3f( shadeProg.uLamppos, lamppos[0], lamppos[1], lamppos[2] );
+
   drawQuad(shadeProg);
 
   // Unbind FBO
@@ -468,6 +479,7 @@ var initShaders = function () {
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
     shadeProg.uDisplayTypeLoc = gl.getUniformLocation( shadeProg.ref(), "u_displayType" );
+    shadeProg.uLamppos = gl.getUniformLocation( shadeProg.ref(), "u_lamppos" );
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, shadeProg); 
 

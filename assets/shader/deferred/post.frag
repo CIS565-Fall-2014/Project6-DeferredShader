@@ -5,8 +5,8 @@ uniform vec2 u_resolution;
 
 varying vec2 v_texcoord;
 
-const float bloom_fac = 0.05;
-const float bloom_rad = 10.0;
+const float bloom_fac = 0.02;
+const float bloom_rad = 0.0;
 
 
 float linearizeDepth( float exp_depth, float near, float far ){
