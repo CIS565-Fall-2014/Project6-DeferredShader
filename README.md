@@ -84,9 +84,9 @@ WASDRF - Movement (along w the arrow keys)
 
 There are also mouse controls for camera rotation.
 
-Personal Link
+Video Link
 -------------------------------------------------------------------------------
-https://www.youtube.com/watch?v=Dg5RBjwsi0w <br />
+http://youtu.be/wwNlNdxbaSo <br />
 
 Web Page
 -------------------------------------------------------------------------------
