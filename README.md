@@ -1,59 +1,33 @@
 ------------------------------------------------------------------------------
 CIS565: Project 6 -- Deferred Shader
 -------------------------------------------------------------------------------
-Fall 2014
--------------------------------------------------------------------------------
-Due Wed, 11/12/2014 at Noon
--------------------------------------------------------------------------------
+To run this project, go to http://webglreport.com/ and check if drawbuffers is supported.
+Also, turn on WebGL extensions in About: Flags in Chrome.
 
--------------------------------------------------------------------------------
-NOTE:
--------------------------------------------------------------------------------
-This project requires any graphics card with support for a modern OpenGL 
-pipeline. Any AMD, NVIDIA, or Intel card from the past few years should work 
-fine, and every machine in the SIG Lab and Moore 100 is capable of running 
-this project.
+###INTRODUCTION:
 
-This project also requires a WebGL capable browser. The project is known to 
-have issues with Chrome on windows, but Firefox seems to run it fine.
+This is a deferred shading render pipeling which does some cool effects
+suc as Screen Space Ambient Occulsion, Toon Shading,and Gaussian Blur
 
--------------------------------------------------------------------------------
-INTRODUCTION:
--------------------------------------------------------------------------------
+[Video Demo] (https://www.youtube.com/watch?v=dSYRA8L7Y9M&feature=youtu.be)
 
-In this project, you will get introduced to the basics of deferred shading. You will write GLSL and OpenGL code to perform various tasks in a deferred lighting pipeline such as creating and writing to a G-Buffer.
+###Overview of Stages:
 
--------------------------------------------------------------------------------
-CONTENTS:
--------------------------------------------------------------------------------
-The Project5 root directory contains the following subdirectories:
-	
-* js/ contains the javascript files, including external libraries, necessary.
-* assets/ contains the textures that will be used in the second half of the
-  assignment.
-* resources/ contains the screenshots found in this readme file.
+* Stage 1 renders the scene geometry to the G-Buffer using:
 
- This Readme file edited as described above in the README section.
+pass.vert and pass.frag
 
--------------------------------------------------------------------------------
-OVERVIEW:
--------------------------------------------------------------------------------
-The deferred shader you will write will have the following stages:
+and writes geometry infromation: position, normal, color and depth into 4 textures.
 
-Stage 1 renders the scene geometry to the G-Buffer
-* pass.vert
-* pass.frag
+* Stage 2 renders the ligting, toon shading (includes silouette detection is done here) and a factor of Ambient Occulusion is calculated too.
 
-Stage 2 renders the lighting passes and accumulates to the P-Buffer
-* quad.vert
-* diffuse.frag
-* diagnostic.frag
+quad.vert and diffuse.frag
 
-Stage 3 renders the post processing
-* post.vert
-* post.frag
+* Stage 3 renders the post processing
 
-The keyboard controls are as follows:
+quad.vert and post.frag
+
+* The keyboard controls are as follows:
 WASDRF - Movement (along w the arrow keys)
 * W - Zoom in
 * S - Zoom out
@@ -71,154 +45,83 @@ WASDRF - Movement (along w the arrow keys)
 * 4 - Depth
 * 0 - Full deferred pipeline
 
-There are also mouse controls for camera rotation.
+###Features:
 
--------------------------------------------------------------------------------
-REQUIREMENTS:
--------------------------------------------------------------------------------
+* diffuse/specular for multiple lights
 
-In this project, you are given code for:
-* Loading .obj file
-* Deferred shading pipeline
-* GBuffer pass
+This is the first pass of the 2 deferred passes. It calculates the diffuse and specular contribution for each light and accumulates them.
 
-You are required to implement:
-* Either of the following effects
-  * Bloom
-  * "Toon" Shading (with basic silhouetting)
-* Screen Space Ambient Occlusion
-* Diffuse and Blinn-Phong shading
+Performance impact of lights in a scene of a 10,000 poly Stanford bunny
 
-**NOTE**: Implementing separable convolution will require another link in your pipeline and will count as an extra feature if you do performance analysis with a standard one-pass 2D convolution. The overhead of rendering and reading from a texture _may_ offset the extra computations for smaller 2D kernels.
+Number of Lights | FPS
+----- | ----- 
+10 | 60 FPS 
+50 | 60 FPS 
+200 | 60 FPS
+500 | 60 FPS
+1100 | ~ 40 FPS
+2000 | ~ 25 FPS
 
-You must implement two of the following extras:
-* The effect you did not choose above
-* Compare performance to a normal forward renderer with
-  * No optimizations
-  * Coarse sort geometry front-to-back for early-z
-  * Z-prepass for early-z
-* Optimize g-buffer format, e.g., pack things together, quantize, reconstruct z from normal x and y (because it is normalized), etc.
-  * Must be accompanied with a performance analysis to count
-* Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
+As we can see, the program can run 60 FPS up to almost 1000 lights, which shows that the decoupling of lighting
+and scene complexity in the deferred shading pipeline has a big advantage in rendering scene with huge
+number of lights
 
--------------------------------------------------------------------------------
-RUNNING THE CODE:
--------------------------------------------------------------------------------
+* Toon Shading
+![] (5.jpg)
 
-Since the code attempts to access files that are local to your computer, you
-will either need to:
+![] (4.jpg)
 
-* Run your browser under modified security settings, or
-* Create a simple local server that serves the files
+![] (2.jpg)
 
+Toon shading consists of 2 effects. One is the rendering of silhouette, which is done using the Sobel operator
+applied on eyeSpace positions of the fragments. I've also tried applying the operator on the normals and the
+result was a rendering of all the edges.
 
-FIREFOX: change ``strict_origin_policy`` to false in about:config 
+The second effect was finite color space, which was achieve by selecting cut-offs in diffuse and specular
+factors.
 
-CHROME:  run with the following argument : `--allow-file-access-from-files`
+* Screen-Space Ambient Occlusion (SSAO)
 
-(You can do this on OSX by running Chrome from /Applications/Google
-Chrome/Contents/MacOS with `open -a "Google Chrome" --args
---allow-file-access-from-files`)
+For each fragment, a uniform sample in a sphere centered at it is obtained and for each fragment in the sample,
+determines whether it's in front of the fragment in the depth buffer. According to percentrages of the sample
+that's in front of the depth buffer, a factor is calculated and it's used as the fragment's color;
 
-* To check if you have set the flag properly, you can open chrome://version and
-  check under the flags
+![] (7.jpg)
+![] (6.jpg)
 
-RUNNING A SIMPLE SERVER: 
+* Gaussian Blur
+Depending on how large is the blur radius, fragments are uniformly sampled in the sphere around the current 
+fragment. Gaussian density is calculated for each fragment depending on how far it is.
 
-If you have Python installed, you can simply run a simple HTTP server off your
-machine from the root directory of this repository with the following command:
+![] (8.jpg)
 
-`python -m SimpleHTTPServer`
+* Screen-Space Depth of Field
 
--------------------------------------------------------------------------------
-RESOURCES:
--------------------------------------------------------------------------------
+![] (3.jpg)
 
-The following are articles and resources that have been chosen to help give you
-a sense of each of the effects:
+First, the distance of the depth of the fragment to the focal length is calculated. Based on this distance
+and whether it's in the focus zone, a factor is calculated, which will then be non-linearize by powering it up
+to enhance contrast. Then a Gaussian blur would be applied with standard deviation of this factor.
 
-* Bloom : [GPU Gems](http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html) 
-* Screen Space Ambient Occlusion : [Floored
-  Article](http://floored.com/blog/2013/ssao-screen-space-ambient-occlusion.html)
+Performance impact of each feature:
 
--------------------------------------------------------------------------------
-README
--------------------------------------------------------------------------------
-All students must replace or augment the contents of this Readme.md in a clear 
-manner with the following:
+Test scene: 10,000 poly Stanford Bunny, 4 lights.
 
-* A brief description of the project and the specific features you implemented.
-* At least one screenshot of your project running.
-* A 30 second or longer video of your project running.  To create the video you
-  can use [Open Broadcaster Software](http://obsproject.com) 
-* A performance evaluation (described in detail below).
+Feature | FPS
+----- | ----- 
+Diffuse/Specular | 60 FPS 
+Gaussian Blur (400 samples) | ~ 58 FPS 
+DOP (400 samples) | ~ 58 FPS 
+Toon Shading | 60 FPS
+SSAO (400 samples) | 60 FPS
+SSAO (4096 samples) | 12 FPS
 
--------------------------------------------------------------------------------
-PERFORMANCE EVALUATION
--------------------------------------------------------------------------------
-The performance evaluation is where you will investigate how to make your 
-program more efficient using the skills you've learned in class. You must have
-performed at least one experiment on your code to investigate the positive or
-negative effects on performance. 
-
-We encourage you to get creative with your tweaks. Consider places in your code
-that could be considered bottlenecks and try to improve them. 
-
-Each student should provide no more than a one page summary of their
-optimizations along with tables and or graphs to visually explain any
-performance differences.
-
--------------------------------------------------------------------------------
-THIRD PARTY CODE POLICY
--------------------------------------------------------------------------------
-* Use of any third-party code must be approved by asking on the Google groups.  
-  If it is approved, all students are welcome to use it.  Generally, we approve 
-  use of third-party code that is not a core part of the project.  For example, 
-  for the ray tracer, we would approve using a third-party library for loading 
-  models, but would not approve copying and pasting a CUDA function for doing 
-  refraction.
-* Third-party code must be credited in README.md.
-* Using third-party code without its approval, including using another 
-  student's code, is an academic integrity violation, and will result in you 
-  receiving an F for the semester.
-
--------------------------------------------------------------------------------
-SELF-GRADING
--------------------------------------------------------------------------------
-* On the submission date, email your grade, on a scale of 0 to 100, to Harmony,
-  harmoli+cis565@seas.upenn.edu, with a one paragraph explanation.  Be concise and 
-  realistic.  Recall that we reserve 30 points as a sanity check to adjust your 
-  grade.  Your actual grade will be (0.7 * your grade) + (0.3 * our grade).  We 
-  hope to only use this in extreme cases when your grade does not realistically 
-  reflect your work - it is either too high or too low.  In most cases, we plan 
-  to give you the exact grade you suggest.
-* Projects are not weighted evenly, e.g., Project 0 doesn't count as much as 
-  the path tracer.  We will determine the weighting at the end of the semester 
-  based on the size of each project.
+Gaussian Blur, SSAO and DOP impacts the performance the most due to their large amount of samples.
 
 
----
-SUBMISSION
----
-As with the previous projects, you should fork this project and work inside of
-your fork. Upon completion, commit your finished project back to your fork, and
-make a pull request to the master repository.  You should include a README.md
-file in the root directory detailing the following
-
-* A brief description of the project and specific features you implemented
-* At least one screenshot of your project running.
-* A link to a video of your project running.
-* Instructions for building and running your project if they differ from the
-  base code.
-* A performance writeup as detailed above.
-* A list of all third-party code used.
-* This Readme file edited as described above in the README section.
-
----
-ACKNOWLEDGEMENTS
----
+###ACKNOWLEDGEMENTS
 
 Many thanks to Cheng-Tso Lin, whose framework for CIS700 we used for this
-assignment.
+project
 
 This project makes use of [three.js](http://www.threejs.org).

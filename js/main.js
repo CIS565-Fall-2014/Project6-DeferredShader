@@ -32,6 +32,10 @@ var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
 
+var projectionMatix;
+
+var stats;
+
 var main = function (canvasId, messageId) {
   var canvas;
 
@@ -53,14 +57,18 @@ var main = function (canvasId, messageId) {
   // Register our render callbacks
   CIS565WEBGLCORE.render = render;
   CIS565WEBGLCORE.renderLoop = renderLoop;
-
+  //FPS tracker
+  stats = new Stats();
+  stats.setMode(1);
+  document.body.appendChild(stats.domElement);
   // Start the rendering loop
   CIS565WEBGLCORE.run(gl);
 };
 
 var renderLoop = function () {
-  window.requestAnimationFrame(renderLoop);
-  render();
+    window.requestAnimationFrame(renderLoop);
+    stats.update();
+    render();
 };
 
 var render = function () {
@@ -183,7 +191,7 @@ var renderMulti = function () {
   //update the normal matrix
   var nmlMat = mat4.create();
   mat4.invert( nmlMat, camera.getViewTransform() );
-  mat4.transpose( nmlMat, nmlMat);
+  mat4.transpose(nmlMat, nmlMat);
   
   gl.uniformMatrix4fv(normProg.uMVPLoc, false, mvpMat);
   gl.uniformMatrix4fv(normProg.uNormalMatLoc, false, nmlMat);
@@ -217,25 +225,28 @@ var renderShade = function () {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Bind necessary textures
-  //gl.activeTexture( gl.TEXTURE0 );  //position
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
-  //gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
+  gl.activeTexture( gl.TEXTURE0 );  //position
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
+  gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
 
-  //gl.activeTexture( gl.TEXTURE1 );  //normal
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  //gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
+  gl.activeTexture( gl.TEXTURE1 );  //normal
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
+  gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
 
   gl.activeTexture( gl.TEXTURE2 );  //color
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( shadeProg.uColorSamplerLoc, 2 );
 
-  //gl.activeTexture( gl.TEXTURE3 );  //depth
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  //gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
+  gl.activeTexture( gl.TEXTURE3 );  //depth
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i(shadeProg.uDepthSamplerLoc, 3);
 
-  // Bind necessary uniforms 
-  //gl.uniform1f( shadeProg.uZNearLoc, zNear );
-  //gl.uniform1f( shadeProg.uZFarLoc, zFar );
+  //modelview
+  gl.uniformMatrix4fv(shadeProg.uModelViewLoc, false, camera.getViewTransform());
+  gl.uniformMatrix4fv(shadeProg.uProjectionLoc, false, projectionMatix);
+  //Bind necessary uniforms 
+  gl.uniform1f( shadeProg.uZNearLoc, zNear );
+  gl.uniform1f( shadeProg.uZFarLoc, zFar );
   
   drawQuad(shadeProg);
 
@@ -311,6 +322,7 @@ var initCamera = function () {
   // Setup camera
   persp = mat4.create();
   mat4.perspective(persp, todeg(60), canvas.width / canvas.height, 0.1, 2000);
+  projectionMatix = persp;
 
   camera = CIS565WEBGLCORE.createCamera(CAMERA_TRACKING_TYPE);
   camera.goHome([0, 0, 4]);
@@ -348,7 +360,7 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  objloader.loadFromFile(gl, "assets/models/simple2.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
@@ -463,7 +475,9 @@ var initShaders = function () {
     shadeProg.uPosSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_positionTex");
     shadeProg.uNormalSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_normalTex");
     shadeProg.uColorSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_colorTex");
-    shadeProg.uDepthSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_depthTex");
+    shadeProg.uDepthSamplerLoc = gl.getUniformLocation(shadeProg.ref(), "u_depthTex");
+    shadeProg.uModelViewLoc = gl.getUniformLocation(shadeProg.ref(), "u_modelview");
+    shadeProg.uProjectionLoc = gl.getUniformLocation(shadeProg.ref(), "u_projection");
 
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
