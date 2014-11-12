@@ -18,7 +18,7 @@ varying vec2 v_texcoord;
 #define HEIGHT 540
 
 #define AO false
-#define AO_NUM_SAMP 6.0
+#define AO_NUM_SAMP 4.0
 #define AO_RADIUS 0.01
 #define TOON_SHADING true
 #define HALF_NUM_LIGHTS 2
@@ -97,7 +97,7 @@ void main()
     //lighting
 	float diffuse = 0.0;
 	float specular = 0.0;
-    vec3 V = vec3(0.0,0.0,-1.0);
+        vec3 V = vec3(0.0,0.0,-1.0);
 	vec3 lightCol = vec3(1.0,1.0,1.0);
 
 	for(int i = -HALF_NUM_LIGHTS; i < HALF_NUM_LIGHTS; ++i)
@@ -119,9 +119,11 @@ void main()
 
    if(TOON_SHADING)
    {
-       if(diffuse <0.3) diffuse = 0.15;
-	   else if(diffuse < 0.66) diffuse = 0.33;
-	   else diffuse = 0.66;
+       if(diffuse <0.2) diffuse = 0.1;
+	   else if(diffuse < 0.4) diffuse = 0.3;
+	   else if (diffuse < 0.6) diffuse = 0.5;
+	   else if (diffuse < 0.8) diffuse = 0.7;
+           else diffuse = 0.9;
 
        if(specular <0.3) specular = 0.15;
 	   else if(specular < 0.66) specular = 0.33;
@@ -130,9 +132,10 @@ void main()
 
    }
 
-   vec3 finalColor =  0.4 * diffuse *texture2D(u_colorTex, v_texcoord).rgb * lightCol + 0.6 * specular * lightCol;
-   float linearD = linearizeDepth(texture2D(u_depthTex,v_texcoord).r,u_zNear,u_zFar);
+   vec3 finalColor =  0.7 * diffuse *texture2D(u_colorTex, v_texcoord).rgb * lightCol + 0.3 * specular * lightCol;
+   float linearD = linearizeDepth(texture2D(u_depthTex, v_texcoord).r,u_zNear,u_zFar);
    		
-	if(Gf > 0.5) gl_FragColor = vec4(0.0,0.0,0.0,1.0);
-	else gl_FragColor =  vec4(ambFactor * finalColor, 1.0);
+	if(Gf > 0.5) gl_FragColor = vec4(0.0,0.0,0.0,linearD);
+        else if(AO) gl_FragColor =  vec4(vec3(ambFactor), linearD);
+	else gl_FragColor =  vec4( finalColor, linearD);
 }

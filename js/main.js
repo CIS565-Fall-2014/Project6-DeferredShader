@@ -34,6 +34,8 @@ var texToDisplay = 1;
 
 var projectionMatix;
 
+var stats;
+
 var main = function (canvasId, messageId) {
   var canvas;
 
@@ -55,14 +57,18 @@ var main = function (canvasId, messageId) {
   // Register our render callbacks
   CIS565WEBGLCORE.render = render;
   CIS565WEBGLCORE.renderLoop = renderLoop;
-
+  //FPS tracker
+  stats = new Stats();
+  stats.setMode(1);
+  document.body.appendChild(stats.domElement);
   // Start the rendering loop
   CIS565WEBGLCORE.run(gl);
 };
 
 var renderLoop = function () {
-  window.requestAnimationFrame(renderLoop);
-  render();
+    window.requestAnimationFrame(renderLoop);
+    stats.update();
+    render();
 };
 
 var render = function () {
@@ -352,7 +358,7 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/simple.obj", null);
+  objloader.loadFromFile(gl, "assets/models/simple2.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
