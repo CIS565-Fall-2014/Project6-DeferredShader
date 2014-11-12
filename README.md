@@ -36,23 +36,43 @@ I implemented basic feature:
 Extra features:
 * Glowing/bluring
 * Edge detection that can illustrate mesh of the object
-* Sketch effect
+
 
 -------------------------------------------------------------------------------
 RESULTS
 -------------------------------------------------------------------------------
+Basic:
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/normal_cat.jpg)
 
 
+Blur effect by using smooth kernel
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/cat_glow.jpg)
 
 Toon effect with four colour levels 
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/cat_toon.jpg)
+
+
 Sobel Filter Application to draw the edges
-Blur effect by using smooth kernel
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/cat_mesh.jpg)
 
 SSAO which use the method of sampling in sphere
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/ao3.jpg)
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/cat.jpg)
+
+Art Pieces during the works
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/ao.jpg)
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/AO2.jpg)
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/funny2.jpg)
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/screwedzebra.jpg)
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/tiger_mesh.jpg)
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/zynga_effect.jpg)
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/toon_multiple_lights.jpg)
+![Final Image](https://github.com/zxm5010/Project6-DeferredShader/blob/master/images/screwdup1.jpg)
+
 -------------------------------------------------------------------------------
 PERFORMANCE EVALUATION
 -------------------------------------------------------------------------------
-For this project, since the obj loader can not load extremely large obj files. The running speed of the is always 60 FPS, until I increase the light to.
+For this project, since the obj loader can not load extremely large obj files. The running speed of the is always 60 FPS, until I increase the light to 1000.
 
 
 
