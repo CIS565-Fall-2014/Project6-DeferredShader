@@ -31,6 +31,9 @@ KEYBOARDS
 * 4 - Depth
 * 5 - Diffuse Lambert Shading
 * 6 - Blinn Shading
+* 7 - Bloom
+* 8 - Toon
+* 9 - Ambient Occulusion
 * 0 - Full deferred pipeline
 
 * mouse - camera rotation
@@ -138,9 +141,11 @@ REFERRENCES
 * Bloom : [GPU Gems](http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html) 
 * Bloom: http://prideout.net/archive/bloom/
 * Screen Space Ambient Occlusion : [Floored Article](http://floored.com/blog/2013/ssao-screen-space-ambient-occlusion.html)
+* SSAO: [SSAO Tutorial]http://john-chapman-graphics.blogspot.co.uk/2013/01/ssao-tutorial.html
 * Toon Shader: http://www.lighthouse3d.com/tutorials/glsl-tutorial/toon-shader-version-ii/
 * Toon Silhouette: http://floored.com/blog/2014/sketch-rendering.html
 * Edge Detection: [Illumination Method]http://mewgen.com/webgl/s/sobel.html
 * Sobel Filter: [Sobel Filter Convolution] http://jabtunes.com/labs/3d/webgl_postprocessing2.html
 * Many thanks to Cheng-Tso Lin, whose framework for CIS700 we used for this assignment.
 * This project makes use of [three.js](http://www.threejs.org).
+* This project makes use of [dat.GUI](https://code.google.com/p/dat-gui/).

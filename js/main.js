@@ -31,28 +31,37 @@ var colorProg;
 var isDiagnostic = false;
 var zNear = 20;
 var zFar = 2000;
-var texToDisplay = 1;
+var texToDisplay = 5;
 
-var testTex;
-var lighting;
-var lightPositions = [];
-var lightColors = [];
+
 var lightcolor;
 var lightdir;
+var diffusecolor;
 
 
-var FILTER_NUM = 4;
+//var FILTER_NUM = 4;
 var kernel = [];
-var kernel2 = [];
+//var kernel2 = [];
+var kernel3 = [];
+var kernel4 = [];
 var filter0 = [];
 var filter1 = [];
 var bloomTex;
+var noiseTex;
+
+var mvpMat;
+var nmlMat;
+
 
 var main = function (canvasId, messageId) {
+
   var canvas;
 
   // Initialize WebGL
   initGL(canvasId, messageId);
+
+  //initialize GUI
+  initGUI();
 
   // Set up camera
   initCamera(canvas);
@@ -87,6 +96,7 @@ var renderLoop = function () {
 };
 
 var render = function () {
+
   if (fbo.isMultipleTargets()) {
     renderPass();
   } else {
@@ -186,15 +196,16 @@ var renderPass = function () {
   gl.enable(gl.DEPTH_TEST);
 
   gl.useProgram(passProg.ref());
-  var mvpMat = mat4.create();
+  mvpMat = mat4.create();
   mat4.multiply( mvpMat, persp, camera.getViewTransform() );
-  var nmlMat = mat4.create();
+  nmlMat = mat4.create();
   mat4.invert( nmlMat, camera.getViewTransform() );
   mat4.transpose( nmlMat, nmlMat);
 
   gl.uniformMatrix4fv( passProg.uModelViewLoc, false, camera.getViewTransform());        
   gl.uniformMatrix4fv( passProg.uMVPLoc, false, mvpMat );        
   gl.uniformMatrix4fv( passProg.uNormalMatLoc, false, nmlMat );  
+  gl.uniform3fv(passProg.uDiffuseColorLoc, diffusecolor)
 
   /*gl.activeTexture( gl.TEXTURE5 );  //texture
   //gl.bindTexture( gl.TEXTURE_2D, model.texture(0) );
@@ -285,10 +296,19 @@ var renderShade = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
   gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
 
+  gl.activeTexture( gl.TEXTURE5);   //noise
+  gl.bindTexture( gl.TEXTURE_2D, noiseTex );
+  gl.uniform1i(shadeProg.uNoiseSamplerLoc,5);
+
   /*gl.activeTexture( gl.TEXTURE4 );  //light
   gl.bindTexture( gl.TEXTURE_2D, lightPosTex);
   //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, lightPosArray.length/3, 1.0, 0, gl.RGB, gl.FLOAT, new Float32Array(lightPosition));
   gl.uniform1i( shadeProg.uLightPosTexLoc, 4 );*/
+
+  gl.uniform1fv(shadeProg.uKernelLoc3, kernel3);
+  gl.uniform1f(shadeProg.uOffsetLoc, 1.0 / canvas.width);
+  gl.uniform1f(shadeProg.uOffsetLoc2, 1.0 / canvas.height);
+  gl.uniformMatrix4fv( shadeProg.uPerspMatLoc, false, mvpMat);
 
 
   // Bind necessary uniforms 
@@ -296,21 +316,12 @@ var renderShade = function () {
   gl.uniform1f( shadeProg.uZFarLoc, zFar );
   gl.uniform1i( shadeProg.uDisplayTypeLoc, texToDisplay ); 
 
-  //lighting = Lighting(DIRECTIONAL_LIGHT);
-  //lightPositions = Lighting(DIRECTIONAL_LIGHT);
-  lightdir = vec3.fromValues(1.0,1.0,1.0);
-  //lightdir = vec3.create();
-  //vec3.random(lightdir);
   vec3.normalize(lightdir, lightdir);
   vec3.transformMat4 (lightdir, lightdir, camera.getViewTransform());
   vec3.normalize(lightdir, lightdir);
-//  console.log(lightdir);
   gl.uniform3fv(shadeProg.uLightDirLoc,lightdir);
 
-  //lightcolor = vec3.fromValues(Math.random(),Math.random(),Math.random());
-  lightcolor = vec3.fromValues(1.0,1.0,1.0);
   gl.uniform3fv(shadeProg.uLightColorLoc, lightcolor);
-
   gl.uniform3fv(shadeProg.uEyePosLoc, camera.getEyePosition());
 
   drawQuad(shadeProg);
@@ -363,7 +374,8 @@ var renderPost = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
 
-  gl.uniform1i( postProg.uDisplayTypeLoc, texToDisplay ); 
+
+  
 
   /*gl.activeTexture(gl.TEXTURE5);
   gl.bindTexture(gl.TEXTURE_2D, filter1[0]);
@@ -383,17 +395,13 @@ var renderPost = function () {
 
   //gl.uniform1fv(postProg.uKernelLoc, 5*5, kernel);   //pass in the 5*5 kernel
   gl.uniform1fv(postProg.uKernelLoc, kernel);   //pass in the 5*5 kernel
-  gl.uniform1fv(postProg.uKernel2Loc, kernel2);   //pass in the 21*21 kernel
+  //gl.uniform1fv(postProg.uKernel2Loc, kernel2);   //pass in the 21*21 kernel
+  //console.log(kernel3);
+
   gl.uniform1f(postProg.uOffsetLoc, 1.0 / canvas.width);
   gl.uniform1f(postProg.uOffsetLoc2, 1.0 / canvas.height);
-
-/*  gl.activeTexture(gl.TEXTURE5);
-  gl.bindTexture(gl.TEXTURE_2D, fbo2[i]);
-  gl.uniform1i(postProg.uBloomSamplerLoc0,5);*/
-
-
-  
-
+  gl.uniform1i( postProg.uDisplayTypeLoc, texToDisplay ); 
+  gl.uniformMatrix4fv( postProg.uPerspMatLoc, false, persp);
 
 
 
@@ -416,7 +424,7 @@ var initKernel = function(){   //normalize kenel
     kernel[i] /= sum;
   }
 
-
+/*
   var sigma = 5.0;
   var sum2 = 0.0;
   var m = 21.0;
@@ -435,12 +443,73 @@ var initKernel = function(){   //normalize kenel
       for(var j = 0; j<= n-1; j++){
         kernel2[i*m+j] /= sum2;
       }
-    }
+    }*/
    // console.log("kernel 2 init: " + kernel2.length);
   //console.log(kernel);
   //console.log(kernel2);
+
+  //kernels is random heimisphere sample
+  var scale;
+  var len;
+  for (var i = 0; i < 16; ++i) {
+    //sample points on hemisphere oriented along the z axis
+     scale = i / 4.0;
+     scale = lerp(0.1, 1.0, scale * scale);  //distance weighted
+   
+     kernel3[i*3 + 0] = ((Math.random() * 2.0) -1.0)*scale;   //[-1,1]
+     kernel3[i*3 + 1] = ((Math.random() * 2.0) -1.0)*scale;   //[-1,1]
+     kernel3[i*3 + 2] = Math.random()*scale;  //[0,1]
+
+     //normallize
+     len = Math.sqrt(kernel3[i*3 + 0] *kernel3[i*3 + 0]  + kernel3[i*3 + 1] *kernel3[i*3 + 1]  + kernel3[i*3 + 2] *kernel3[i*3 + 2]);
+     kernel3[i*3 + 0] /= len;
+     kernel3[i*3 + 1] /= len;
+     kernel3[i*3 + 2] /= len;
+  }
+  // console.log(kernel3);
+
+
+  //noise kernel to  rotate the sample kernel used by AO
+  //avoid banding effect
+  for (var i = 0; i < 16; i++) {
+     kernel4[i*3+0] = ((Math.random() * 2.0) -1.0);
+     kernel4[i*3+1] = ((Math.random() * 2.0) -1.0);
+     kernel4[i*3+2] = 0.0;
+
+     //normallize
+     len = Math.sqrt(kernel4[i*3 + 0] *kernel4[i*3 + 0]  + kernel4[i*3 + 1] *kernel4[i*3 + 1]  + kernel4[i*3 + 2] *kernel4[i*3 + 2]);
+     kernel4[i*3 + 0] /= len;
+     kernel4[i*3 + 1] /= len;
+     kernel4[i*3 + 2] /= len;
+  }
+
+  var noiseArray = new Float32Array( kernel4 );
+  noiseTex = gl.createTexture();
+  createCustomTexture(noiseTex, noiseArray, gl.RGB, 16, 1);
+  //console.log("noise array size:" + noiseArray.length/3);
+  //console.log(noiseTex);
+console.log("noise: "+kernel4);
 };
 
+var lerp = function(a, b, t) {
+    return a + t * (b-a);
+};
+
+
+//create texture from data arrays
+var createCustomTexture = function( textureName, dataArray, format, width, height ){
+  gl.bindTexture(gl.TEXTURE_2D, textureName);
+  //INVALID_OPERATION: texImage2D: ArrayBufferView not big enough for request   ???
+  gl.texImage2D( gl.TEXTURE_2D, 0, format, width, height, 0, format, gl.FLOAT, dataArray);    
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
+  //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
+ // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR );
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE );
+  gl.bindTexture(gl.TEXTURE_2D, null);
+
+};
 
 var initFilters = function(){
   var w = canvas.width;
@@ -501,10 +570,65 @@ var initGL = function (canvasId, messageId) {
   gl.clearColor(0.3, 0.3, 0.3, 1.0);
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LESS);
+
+  lightdir = vec3.fromValues(1.0,1.0,1.0);
+  lightcolor = vec3.fromValues(1.0,1.0,1.0);
+  diffusecolor = vec3.fromValues(1.0,0.0,0.0);
 };
 
 
+//  window.onload = function() {
+ // }
 
+  var ControllerText = function() {
+    this.DebugShader = 'normal';
+    this.AdvancedShader = 'diffuse';
+   
+    this.DiffuseColor = [ 255, 0,0 ]; // RGB array
+  
+  };
+
+var initGUI = function(){
+    var cText = new ControllerText();
+    var gui = new dat.GUI( );
+    var diffuseColorController = gui.addColor(cText, 'DiffuseColor');
+    var debugShaderController = gui.add(cText, 'DebugShader',['normal','color','depth','position']);
+    var advancedShaderController = gui.add(cText, 'AdvancedShader',['diffuse','blinn','bloom','toon','AO']);
+    diffuseColorController.onChange(function(value){
+      diffusecolor[0] = parseFloat(value[0])/255.0;
+      diffusecolor[1] = parseFloat(value[1])/255.0;
+      diffusecolor[2] = parseFloat(value[2])/255.0;
+      console.log("diffuse color: " + diffusecolor);
+    });
+     diffuseColorController.onFinishChange(function(value) {
+      console.log("diffuse color: " + diffusecolor);
+     });
+
+    debugShaderController.onChange(function(value){
+      isDiagnostic = true;
+      if(value=='position')
+        texToDisplay = 1;
+      else if(value == 'normal')
+        texToDisplay = 2;
+      else if(value == 'color')
+        texToDisplay = 3;
+      else if(value == 'depth')
+        texToDisplay = 4;
+   });
+    advancedShaderController.onChange(function(value){
+      isDiagnostic = false;
+      if(value=='diffuse')
+        texToDisplay = 5;
+      else if(value == 'blinn')
+        texToDisplay = 6;
+      else if(value == 'bloom')
+        texToDisplay = 7;
+      else if(value == 'toon')
+        texToDisplay = 8;
+      else if(value == 'AO')
+        texToDisplay = 9;
+   });
+}
 
 var initCamera = function () {
   // Setup camera
@@ -554,6 +678,10 @@ var initCamera = function () {
       case 56:  //8 = toon shading  + silhouette
         isDiagnostic = false;
         texToDisplay = 8;
+        break;
+      case 57:  //9 = SSAO
+        isDiagnostic = false;
+        texToDisplay = 9;
         break;
     }
   }
@@ -620,6 +748,7 @@ var initShaders = function () {
       passProg.uMVPLoc = gl.getUniformLocation( passProg.ref(), "u_mvp" );
       passProg.uNormalMatLoc = gl.getUniformLocation( passProg.ref(), "u_normalMat");
       passProg.uSamplerLoc = gl.getUniformLocation( passProg.ref(), "u_sampler");
+      passProg.uDiffuseColorLoc = gl.getUniformLocation( passProg.ref(), "u_diffuseColor");
     });
 
     CIS565WEBGLCORE.registerAsyncObj(gl, passProg);
@@ -684,6 +813,9 @@ var initShaders = function () {
     shadeProg.uNormalSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_normalTex");
     shadeProg.uColorSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_colorTex");
     shadeProg.uDepthSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_depthTex");
+    shadeProg.uNoiseSamplerLoc = gl.getUniformLocation( shadeProg.ref(),"u_noiseTex");
+    shadeProg.uExtraSamplerLoc = gl.getUniformLocation( shadeProg.ref(),"u_extraTex");
+
     shadeProg.uLightDirLoc = gl.getUniformLocation( shadeProg.ref(),"u_lightDir");
     shadeProg.uLightColorLoc = gl.getUniformLocation( shadeProg.ref(),"u_lightColor");
     shadeProg.uEyePosLoc = gl.getUniformLocation( shadeProg.ref(),"u_eyePos");
@@ -691,6 +823,11 @@ var initShaders = function () {
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
     shadeProg.uDisplayTypeLoc = gl.getUniformLocation( shadeProg.ref(), "u_displayType" );
+
+    shadeProg.uKernelLoc3 = gl.getUniformLocation( shadeProg.ref(), "u_kernel3");
+    shadeProg.uPerspMatLoc = gl.getUniformLocation(shadeProg.ref(), "u_perspMat");
+    shadeProg.uOffsetLoc = gl.getUniformLocation(shadeProg.ref(), "u_offset");   //texture coord offset
+    shadeProg.uOffsetLoc2 = gl.getUniformLocation( shadeProg.ref(), "u_offset2");
 
   //  shadeProg.uKernelLoc = gl.getUniformLocation( shadeProg.ref(), "u_kernel");  // 25 * float 
    // shadeProg.uOffsetLoc = gl.getUniformLocation( shadeProg.ref(), "u_offset");   //texture coord offset
@@ -708,16 +845,19 @@ var initShaders = function () {
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
     postProg.uDisplayTypeLoc = gl.getUniformLocation( postProg.ref(), "u_displayType" );
     postProg.uBloomSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_bloomTex");
+   
    /* postProg.uBloomSamplerLoc0 = gl.getUniformLocation( postProg.ref(), "u_bloomTex0");
     postProg.uBloomSamplerLoc1 = gl.getUniformLocation( postProg.ref(), "u_bloomTex1");
     postProg.uBloomSamplerLoc2 = gl.getUniformLocation( postProg.ref(), "u_bloomTex2");
     postProg.uBloomSamplerLoc3 = gl.getUniformLocation( postProg.ref(), "u_bloomTex3");*/
 
     postProg.uKernelLoc = gl.getUniformLocation( postProg.ref(), "u_kernel");  // 25 * float 
-    postProg.uKernel2Loc = gl.getUniformLocation( postProg.ref(), "u_kernel2");  // 21*21 * float 
+  //  postProg.uKernel2Loc = gl.getUniformLocation( postProg.ref(), "u_kernel2");  // 21*21 * float 
+
     postProg.uOffsetLoc = gl.getUniformLocation( postProg.ref(), "u_offset");   //texture coord offset
     postProg.uOffsetLoc2 = gl.getUniformLocation( postProg.ref(), "u_offset2");
-  });
+    
+      });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };
 
@@ -727,5 +867,6 @@ var initFramebuffer = function () {
     console.log("FBO Initialization failed");
     return;
   }
+
 
 };

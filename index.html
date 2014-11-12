@@ -4,30 +4,78 @@
     <title>CIS 565 WebGL Deferred Shader</title>
   </head>
   <body>
-    <div id="message" style="position:relative;top:100px"/>
-    <canvas id="webglview" width="960" height="540">
-      WebGL unavailable.
-    </canvas>
-    <script src="js/ext/math/gl-matrix.js" type="text/javascript"></script>
-    <script src="js/ext/threejs/three.js" tyoe="text/javascript"></script>
-    <script src="js/ext/threejs/OBJLoader.js" type="text/javascript"></script>
-    <script src="js/ext/threejs/MTLLoader.js" type="text/javascript"></script>
-    <script src="js/ext/threejs/OBJMTLLoader.js"
-    type="text/javascript"></script>
 
-    <script src="js/core/shader-util.js" type="text/javascript"></script>
-    <script src="js/core/webgl-util.js" type="text/javascript"></script>
-    <script src="js/core/fbo-util.js" type="text/javascript"></script>
-    <script src="js/core/camera.js" type="text/javascript"></script>
-    <script src="js/core/cameraInteractor.js" type="text/javascript"></script>
-    <script src="js/core/obj-loader.js" type="text/javascript"></script>
+    <style>
+    body{font-family: Microsoft Yahei;} 
+    </style>
 
-    <script src="js/constants.js" type="text/javascript"></script>
-    <script src="js/screenQuad.js" type="text/javascript"></script>
-    <script src="js/main.js" type="text/javascript"></script>
+    <h1>WebGL Deferred Shader</h1>
+   <table>
+      <tr>
+          <td>
+              <div id="message" style="position:relative;top:20px"/>
+                <canvas id="webglview" width="960" height="540">
+                  WebGL unavailable.
+                </canvas>
+                <script src="js/ext/math/gl-matrix.js" type="text/javascript"></script>
+                <script src="js/ext/threejs/three.js" tyoe="text/javascript"></script>
+                <script src="js/ext/threejs/OBJLoader.js" type="text/javascript"></script>
+                <script src="js/ext/threejs/MTLLoader.js" type="text/javascript"></script>
+                <script src="js/ext/threejs/OBJMTLLoader.js"type="text/javascript"></script>
+                <script src="js/ext/dat.gui.min.js" type="text/javascript"></script>
+                <script src="js/ext/stats.min.js" type="text/javascript"></script>
 
-    <script>
-      main("webglview", "message");
-    </script>
+                <script src="js/core/shader-util.js" type="text/javascript"></script>
+                <script src="js/core/webgl-util.js" type="text/javascript"></script>
+                <script src="js/core/fbo-util.js" type="text/javascript"></script>
+                <script src="js/core/camera.js" type="text/javascript"></script>
+                <script src="js/core/cameraInteractor.js" type="text/javascript"></script>
+                <script src="js/core/obj-loader.js" type="text/javascript"></script>
+
+                <script src="js/constants.js" type="text/javascript"></script>
+                <script src="js/screenQuad.js" type="text/javascript"></script>
+                <script src="js/main.js" type="text/javascript"></script>
+
+                <script>
+                //update();
+                  /*  // the fps timer
+                  var stats = new Stats();
+                  stats.setMode( 0);  //0:fps, 1:ms
+                  stats.domElement.style.position = 'absolute';
+                  stats.domElement.style.left = '500px';
+                  stats.domElement.style.top = '0px';
+                  document.body.appendChild( stats.domElement );
+                  var update = function () {
+                  stats.begin();*/
+                  main("webglview", "message");
+
+                 /* stats.end();
+                  requestAnimationFrame( update );
+                  };
+                  requestAnimationFrame( update );*/
+                </script>
+              </div>
+          </td>
+
+          <td align="left" valign="top" style="padding:20px;">
+              <strong>Binglu Du</strong> <br>
+              <a href = "http://www.bingludu.com" target = "_blank"><strong>Click here for My Website</strong></a> <br>
+              <a href = "https://github.com/dblsai?tab=repositories" target = "_blank"><strong>Fork me on Github</strong></a> <br>
+              <br>Keyboard Camera Control: <br>
+              <ul>
+              <li>W - Zoom in </li>
+              <li>S - Zoom out </li>
+              <li>A - Left </li>
+              <li>D - Right </li>
+              <li>R - Up </li>
+              <li>F - Down </li>
+              <li>^ - Up </li>
+              <li>v - Down </li>
+              <li>< - Left </li>
+              <li>> - Right </li>
+              </ul>
+          </td>
+      </tr>
+    </table>
   </body>
 </html>

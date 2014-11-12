@@ -1,6 +1,7 @@
 precision highp float;
 
 uniform sampler2D u_shadeTex;
+
 //uniform sampler2D u_colorTex;
 //uniform sampler2D u_bloomTex;
 /*uniform sampler2D u_bloomTex0;
@@ -8,8 +9,11 @@ uniform sampler2D u_bloomTex1;
 uniform sampler2D u_bloomTex2;
 uniform sampler2D u_bloomTex3;*/
 
+
+
 uniform float u_kernel[25];    //5*5 kernel
-uniform float u_kernel2[441];    //21*21 kernel
+//uniform float u_kernel2[441];    //21*21 kernel
+
 uniform float u_offset;     //texture coord offset in width
 uniform float u_offset2;   //texture coord offset in height
 uniform int u_displayType;
@@ -40,17 +44,19 @@ void main()
 	  // Fill in post-processing as necessary HERE
 	  // NOTE : You may choose to use a key-controlled switch system to display one feature at a time
 	  
+	  vec2 texcoord = v_texcoord;
+	  
 	  if(u_displayType==1 || u_displayType == 5 || u_displayType ==6){
-		gl_FragColor = vec4(texture2D( u_shadeTex, v_texcoord).rgb, 1.0); 
+		gl_FragColor = vec4(texture2D( u_shadeTex, texcoord).rgb, 1.0); 
 	  }
 	  else if (u_displayType == 7){   //naive bloom
-		float left = v_texcoord.s - u_offset * 2.0;
-		float top = v_texcoord.t - u_offset *2.0;
+		float left = texcoord.s - u_offset * 2.0;
+		float top = texcoord.t - u_offset *2.0;
 		vec2 tc = vec2(left, top);
 		vec3 c = vec3(0.0, 0.0, 0.0);
 		//vec4 c = vec4(0.0, 0.0, 0.0, 0.0);
 		
-		//vec4 tmp = texture2D(u_shadeTex, v_texcoord);
+		//vec4 tmp = texture2D(u_shadeTex, texcoord);
 		//if(tmp.a > 0.01){
 			for(int i=0; i<5; i++){
 				for(int j=0; j<5; j++){
@@ -65,8 +71,8 @@ void main()
 				}
 			}
 					
-			left = v_texcoord.s - u_offset * 10.0;
-			top = v_texcoord.t - u_offset * 10.0;
+			left = texcoord.s - u_offset * 10.0;
+			top = texcoord.t - u_offset * 10.0;
 			tc = vec2(left, top);
 
 			for(int i=0; i<=20; i++){
@@ -92,8 +98,9 @@ void main()
 		// smooth toon shader
 		vec2 offset = vec2(u_offset, u_offset2);
 		vec3 toon;
-		float diffuse = texture2D(u_shadeTex, v_texcoord ).a;
-
+		float diffuse = texture2D(u_shadeTex, texcoord ).a;
+		//vec3 diffusecolor = texture2D(u_shadeTex, texcoord ).rgb;
+		//float mincolor = min(diffusecolor.r, min(diffusecolor.g, diffusecolor.b));
 		if (diffuse > 0.951)   //cos(18)
 			toon = vec3(1.0,0.5,0.5);
 		else if(diffuse > 0.809)   //cos(36)
@@ -106,14 +113,14 @@ void main()
 			toon = vec3(0.2,0.1,0.1);
 	
 		//obtain surrounding illumination
-		float t00 = lum(texture2D(u_shadeTex, v_texcoord + offset * vec2(-1, -1)));
-		float t10 = lum(texture2D(u_shadeTex, v_texcoord + offset * vec2( 0, -1)));
-		float t20 = lum(texture2D(u_shadeTex, v_texcoord + offset * vec2( 1, -1)));
-		float t01 = lum(texture2D(u_shadeTex, v_texcoord + offset * vec2(-1,  0)));
-		float t21 = lum(texture2D(u_shadeTex, v_texcoord + offset * vec2( 1,  0)));
-		float t02 = lum(texture2D(u_shadeTex, v_texcoord + offset * vec2(-1,  1)));
-		float t12 = lum(texture2D(u_shadeTex, v_texcoord + offset * vec2( 0,  1)));
-		float t22 = lum(texture2D(u_shadeTex, v_texcoord + offset * vec2( 1,  1)));
+		float t00 = lum(texture2D(u_shadeTex, texcoord + offset * vec2(-1, -1)));
+		float t10 = lum(texture2D(u_shadeTex, texcoord + offset * vec2( 0, -1)));
+		float t20 = lum(texture2D(u_shadeTex, texcoord + offset * vec2( 1, -1)));
+		float t01 = lum(texture2D(u_shadeTex, texcoord + offset * vec2(-1,  0)));
+		float t21 = lum(texture2D(u_shadeTex, texcoord + offset * vec2( 1,  0)));
+		float t02 = lum(texture2D(u_shadeTex, texcoord + offset * vec2(-1,  1)));
+		float t12 = lum(texture2D(u_shadeTex, texcoord + offset * vec2( 0,  1)));
+		float t22 = lum(texture2D(u_shadeTex, texcoord + offset * vec2( 1,  1)));
 		vec2 grad;
 		grad.x = t00 + 2.0*t01 + t02 - t20 - 2.0*t21 - t22;
 		grad.y = t00 + 2.0*t10 + t20 - t02 - 2.0*t12 - t22;
@@ -122,7 +129,55 @@ void main()
 		gl_FragColor = vec4(toon + edge, 1.0);
 
 		
-	  }
+	}
+	else if(u_displayType == 9){
+		
+	/*	float AO = 0.0;
+		float weight;
+		float depth = texture2D(u_shadeTex, texcoord ).a;
+		float depth_i;
+		vec3 pos = texture2D(u_shadeTex, texcoord ).rgb;
+		vec3 pos_i;
+		vec2 offset = vec2(u_offset, u_offset2);
+		
+		//4x4 sampling
+		for(float i = -2.0; i <= 2.0; i++){
+			for(float j = -2.0; j <= 2.0; j++){
+				depth_i = texture2D(u_shadeTex, texcoord + offset * vec2(int(i), int(j))).a;
+				if(depth_i < depth){
+					pos_i = texture2D(u_shadeTex, texcoord + offset * vec2(int(i), int(j))).rgb;
+					weight = length(pos_i - pos)*0.0625;    // 1/16 = 0.0625
+					AO += weight;
+				}else{
+
+				}
+			}
+		}
+		gl_FragColor = vec4(AO,AO,AO, 1.0);*/
+		
+		gl_FragColor = vec4(texture2D( u_shadeTex, texcoord).rgb, 1.0);
+		vec2 texel = vec2(u_offset, u_offset2);
+		float result = 0.0;
+		vec2 hlim = vec2(float(-4.0) * 0.5 + 0.5);
+	   
+	   //4x4 blurring
+	   for (int i = 0; i < 4; i++) {
+		  for (int j = 0; j < 4; j++) {
+			 vec2 offset = ( hlim + vec2(float(i), float(j))) * texel;
+			 result += texture2D(u_shadeTex, texcoord + offset).r;
+		  }
+	   }
+	 
+	   result /= 16.0;
+	   
+	   gl_FragColor = vec4(result,result,result,1.0);
+	
+	}
+	else if(u_displayType == 10){   //for fun
+	
+	
+		
+	}
   
 	
 
