@@ -19,5 +19,6 @@ void main()
 {
   // Write a diffuse shader and a Blinn-Phong shader
   // NOTE : You may need to add your own normals to fulfill the second's requirements
+  
   gl_FragColor = vec4(texture2D(u_colorTex, v_texcoord).rgb, 1.0);
 }
