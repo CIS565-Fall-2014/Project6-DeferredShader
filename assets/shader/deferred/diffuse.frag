@@ -15,15 +15,26 @@ varying vec2 v_texcoord;
 
 const vec3 lampcol = vec3(0.8, 0.9, 1.0);
 const float specexp = 50.0;
-const float _ambfact = 0.1;
+const float ambfact = 0.1;
 const vec3 u_bgcolor = vec3(0.2, 0.2, 0.2);
+
+const float SSAO_RAD = 10.0;
+const float SSAO_SAMPLES = 100.0;
 
 float linearizeDepth( float exp_depth, float near, float far ){
 	return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
 }
 
+// https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
+float rand(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 void main()
 {
+    vec3  n = texture2D(u_normalTex  , v_texcoord).rgb;
+    vec3  p = texture2D(u_positionTex, v_texcoord).rgb;
+    vec3  c = texture2D(u_colorTex   , v_texcoord).rgb;
     float d = texture2D(u_depthTex   , v_texcoord).r;
 
     if (d > 0.999) {
@@ -31,15 +42,36 @@ void main()
         return;
     }
 
-    float ambfact = _ambfact;
-    vec3  p = texture2D(u_positionTex, v_texcoord).rgb;
-    vec3  n = texture2D(u_normalTex  , v_texcoord).rgb;
-    vec3  c = texture2D(u_colorTex   , v_texcoord).rgb;
+    // SSAO
+    vec3 tang = cross(vec3(0, 1, 0), n);
+    vec3 bitang = cross(n, tang);
+    float aofact = 1.0;
+    for (float i = 0.0; i < SSAO_SAMPLES; ++i) {
+        vec3 hemi = normalize(vec3(
+            rand(p.xy * vec2(i, 2)) * 2.0 - 1.0,
+            rand(p.xy * vec2(i, 3)) * 2.0 - 1.0,
+            rand(p.xy * vec2(i, 5))
+            )) * SSAO_RAD;
+        float scale = i / SSAO_SAMPLES;
+        hemi *= mix(0.1, 1.0, scale * scale);
+        vec3 samppos = mat3(tang, bitang, n) * hemi;
+        vec2 sampcoord = v_texcoord + samppos.xy;
+        if (samppos.z < texture2D(u_depthTex, sampcoord).r) {
+            aofact += 1.0;
+        }
+    }
+    aofact /= SSAO_SAMPLES;
+    aofact = 1.0 - aofact;
 
+    if (u_effect == 3) {
+        // SSAO only
+        gl_FragColor = vec4(aofact, aofact, aofact, 1.0);
+        return;
+    }
+
+    // Diffuse/specular
     vec3 lampdir = normalize(u_lamppos - p);
-
     float difffact = max(0.0, dot(lampdir, n));
-
     float specfact = pow(max(0.0, dot(n, lampdir)), specexp);
 
     if (u_effect == 2) {
@@ -49,9 +81,10 @@ void main()
         specfact = mix(0.0, 1.0, clamp((specfact - 0.1) * 10.0, 0.0, 1.0));
     }
 
-    vec3 color = (ambfact + difffact + specfact) * lampcol * c;
+    vec3 color = (aofact * (ambfact + difffact + specfact)) * lampcol * c;
 
     if (u_effect == 2) {
+        // Toon shading outline
         if (n.z < 0.6) {
             color = vec3(0.0);
         }

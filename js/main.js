@@ -353,14 +353,17 @@ var initCamera = function () {
         isDiagnostic = true;
         texToDisplay = 4;
         break;
-      case 55:
+      case 54:
         effect = 0;
         break;
-      case 56:
+      case 55:
         effect = 1;
         break;
-      case 57:
+      case 56:
         effect = 2;
+        break;
+      case 57:
+        effect = 3;
         break;
     }
   }
