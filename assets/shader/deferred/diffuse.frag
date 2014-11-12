@@ -21,6 +21,11 @@ void main()
 
   // Diffuse calculation
   vec3 normal = texture2D(u_normalTex, v_texcoord).xyz;
+
+  //float norm_y = texture2D(u_normalTex, v_texcoord).y;
+  //float norm_z = texture2D(u_normalTex, v_texcoord).z;
+  //vec3 normal = normalize(vec3(sqrt(1.0 - pow(norm_y,2.0) - pow(norm_z,2.0)), norm_y, norm_z));
+  
   vec3 position = texture2D(u_positionTex, v_texcoord).xyz;
   vec3 lightDir = normalize(u_Light.xyz - position);
   vec3 diffuseColor = texture2D(u_colorTex, v_texcoord).rgb;

@@ -9,7 +9,8 @@ var FBO_GBUFFER_POSITION = 0;
 var FBO_GBUFFER_NORMAL = 1;
 var FBO_GBUFFER_COLOR = 2;
 var FBO_GBUFFER_DEPTH = 3;
-var FBO_GBUFFER_TEXCOORD = 4;
+var FBO_GBUFFER_NORMAL2 = 4;
+var FBO_GBUFFER_TEXCOORD = 5;
 
 CIS565WEBGLCORE.createFBO = function(){
     "use strict"
@@ -46,9 +47,9 @@ CIS565WEBGLCORE.createFBO = function(){
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT, width, height, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_SHORT, null);
 
         // Create textures for FBO attachment 
-        for( var i = 0; i < 5; ++i ){
-        	textures[i] = gl.createTexture()
-        	gl.bindTexture( gl.TEXTURE_2D,  textures[i] );
+        for( var i = 0; i < 6; ++i ){
+          textures[i] = gl.createTexture()
+          gl.bindTexture( gl.TEXTURE_2D,  textures[i] );
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -67,6 +68,7 @@ CIS565WEBGLCORE.createFBO = function(){
           drawbuffers[1] = extDrawBuffers.COLOR_ATTACHMENT1_WEBGL;
           drawbuffers[2] = extDrawBuffers.COLOR_ATTACHMENT2_WEBGL;
           drawbuffers[3] = extDrawBuffers.COLOR_ATTACHMENT3_WEBGL;
+          drawbuffers[4] = extDrawBuffers.COLOR_ATTACHMENT4_WEBGL;
           extDrawBuffers.drawBuffersWEBGL( drawbuffers );
 
           //Attach textures to FBO
@@ -74,7 +76,8 @@ CIS565WEBGLCORE.createFBO = function(){
           gl.framebufferTexture2D( gl.FRAMEBUFFER, drawbuffers[0], gl.TEXTURE_2D, textures[0], 0 );
           gl.framebufferTexture2D( gl.FRAMEBUFFER, drawbuffers[1], gl.TEXTURE_2D, textures[1], 0 );
           gl.framebufferTexture2D( gl.FRAMEBUFFER, drawbuffers[2], gl.TEXTURE_2D, textures[2], 0 );
-          gl.framebufferTexture2D( gl.FRAMEBUFFER, drawbuffers[3], gl.TEXTURE_2D, textures[3], 0 );
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, drawbuffers[3], gl.TEXTURE_2D, textures[3], 0);
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, drawbuffers[4], gl.TEXTURE_2D, textures[4], 0);
 
           var FBOstatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
           if( FBOstatus !== gl.FRAMEBUFFER_COMPLETE ){
@@ -87,7 +90,7 @@ CIS565WEBGLCORE.createFBO = function(){
           gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[FBO_PBUFFER]);
 
           // Attach textures
-          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[4], 0);
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[5], 0);
 
           FBOstatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
           if(FBOstatus !== gl.FRAMEBUFFER_COMPLETE) {
@@ -112,7 +115,7 @@ CIS565WEBGLCORE.createFBO = function(){
 
           fbo[FBO_PBUFFER] = gl.createFramebuffer();
           gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[FBO_PBUFFER]);
-          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[4], 0);
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[5], 0);
 
           FBOstatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
           if (FBOstatus !== gl.FRAMEBUFFER_COMPLETE) {
@@ -146,6 +149,20 @@ CIS565WEBGLCORE.createFBO = function(){
           if (FBOstatus !== gl.FRAMEBUFFER_COMPLETE) {
             console.log("GBuffer Color FBO incomplete! Init failed!");
             return false;
+          }
+
+          gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+          // Set up GBuffer Normal2
+          fbo[FBO_GBUFFER_NORMAL2] = gl.createFramebuffer();
+          gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[FBO_GBUFFER_NORMAL2]);
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTex, 0);
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[4], 0);
+
+          FBOstatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+          if (FBOstatus !== gl.FRAMEBUFFER_COMPLETE) {
+              console.log("GBuffer Color FBO incomplete! Init failed!");
+              return false;
           }
         }
 

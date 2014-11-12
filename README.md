@@ -7,6 +7,8 @@ Author: Dave Kotfis
 
 [Click Here For A Demo](http://dkotfis.github.io/Project6-DeferredShader/index.html)
 
+Visit [Youtube](http://youtu.be/4bRB2lEsQBo) to checkout a video of it running.
+
 ##Overview
 
 This project features special rendering effects that can be performed efficiently through a deferred shading pipeline using WebGL. Effects include Toon Shading, Bloom Shading, and Screen Space Ambient Occlusion.
@@ -21,7 +23,7 @@ The result with diffuse shading only with no added effects looks like this:
 
 Toon Shading makes the render look cartoonish, where only a few discrete shades of color are used, and the edges of objects have thick, pencil-drawn borders. I implemented this in the post processing shader by first quantizing the color shade into a discrete number of colors. I then detected edges by using a high pass filter (subtracting out blur) on the depth buffer. I draw anything with a edge score above a certain threshold as black.
 
-![Toon Shading] (renders/toon.png)
+![Toon Shading] (renders/nice-toon.png)
 
 ##Bloom Shading
 
@@ -35,6 +37,11 @@ Inspired by the Crytek approach, I implemented SSAO by generating 100 direction 
 
 ![Without SSAO] (renders/no-ao.png)
 ![SSAO] (renders/with-ao.png)
+
+##G-Buffer Optimization
+
+I have attempted to optimize the G-Buffer by condensing the normal down into only y and z components, inferring the x coordinates through normalization in the shading and post processing passes. However, I found that without an increase in resolution to the y and z components, there is not enough precision to accurately compute the third component. When using the data in this form in the blinn-phong shading only, a strange glow would happen depending on the screen space position of the model, where the precision was particularly bad for the pow and sqrt functions on the GPU. There seemed to be little to be gained on this route.
+
 
 The keyboard controls are as follows:
 WASDRF - Movement (along w the arrow keys)

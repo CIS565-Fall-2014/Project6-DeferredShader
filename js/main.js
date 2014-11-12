@@ -69,6 +69,7 @@ var renderLoop = function () {
 };
 
 var render = function () {
+  console.time("render");
   if (fbo.isMultipleTargets()) {
     renderPass();
   } else {
@@ -81,7 +82,7 @@ var render = function () {
   } else {
     renderDiagnostic();
   }
-
+  console.timeEnd("render");
   gl.useProgram(null);
 };
 
@@ -299,9 +300,9 @@ var renderPost = function () {
   gl.bindTexture(gl.TEXTURE_2D, fbo.depthTexture());
   gl.uniform1i(postProg.uDepthSamplerLoc, 3);
 
-  gl.activeTexture( gl.TEXTURE4 ); //shade
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
-  gl.uniform1i(postProg.uShadeSamplerLoc, 4);
+  gl.activeTexture( gl.TEXTURE5 ); //shade
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(5) );
+  gl.uniform1i(postProg.uShadeSamplerLoc, 5);
 
   gl.uniform1f(postProg.uZNearLoc, zNear);
   gl.uniform1f(postProg.uZFarLoc, zFar);
