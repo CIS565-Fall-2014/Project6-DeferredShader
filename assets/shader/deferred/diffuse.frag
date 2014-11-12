@@ -17,8 +17,7 @@ float linearizeDepth( float exp_depth, float near, float far ){
 
 void main()
 {
-    // Write a diffuse shader and a Blinn-Phong shader
-    // NOTE : You may need to add your own normals to fulfill the second's requirements
+    // DEBUG: Pass color through.
     //gl_FragColor = vec4(texture2D(u_colorTex, v_texcoord).rgb, 1.0);
 
     vec3 light_pos = vec3( 10.0, 0.0, 10.0 );

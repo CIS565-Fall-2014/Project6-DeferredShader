@@ -283,6 +283,30 @@ var renderPost = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
 
+  // Danny was here.
+  gl.activeTexture( gl.TEXTURE0 );  //position
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
+  gl.uniform1i( postProg.uPosSamplerLoc, 0 );
+
+  // Danny was here.
+  gl.activeTexture( gl.TEXTURE1 );  //normal
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
+  gl.uniform1i( postProg.uNormalSamplerLoc, 1 );
+
+  // Danny was here.
+  gl.activeTexture( gl.TEXTURE2 );  //color
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
+  gl.uniform1i( postProg.uColorSamplerLoc, 2 );
+
+  // Danny was here.
+  gl.activeTexture( gl.TEXTURE3 );  //depth
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( postProg.uDepthSamplerLoc, 3 ); 
+
+  // Danny was here.
+  gl.uniform1f( postProg.uZNearLoc, zNear );
+  gl.uniform1f( postProg.uZFarLoc, zFar );
+
   drawQuad(postProg);
 };
 
@@ -477,6 +501,16 @@ var initShaders = function () {
     postProg.aVertexTexcoordLoc = gl.getAttribLocation( postProg.ref(), "a_texcoord" );
 
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
+
+    // Danny was here.
+    postProg.uPosSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_positionTex");
+    postProg.uNormalSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_normalTex");
+    postProg.uColorSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_colorTex");
+    postProg.uDepthSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_depthTex");
+
+    // Danny was here.
+    postProg.uZNearLoc = gl.getUniformLocation( postProg.ref(), "u_zNear" );
+    postProg.uZFarLoc = gl.getUniformLocation( postProg.ref(), "u_zFar" );
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };
