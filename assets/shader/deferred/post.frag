@@ -10,6 +10,7 @@ uniform int u_displayType;
 
 uniform float u_zFar;
 uniform float u_zNear;
+uniform float u_time;
 
 varying vec2 v_texcoord;
 
@@ -83,26 +84,26 @@ void main()
 	}
 	else if(u_displayType == 8){
 		if(color.x == 1.0){
-			float radius = 0.1;
-			int kernelSize = 100;
+			float radius = 0.01;
+			float kernelSize = 100.0;
 			float occlusion = 0.0;
 			
 			vec3 origin = vec3(position.x, position.y, depth);
 
 			
 			for(int i = 0; i < 100; ++i){
-				vec3 randVector = vec3(hash(position.x + float(i)*0.1357),
-								  hash(position.y + float(i)*0.2468),
-								  (hash(position.z + float(i)*0.1479)+1.0) / 2.0);
+				vec3 randVector = vec3(hash(position.x * 0.01  + float(i)*0.1357),
+								       hash(position.y * 0.01  + float(i)*0.2468),
+								      (hash(position.z * 0.01  + float(i)*0.1479)+1.0) / 2.0);
 				//vec3 randVector = vec3(0.0, 0.0, 1.0);
 								  
 				randVector = normalize(randVector);
 
-				float scale = float(i) / float(kernelSize);
+				float scale = float(i) / kernelSize;
 				scale = mix(0.1, 1.0, scale * scale);
 				randVector = randVector * scale ;
 
-				/*
+				
 				vec3 directionNotNormal;
 				if (abs(normal.x) < 0.57735) {
 				  directionNotNormal = vec3(1, 0, 0);
@@ -112,15 +113,15 @@ void main()
 				  directionNotNormal = vec3(0, 0, 1);
 				}
 				
-				vec3 perpendicularDirection1 = normalize(cross(normal, directionNotNormal));
+				/*vec3 perpendicularDirection1 = normalize(cross(normal, directionNotNormal));
 				vec3 perpendicularDirection2 = normalize(cross(normal, perpendicularDirection1));
 				vec3 temp =( randVector.z * normal ) + ( randVector.x * perpendicularDirection1 ) + ( randVector.y * perpendicularDirection2 );
 				vec3 sampleVector = normalize(temp);*/
 				
-				vec3 rvec = normalize(vec3(hash(position.x + float(i)*0.1234), 
-										   hash(position.y + float(i)*0.5678), 
-										   0.0));
-
+				vec3 rvec = normalize(vec3(0.0, //hash(position.x * 0.01 * u_time + float(i)*0.1234)
+										   hash(position.y * 0.01  + float(i)*0.5678), 
+										   hash(position.z * 0.01  + float(i)*0.1357)));
+				//vec3 rvec = directionNotNormal;
 				
 				
 				vec3 tangent = normalize(rvec - normal * dot(rvec, normal));
@@ -140,7 +141,7 @@ void main()
 				
 			}
 			
-			gl_FragColor = vec4(1.0 - occlusion/100.0, 1.0 - occlusion/100.0, 1.0 - occlusion/100.0, 1.0);
+			gl_FragColor = vec4(1.0 - occlusion/kernelSize, 1.0 - occlusion/kernelSize, 1.0 - occlusion/kernelSize, 1.0);
 
 			
 			
