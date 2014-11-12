@@ -368,6 +368,18 @@ var renderPost = function () {
   //////////////////////////////////////////////////////////////////////NEW POST PROCESSING///////////////////////
   gl.uniform1fv(postProg.uGaussKern , gaussian5x5 );
   gl.uniform2f(postProg.uTexSizeLoc, canvas.width, canvas.height)////////add texture size
+
+
+  gl.activeTexture( gl.TEXTURE3 );  //depth
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( postProg.uDepthSamplerLoc, 3 );
+
+/////////////////////////////////////////////////////////////
+  gl.activeTexture( gl.TEXTURE5 );  //occlusion
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(5) );
+  gl.uniform1i( postProg.uExtraLoc, 5 );
+////////////////////////////////////////////////////////////
+  
   drawQuad(postProg);
 };
 
@@ -572,7 +584,7 @@ var initShaders = function () {
     ambientProg.uNormalSamplerLoc = gl.getUniformLocation( ambientProg.ref(), "u_normalTex");
     ambientProg.uColorSamplerLoc  = gl.getUniformLocation( ambientProg.ref(), "u_colorTex");
     ambientProg.uDepthSamplerLoc  = gl.getUniformLocation( ambientProg.ref(), "u_depthTex");
-    //ambientProg.uExtraLoc         = gl.getUniformLocation( ambientProg.ref(), "u_extraTex");
+    
 
     ambientProg.uZNearLoc = gl.getUniformLocation( ambientProg.ref(), "u_zNear" );
     ambientProg.uZFarLoc = gl.getUniformLocation( ambientProg.ref(), "u_zFar" );
@@ -592,8 +604,10 @@ var initShaders = function () {
 
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
     ////////////////////////////////////////////////////////////////////////////////////////new stuff
-    postProg.uGaussKern = gl.getUniformLocation( postProg.ref(), "u_gaussKernel");//gaussian
-    postProg.uTexSizeLoc = gl.getUniformLocation( postProg.ref(), "u_textureSize");
+    postProg.uGaussKern        = gl.getUniformLocation( postProg.ref(),    "u_gaussKernel");//gaussian
+    postProg.uTexSizeLoc       = gl.getUniformLocation( postProg.ref(),    "u_textureSize");
+    postProg.uExtraLoc         = gl.getUniformLocation( postProg.ref(),    "u_extraTex");//AmbientOcclusionMap
+    postProg.uDepthSamplerLoc  = gl.getUniformLocation( ambientProg.ref(), "u_depthTex");
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };
