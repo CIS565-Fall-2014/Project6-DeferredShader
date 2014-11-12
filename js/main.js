@@ -245,7 +245,8 @@ var renderShade = function () {
   time += 0.04;
   vec3.transformMat4(lamppos, lamppos_w, lrot);
   vec3.transformMat4(lamppos, lamppos, camera.getViewTransform());
-  gl.uniform3f( shadeProg.uLamppos, lamppos[0], lamppos[1], lamppos[2] );
+  gl.uniform3f( shadeProg.uLampposLoc, lamppos[0], lamppos[1], lamppos[2] );
+  gl.uniform1i(shadeProg.uEffectLoc, effect);
 
   drawQuad(shadeProg);
 
@@ -370,7 +371,7 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  objloader.loadFromFile(gl, "assets/models/suzanne_sub.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
@@ -490,7 +491,8 @@ var initShaders = function () {
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
     shadeProg.uDisplayTypeLoc = gl.getUniformLocation( shadeProg.ref(), "u_displayType" );
-    shadeProg.uLamppos = gl.getUniformLocation( shadeProg.ref(), "u_lamppos" );
+    shadeProg.uLampposLoc = gl.getUniformLocation( shadeProg.ref(), "u_lamppos" );
+    shadeProg.uEffectLoc = gl.getUniformLocation(shadeProg.ref(), "u_effect");
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, shadeProg); 
 
