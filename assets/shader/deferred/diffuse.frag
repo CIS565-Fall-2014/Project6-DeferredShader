@@ -41,7 +41,7 @@ void main()
   depth = linearizeDepth( depth, u_zNear, u_zFar );
 
   if (depth > 0.99) {
-    gl_FragColor = vec4(vec3(0.0), 1.0);//vec4(vec3(u_displayType == 5 ? 0.0 : 0.0), 1.0);
+    gl_FragColor = vec4(vec3(u_displayType == 5 ? 0.0 : 0.8), 1.0);
   } else {
     gl_FragColor = vec4(diffuseTerm*diffuseColor + specular*vec3(1.0), 1.0);
   }

@@ -111,11 +111,9 @@ vec4 Blur() {
    
    vec2 hlim = vec2(float(-uBlurSize) * 0.5 + 0.5);
     for (int i = 0; i < uBlurSize; ++i) {
-        if(i<=depB) 
-        {
+        if(i<=depB) {
             for (int j = 0; j < uBlurSize; ++j) {
-                if(j<=depB)
-                {
+                if(j<=depB){
                     vec2 offset = (hlim + vec2(float(i), float(j))) * texelSize;
                     result += texture2D(u_shadeTex, v_texcoord + offset).rgb;
                 }
@@ -142,6 +140,6 @@ void main()
   if(u_displayType == DISPLAY_SSAO)
     gl_FragColor = SSAO(color); 
   if(u_displayType == DISPLAY_DOF)
-    gl_FragColor = vec4(color, 1.0);; 
+    gl_FragColor = Blur(); 
     
 }
