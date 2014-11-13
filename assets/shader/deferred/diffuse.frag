@@ -41,15 +41,13 @@ void main()
 
 
 	vec3 finalColor =  0.5 * diffuse *texture2D(u_colorTex, v_texcoord).rgb + 0.5 * specular * lightColor;
-	//vec3 finalColor = diffuse * lightColor;
-	//vec3 finalColor = specular * lightColor;
+
 	//////////////////////////////////////////////////////////////////////
 	if(color.x == 1.0)
 		gl_FragColor = vec4(finalColor, 1.0);
 	else
 		gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 
-	    //gl_FragColor = vec4( normal, 1.0 );
   
   
 }
