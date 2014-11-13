@@ -13,8 +13,13 @@ uniform mat4 u_projection;
 
 varying vec2 v_texcoord;
 
-const vec3 light_pos = vec3( 10.0, 0.0, 10.0 );
-const float light_intensity = 1.0;
+// Lighting constants.
+const vec3 LIGHT_POS = vec3( 10.0, 0.0, 10.0 );
+const float LIGHT_INTENSITY = 1.0;
+const vec3 LIGHT_COLOR = vec3( 1.0, 1.0, 1.0 );
+const vec3 AMBIENT_COLOR = vec3( 0.1, 0.0, 0.0 );
+const vec3 SPECULAR_COLOR = vec3( 1.0, 1.0, 1.0 );
+const float SPECULAR_EXPONENT = 32.0;
 
 // Horizon-based AO constants.
 const int NUM_DIRECTIONS = 4;   // Number of direction vectors to walk for each pixel.
@@ -161,6 +166,21 @@ void main()
 
     /*********** LAMBERTIAN SHADING ***********/
 
-    float diffuse = max( dot( normal, normalize( light_pos - position ) ), 0.0 );
-    gl_FragColor = vec4( diffuse * color * light_intensity, 1.0 );
+    vec3 light_dir = normalize( LIGHT_POS - position );
+    float diffuse = max( dot( normal, light_dir ), 0.0 );
+    float specular = 0.0;
+
+    if ( diffuse > 0.0 ) {
+
+        vec3 view_dir = normalize( -position );
+
+        vec3 half_dir = normalize( light_dir + view_dir );
+        float spec_angle = max( dot( half_dir, normal ), 0.0);
+        specular = pow( spec_angle, SPECULAR_EXPONENT );
+    }
+
+    gl_FragColor = vec4( AMBIENT_COLOR + diffuse * color + specular * SPECULAR_COLOR, 1.0 );
+
+    //float diffuse = max( dot( normal, normalize( light_pos - position ) ), 0.0 );
+    //gl_FragColor = vec4( diffuse * color * light_intensity, 1.0 );
 }

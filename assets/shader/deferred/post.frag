@@ -34,9 +34,10 @@ const vec3 EDGE_COLOR = vec3( 0.0, 0.0, 0.0 );
 
 // Blur constants.
 const int CONVOLUTION_KERNEL_SIZE = 7;
-const float GLOW_FACTOR = 1.0;
-const int GLOW_WIDTH = 1;
-const int GLOW_HEIGHT = 1;
+const float GLOW_FACTOR_BLOOM = 0.3;
+const float GLOW_FACTOR_BLUR = 1.0;
+const int GLOW_WIDTH = 5;
+const int GLOW_HEIGHT = 5;
 
 float linearizeDepth( float exp_depth, float near, float far )
 {
@@ -119,7 +120,7 @@ void main()
     // Apply a "glow" to edge fragments by blurring.
     // Implementation inspired by: http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html
 /*
-    float accum = 0.0;
+    float blur_summation = 0.0;
 
     // Check for edges.
     if ( dot( normal, neighbor_norm_1 ) < EDGE_DETECTION_THRESHOLD ||
@@ -129,12 +130,25 @@ void main()
     {
         for ( int x = -CONVOLUTION_KERNEL_SIZE / 2; x < CONVOLUTION_KERNEL_SIZE / 2; ++x ) {
             for ( int y = -CONVOLUTION_KERNEL_SIZE / 2; y < CONVOLUTION_KERNEL_SIZE / 2; ++y ) {
-                accum += computeGaussian( abs( float( x ) ), abs( float( y ) ) ) * GLOW_FACTOR * texture2D( u_shadeTex, vec2( v_texcoord.s + ( float( x ) * HORIZONTAL_STEP ), v_texcoord.t + ( float( y ) * VERTICAL_STEP ) ) ).rgb;
+                blur_summation += computeGaussian( abs( float( x ) ), abs( float( y ) ) ) * GLOW_FACTOR * texture2D( u_shadeTex, vec2( v_texcoord.s + ( float( x ) * HORIZONTAL_STEP ), v_texcoord.t + ( float( y ) * VERTICAL_STEP ) ) ).rgb;
+            }
+        }
+    }
+*/
+
+/*
+    float blur_summation = 0.0;
+    float intensity = dot( normalize( light_pos - position ), normalize( normal ) );
+
+    if ( intensity < 0.25 ) {
+        for ( int x = -CONVOLUTION_KERNEL_SIZE / 2; x < CONVOLUTION_KERNEL_SIZE / 2; ++x ) {
+            for ( int y = -CONVOLUTION_KERNEL_SIZE / 2; y < CONVOLUTION_KERNEL_SIZE / 2; ++y ) {
+                blur_summation += computeGaussian( abs( float( x ) ), abs( float( y ) ) ) * GLOW_FACTOR_BLOOM * texture2D( u_shadeTex, vec2( v_texcoord.s + ( float( x ) * HORIZONTAL_STEP ), v_texcoord.t + ( float( y ) * VERTICAL_STEP ) ) ).rgb;
             }
         }
     }
 
-    gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb + accum, 1.0 );
+    //gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb + blur_summation, 1.0 );
 */
 
 
@@ -143,10 +157,10 @@ void main()
     vec3 blur_color = vec3( 0.0, 0.0, 0.0 );
     for ( int x = -CONVOLUTION_KERNEL_SIZE / 2; x < CONVOLUTION_KERNEL_SIZE / 2; ++x ) {
         for ( int y = -CONVOLUTION_KERNEL_SIZE / 2; y < CONVOLUTION_KERNEL_SIZE / 2; ++y ) {
-            blur_color += computeGaussian( abs( float( x ) ), abs( float( y ) ) ) * GLOW_FACTOR * texture2D( u_shadeTex, vec2( v_texcoord.s + ( float( x ) * HORIZONTAL_STEP ), v_texcoord.t + ( float( y ) * VERTICAL_STEP ) ) ).rgb;
+            blur_color += computeGaussian( abs( float( x ) ), abs( float( y ) ) ) * GLOW_FACTOR_BLUR * texture2D( u_shadeTex, vec2( v_texcoord.s + ( float( x ) * HORIZONTAL_STEP ), v_texcoord.t + ( float( y ) * VERTICAL_STEP ) ) ).rgb;
         }
     }
-    gl_FragColor = vec4( blur_color, 1.0 );
+    gl_FragColor = vec4( blur_color + blur_summation, 1.0 );
 */
 
     // DEBUG - Pass color through.
