@@ -35,6 +35,8 @@ var texToDisplay = 1;
 var lightColor = [1.0, 1.0, 1.0];
 var lightPos = [0.0, 5.0, 4.0];
 
+var eyePos = [0.0, 1.0, 5.0];
+
 var main = function (canvasId, messageId) {
   var canvas;
 
@@ -61,10 +63,24 @@ var main = function (canvasId, messageId) {
   CIS565WEBGLCORE.run(gl);
 };
 
+var stats = new Stats();
+stats.setMode(0); // 0: fps, 1: ms
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.right = '0px';
+stats.domElement.style.top = '108px';
+document.body.appendChild(stats.domElement );
+var renderloop = document.createElement('div');
+renderloop.innerHTML = 'render';
+stats.domElement.appendChild(renderloop);
+	
 var renderLoop = function () {
   window.requestAnimationFrame(renderLoop);
+
+  stats.begin()
   render();
+  stats.end();
 };
+
 
 var render = function () {
   if (fbo.isMultipleTargets()) {
@@ -242,10 +258,9 @@ var renderShade = function () {
   gl.uniform1f( shadeProg.uZNearLoc, zNear );
   gl.uniform1f( shadeProg.uZFarLoc, zFar );
   
-  //gl.uniform3fv(shadeProg.uLightColLoc, lightColor);
-  //gl.uniform3fv(shadeProg.uLightPosLoc, lightPos);
-  //var eyePos = [camera.position.x, camera.position.y, camera.position.z];
-  //gl.uniform3fv(shadeProg.uEyePosLoc, camera.position);
+  gl.uniform3fv(shadeProg.uLightColLoc, lightColor);
+  gl.uniform3fv(shadeProg.uLightPosLoc, lightPos);
+  gl.uniform3fv(shadeProg.uEyePosLoc, eyePos);
   
   drawQuad(shadeProg);
 
@@ -300,9 +315,9 @@ var renderPost = function () {
   gl.uniform1i(postProg.uWidthLoc, canvas.width);
   gl.uniform1i(postProg.uHeightLoc, canvas.height);
   
-  //gl.uniform3fv(postProg.uLightColLoc, lightColor);
-  //gl.uniform3fv(postProg.uLightPosLoc, lightPos);
-  //gl.uniform3fv(postProg.uEyePosLoc, camera.position);
+  gl.uniform3fv(postProg.uLightColLoc, lightColor);
+  gl.uniform3fv(postProg.uLightPosLoc, lightPos);
+  gl.uniform3fv(postProg.uEyePosLoc, eyePos);
   
   drawQuad(postProg);
 };
@@ -508,9 +523,9 @@ var initShaders = function () {
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
     shadeProg.uDisplayTypeLoc = gl.getUniformLocation( shadeProg.ref(), "u_displayType" );
 	
-	//shadeProg.uLightColLoc = gl.getUniformLocation( shadeProg.ref(), "u_lightCol" );
-	//shadeProg.uEyePosLoc = gl.getUniformLocation( shadeProg.ref(), "u_lightPos" );
-	//shadeProg.uEyePosLoc = gl.getUniformLocation( shadeProg.ref(), "u_eyePos" );
+	shadeProg.uLightColLoc = gl.getUniformLocation( shadeProg.ref(), "u_lightCol" );
+	shadeProg.uEyePosLoc = gl.getUniformLocation( shadeProg.ref(), "u_lightPos" );
+	shadeProg.uEyePosLoc = gl.getUniformLocation( shadeProg.ref(), "u_eyePos" );
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, shadeProg); 
 
@@ -526,9 +541,9 @@ var initShaders = function () {
 	postProg.uWidthLoc = gl.getUniformLocation( postProg.ref(), "u_width" );
 	postProg.uHeightLoc = gl.getUniformLocation( postProg.ref(), "u_height" );
 	
-	//postProg.uLightColLoc = gl.getUniformLocation( postProg.ref(), "u_lightCol" );
-	//postProg.uEyePosLoc = gl.getUniformLocation( postProg.ref(), "u_lightPos" );
-	//postProg.uEyePosLoc = gl.getUniformLocation( postProg.ref(), "u_eyePos" );
+	postProg.uLightColLoc = gl.getUniformLocation( postProg.ref(), "u_lightCol" );
+	postProg.uEyePosLoc = gl.getUniformLocation( postProg.ref(), "u_lightPos" );
+	postProg.uEyePosLoc = gl.getUniformLocation( postProg.ref(), "u_eyePos" );
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };

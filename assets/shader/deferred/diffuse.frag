@@ -24,10 +24,6 @@ void main()
 {
   // Write a diffuse shader and a Blinn-Phong shader
   // NOTE : You may need to add your own normals to fulfill the second's requirements
-  vec3 u_lightCol = vec3(1,1,1);
-  vec3 u_lightPos = vec3(0, 5, 4);
-  
-  vec3 u_eyePos = vec3(0, 1, 5);
   
   vec3 lightDir = normalize(texture2D(u_positionTex, v_texcoord).rgb - u_lightPos);
   float diffuseTerm = clamp(dot(-lightDir, texture2D(u_normalTex, v_texcoord).rgb), 0.0, 1.0);
