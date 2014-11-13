@@ -24,7 +24,7 @@ In addition, instead of using the continuous RGB to shade the color, I divided t
 ![toon shading result](result/toon.jpg)
 
 #Bloom
-Because the bloom shading needs the alpha value to represent the place where we want to make it glow. However, our model here lacks the alpha information. 
+Because the bloom shading needs the alpha value to mark the place where we want to make it glow. However, our model here lacks the alpha information. 
 Therefore, I use the silhouettes which I created for toon shading to be my alpha value. The belowing image shows the silhouette which I used to glow my first diffuse_bling shading.  
 What different between the white glow image and green glow image is that I used separable convolution to do the bloom for white glow one.
 ![bloom result with convolution](result/silhouette.jpg)
@@ -41,11 +41,13 @@ What difficult here is to find the appropriate radius to cast our samples.
 
 #Performance Analysis
 
-When I am doing the experiment, I found something interesting. Because initially I wrote the bloom with separable convolution and bloom without separable convolution in the same shader and using keys to switch 
-to different code pathes by passing the uniform integer, and the FPS of these two methods are the same. It's weird for me because the code path without separable convolution 
-should have more computation loading than the other one. After I asked Cheng-Tso Lin, he told me that what I found is possible because of the compiling issue. Anyway, in order to 
-do this experiment, I eventually wrote the bloom with separable convolution and bloom without separable convolution in two different shader. 
-
+When I am doing the experiment, I found something interesting. Because initially I wrote the bloom shaders with and without separable convolution in the same shader file and using keys to switch 
+to different code pathes by passing in the uniform integer, and the FPS of these two methods are the same. It's weird for me because the code path without using separable convolution 
+should have much more computation loading than the other one. After I asked Cheng-Tso Lin, he told me that what I found is possible because of the WebGL compiling issue. Anyway, in order to 
+finish this experiment, I eventually wrote the bloom shaders with and without separable convolution in two different shader file.  
+From this chart we could obviously found that using separable convolution to do the bloom shading has huge benefit on performance. The benefit will become huger when the number of samples become larger.  
+![performance result](result/performance.jpg)
+![performance result](result/performance2.jpg)
 #Video
 http://youtu.be/U8ZvzvczlKc
 
