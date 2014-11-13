@@ -36,4 +36,6 @@ void main()
     // TODO: Make light position and intensity uniforms.
 
     // TODO: Add material specularity as a uniform.
+
+    //gl_FragColor = vec4(texture2D(u_colorTex, v_texcoord).rgb, 1.0);
 }

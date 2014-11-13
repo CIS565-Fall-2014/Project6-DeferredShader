@@ -23,6 +23,8 @@ const float STEP_SIZE = 0.001;
 
 // Math constants.
 const float PI = 3.1415926535;
+const float EULER = 2.7182818284;
+const float SIGMA = 0.8;
 
 // Light constants.
 const vec3 light_pos = vec3( 10.0, 0.0, 10.0 );
@@ -36,11 +38,25 @@ const float HORIZONTAL_STEP = 1.0 / WIDTH;
 const float VERTICAL_STEP = 1.0 / HEIGHT;
 
 // Edge detection constants.
-float EDGE_DETECTION_THRESHOLD = 0.6;
-vec3 EDGE_COLOR = vec3( 0.0, 0.0, 0.0 );
+const float EDGE_DETECTION_THRESHOLD = 0.65;
+const vec3 EDGE_COLOR = vec3( 0.0, 0.0, 0.0 );
 
-float linearizeDepth( float exp_depth, float near, float far ){
+// Blur constants.
+const int CONVOLUTION_KERNEL_SIZE = 7;
+const float GLOW_FACTOR = 0.5;
+const int GLOW_WIDTH = 1;
+const int GLOW_HEIGHT = 1;
+
+float linearizeDepth( float exp_depth, float near, float far )
+{
     return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
+}
+
+float computeGaussian( float x, float y )
+{
+    float part_1 = 1.0 / ( 2.0 * PI * pow( SIGMA, 2.0 ) );
+    float part_2 = -1.0 * ( ( x * x + y * y ) / ( 2.0 * pow( SIGMA, 2.0 ) ) );
+    return part_1 * pow( EULER, part_2 );
 }
 
 void main()
@@ -181,10 +197,23 @@ void main()
 
     /*********** BLOOM ***********/
 
-    // TODO: Bloom.
+    float accum = 0.0;
 
-    // TODO: Apply a fake glow on object edges to avoid having to import a glow texture.
+    // Check for edges.
+    if ( dot( normal, neighbor_norm_1 ) < EDGE_DETECTION_THRESHOLD ||
+         dot( normal, neighbor_norm_2 ) < EDGE_DETECTION_THRESHOLD ||
+         dot( normal, neighbor_norm_3 ) < EDGE_DETECTION_THRESHOLD ||
+         dot( normal, neighbor_norm_4 ) < EDGE_DETECTION_THRESHOLD )
+    {
+        for ( int x = -CONVOLUTION_KERNEL_SIZE / 2; x < CONVOLUTION_KERNEL_SIZE / 2; ++x ) {
+            for ( int y = -CONVOLUTION_KERNEL_SIZE / 2; y < CONVOLUTION_KERNEL_SIZE / 2; ++y ) {
+                accum += computeGaussian( abs( float( x ) ), abs( float( y ) ) ) * GLOW_FACTOR * texture2D( u_shadeTex, vec2( v_texcoord.s + ( float( x ) * HORIZONTAL_STEP ), v_texcoord.t + ( float( y ) * VERTICAL_STEP ) ) ).rgb;
+            }
+        }
+    }
+
+    gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb + accum, 1.0 );
 
     // DEBUG - Pass color through.
-    gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb, 1.0 );
+    //gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb, 1.0 );
 }
