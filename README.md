@@ -61,7 +61,7 @@ TODO
 Performance
 -----------
 
-### RUNTIME SWITCHES
+### Runtime Switches
 
 | Effects               | Frame time |
 |:--------------------- | ----------:|
@@ -73,7 +73,7 @@ Performance
 | Bloom & SSAO          |    84.5 ms |
 
 
-### COMPILE-TIME SWITCHES
+### Compile-Time Switches
 
 | Effects               | Frame time |
 |:--------------------- | ----------:|
