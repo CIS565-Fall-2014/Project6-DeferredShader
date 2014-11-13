@@ -33,10 +33,11 @@ void main()
 #if BLOOM
     if (flagged(u_effect, 1)) {
         // Bloom
+        float radsq = bloom_rad * bloom_rad;
         if (bloom_rad > 0.0) {
             for (float x = -bloom_rad; x <= bloom_rad; ++x) {
                 for (float y = -bloom_rad; y <= bloom_rad; ++y) {
-                    float inten = 1.0 - sqrt(x * x + y * y) / bloom_rad;
+                    float inten = 1.0 - (x * x + y * y) / radsq;
                     if (inten > 0.0 && x != 0.0 && y != 0.0) {
                         vec2 tc = v_texcoord + vec2(x, y) / u_resolution;
                         sum += inten * clamp(texture2D(u_shadeTex, tc).rgb - vec3(0.5), 0.0, 1.0) * bloom_fac;

@@ -31,14 +31,19 @@ Effects
 
 ### Diffuse & Specular lighting
 
-TODO
+This adds a lighting term which includes Lambert diffuse and Blinn-Phong
+specular lighting.
 
 ![](images/diffuse.png)
 
 
 ### Bloom effect
 
-TODO
+Sum the entire image with a version blurred using a circular paraboloid.
+The result of this is a bloom effect with circular highlights at configurable
+radii and with a configurable factor.
+(This kernel was chosen because it looks good, is fast to compute, and doesn't
+require a convolution kernel texture).
 
 ![](images/bloom.png)
 
