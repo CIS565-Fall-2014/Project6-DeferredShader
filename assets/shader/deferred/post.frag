@@ -34,9 +34,6 @@ void main()
 	{
 		vec3 color = texture2D( u_shadeTex, v_texcoord).rgb;
 		
-		vec3 lineColor = vec3(0,0,0);
-		float lineThick = 0.3;
-		
 		vec3 normal = normalize(texture2D(u_normalTex, v_texcoord).rgb);
 		vec3 lightDir = normalize(texture2D(u_positionTex, v_texcoord).rgb - u_lightPos);
 		float intensity = dot(-lightDir, normal);
@@ -51,18 +48,21 @@ void main()
 		else
 			color = vec3(0.1,0.1,0.1) * color;
 		
-		//silhouetting
+		//silhouetting, sobel detect
+		vec2 G = vec2(0,0);
 		for (int i = -1; i <= 1; i++)
 		{
 			for (int j = -1; j <= 1; j++)
 			{
 				vec3 n = normalize(texture2D(u_normalTex, v_texcoord + vec2( float(i)/float(u_width), float(j)/float(u_height))).rgb);
-				if (dot(n, normal) < 0.5)
-					color = vec3(0,0,0);
+				float cosT = dot(n, normal);
+				G.x += float((i == 0) ? j + j : j + 0) * cosT;
+				G.y += float((j == 0) ? i + i : i + 0) * cosT;
 			}
 		}
+		float line = (1.0 - 0.3 * length(G));
 		
-		gl_FragColor = vec4(color, 1.0); 
+		gl_FragColor = vec4(line * color, 1.0); 
 		
 	}
 	else if( u_displayType == DISPLAY_BLOOM )
