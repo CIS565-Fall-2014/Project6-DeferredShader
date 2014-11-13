@@ -10,11 +10,11 @@
     </style>
 
     <h1>WebGL Deferred Shader</h1>
-    <div id="loader">(Some Assets may take long to load, keep waiting, and don't kill the program) <strong>Loading...</strong></div>
+    <div id="loader">Some Assets take long to load, keep waiting, and don't kill the program. <strong>Loading...</strong></div>
    <table>
       <tr>
           <td>
-              <div id="message" style="position:relative;top:20px"/>
+              <div id="message" style="position:absolute;top:120px"/>
                 <canvas id="webglview" width="960" height="540">
                   WebGL unavailable.
                 </canvas>
@@ -63,7 +63,7 @@
               </div>
           </td>
 
-          <td align="left" valign="top" style="padding:20px;">
+          <td align="left" valign="top" style="position:absolute;left:1000px;padding:20px;">
               <strong>Binglu Du</strong> <br>
               <a href = "http://www.bingludu.com" target = "_blank"><strong>Click here for My Website</strong></a> <br>
               <a href = "https://github.com/dblsai?tab=repositories" target = "_blank"><strong>Fork me on Github</strong></a> <br>
@@ -71,15 +71,20 @@
               <ul>
               <li>W - Zoom in </li>
               <li>S - Zoom out </li>
-              <li>A - Left </li>
-              <li>D - Right </li>
-              <li>R - Up </li>
-              <li>F - Down </li>
-              <li>^ - Up </li>
-              <li>v - Down </li>
-              <li>< - Left </li>
-              <li>> - Right </li>
+              <li>A/< - Left </li>
+              <li>D/> - Right </li>
+              <li>R/^ - Up </li>
+              <li>F/v - Down </li>
+			 </ul>
+				<br>You may need to adjust 'Near' and 'Far' in order to achieve best AO<br>
+			  <br>To Compare Rendering with/without AO: <br>
+			  <ul>
+			  <li>lambert - without AO </li>
+              <li>lambert+AO - with AO </li>
               </ul>
+			  
+			
+				<div>fps: <span id="fps"></span></div>
           </td>
       </tr>
     </table>

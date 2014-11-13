@@ -47,7 +47,7 @@ CIS565WEBGLCORE.createOBJLoader = function(){
         var loader;
 
         var eventlistener = function(object){
-            
+            $('#loader').html("Some Assets take long to load, keep waiting, and don't kill the program. <strong>Loading...</strong>");
             content = object;
             console.log("load file: "+filename);
             console.log("children count: " + object.children.length );
@@ -221,6 +221,7 @@ CIS565WEBGLCORE.createOBJLoader = function(){
             var i;
             for( i = 0; i < callbackFunArray.length; ++i ){
                 callbackFunArray[i]();
+				//console.log(callbackFunArray[i]);
             }
         }       
     };
@@ -260,6 +261,7 @@ var Model = function (gl, objLoader) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
     iboLength.push(objLoader.indices(i).length);
+	console.log("creating Model with indices: "+ objLoader.indices(i).length);
   }
 
   return {

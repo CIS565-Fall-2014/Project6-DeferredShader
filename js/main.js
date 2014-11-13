@@ -29,10 +29,10 @@ var normProg;
 var colorProg;
 
 var isDiagnostic = false;
-var zNear = 20;
-var zFar = 2000;
-var texToDisplay = 5;
-
+var zNear = 20.0;
+var zFar = 2000.0;
+var texToDisplay = 0;
+var modelToLoad = 0;
 
 var lightcolor;
 var lightdir;
@@ -51,6 +51,13 @@ var noiseTex;
 
 var mvpMat;
 var nmlMat;
+
+
+var numFramesToAverage = 16;
+var frameTimeHistory = [];
+var frameTimeIndex = 0;
+var totalTimeForFrames = 0;
+var then = Date.now() / 1000;
 
 
 var main = function (canvasId, messageId) {
@@ -81,7 +88,6 @@ var main = function (canvasId, messageId) {
   // Set up shaders
   initShaders();
 
-
   // Register our render callbacks
   CIS565WEBGLCORE.render = render;
   CIS565WEBGLCORE.renderLoop = renderLoop;
@@ -90,7 +96,24 @@ var main = function (canvasId, messageId) {
   CIS565WEBGLCORE.run(gl);
 };
 
+
 var renderLoop = function () {
+
+	var now = Date.now() / 1000;  
+    var elapsedTime = now - then;
+    then = now;
+
+    // update the frame history.
+    totalTimeForFrames += elapsedTime - (frameTimeHistory[frameTimeIndex] || 0);
+    frameTimeHistory[frameTimeIndex] = elapsedTime;
+    frameTimeIndex = (frameTimeIndex + 1) % numFramesToAverage;
+
+    // compute fps
+    var averageElapsedTime = totalTimeForFrames / numFramesToAverage;
+    var fps = 1 / averageElapsedTime;
+    //document.getElementById("fps").innerText = fps.toFixed(0); 
+	$('#fps').html(fps.toFixed(0));
+	
   window.requestAnimationFrame(renderLoop);
   render();
 };
@@ -138,6 +161,7 @@ function initLoadedTexture(texture){
 
 var drawModel = function (program, mask) {
   // Bind attributes
+ 
   for(var i = 0; i < model.numGroups(); i++) {
     if (mask & 0x1) {
       gl.bindBuffer(gl.ARRAY_BUFFER, model.vbo(i));
@@ -161,7 +185,7 @@ var drawModel = function (program, mask) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.ibo(i));
     gl.drawElements(gl.TRIANGLES, model.iboLength(i), gl.UNSIGNED_SHORT, 0);
   }
-
+ //console.log ("model number of indices: " + model.iboLength(0));
   if (mask & 0x1) gl.disableVertexAttribArray(program.aVertexPosLoc);
   if (mask & 0x2) gl.disableVertexAttribArray(program.aVertexNormalLoc);
   if (mask & 0x4) gl.disableVertexAttribArray(program.aVertexTexcoordLoc);
@@ -263,6 +287,7 @@ var renderMulti = function () {
   gl.useProgram(colorProg.ref());
 
   gl.uniformMatrix4fv(colorProg.uMVPLoc, false, mvpMat);
+  gl.uniform3fv(colorProg.uDiffuseColorLoc, diffusecolor);
 
   drawModel(colorProg, 1);
 
@@ -584,17 +609,29 @@ var initGL = function (canvasId, messageId) {
   var ControllerText = function() {
     this.DebugShader = 'normal';
     this.AdvancedShader = 'diffuse';
-   
     this.DiffuseColor = [ 255, 0,0 ]; // RGB array
-  
+	this.Near = 20;
+	this.Far = 2000;
+	this.ChangeModel = 0;
   };
 
 var initGUI = function(){
     var cText = new ControllerText();
     var gui = new dat.GUI( );
-    var diffuseColorController = gui.addColor(cText, 'DiffuseColor');
+	var modelController = gui.add(cText, 'ChangeModel',['suzanne','village','teapot','suzanne&friends','sponza']);
     var debugShaderController = gui.add(cText, 'DebugShader',['normal','color','depth','position']);
-    var advancedShaderController = gui.add(cText, 'AdvancedShader',['diffuse','blinn','bloom','toon','AO']);
+    var advancedShaderController = gui.add(cText, 'AdvancedShader',['lambert','blinn','bloom','toon','AO', 'lambert+AO']);
+	var diffuseColorController = gui.addColor(cText, 'DiffuseColor');
+	var nearController =  gui.add(cText, 'Near', 20, 1000);
+	var farController =  gui.add(cText, 'Far', 2000, 20000);
+	gui.remember(cText);
+	
+	nearController.onChange(function(value){
+      zNear = parseFloat(value);
+    });
+	farController.onChange(function(value){
+      zFar = parseFloat(value);
+    });
     diffuseColorController.onChange(function(value){
       diffusecolor[0] = parseFloat(value[0])/255.0;
       diffusecolor[1] = parseFloat(value[1])/255.0;
@@ -605,6 +642,28 @@ var initGUI = function(){
       console.log("diffuse color: " + diffusecolor);
      });
 
+	 modelController.onChange(function(value){
+		var previous = modelToLoad;
+		if(value == 'suzanne')
+			modelToLoad = 0;
+		else if(value == 'village')
+			modelToLoad = 1;
+		else if(value == 'teapot')
+			modelToLoad = 2;
+		else if(value == 'suzanne&friends')
+			modelToLoad = 3;
+		else if(value == 'sponza')
+			modelToLoad = 4;
+			
+			
+		if(previous != modelToLoad){
+			initObjs();
+			//initShaders();
+			CIS565WEBGLCORE.run(gl);
+		}
+		
+	});
+	
     debugShaderController.onChange(function(value){
       isDiagnostic = true;
       if(value=='position')
@@ -618,7 +677,7 @@ var initGUI = function(){
    });
     advancedShaderController.onChange(function(value){
       isDiagnostic = false;
-      if(value=='diffuse')
+      if(value=='lambert')
         texToDisplay = 5;
       else if(value == 'blinn')
         texToDisplay = 6;
@@ -628,6 +687,8 @@ var initGUI = function(){
         texToDisplay = 8;
       else if(value == 'AO')
         texToDisplay = 9;
+	  else if(value == 'lambert+AO')
+        texToDisplay = 0;
    });
 }
 
@@ -684,6 +745,10 @@ var initCamera = function () {
         isDiagnostic = false;
         texToDisplay = 9;
         break;
+	  case 58:  //10 = SSAO + diffuse
+        isDiagnostic = false;
+        texToDisplay = 0;
+        break;
     }
   }
 };
@@ -693,11 +758,21 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  //objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
-  //objloader.loadFromFile(gl, "assets/models/teapot/hteapot.obj", null);
+  if(modelToLoad == 0){
+	console.log("load suzanne");
+	objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  }else if (modelToLoad == 1){
+	console.log("load village");
+	objloader.loadFromFile(gl, "assets/models/myScene3.obj",null);
+  }else if(modelToLoad == 2){
+	objloader.loadFromFile(gl, "assets/models/teapot/hteapot.obj", null);
+  }else if(modelToLoad == 3){
+	objloader.loadFromFile(gl, "assets/models/myScene2.obj",null);
+  }else if(modelToLoad == 4){
+	objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj",null);
+  }
+ 
   //objloader.loadFromFile(gl, "assets/models/myScene.obj",null);
-  objloader.loadFromFile(gl, "assets/models/myScene2.obj",null);
- // objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj",null);
 //  objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", "assets/models/crytek-sponza/sponza.mtl")
 //objloader.loadFromFile(gl, "assets/models/sphere/sphere.obj", "assets/models/sphere/sphere.mtl");
 
@@ -705,10 +780,11 @@ var initObjs = function () {
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
     model = new Model(gl, objloader);
+	console.log ("model number of indices: " + model.iboLength(0));
   });
-
-testTex = gl.createTexture();
-initializeTexture(testTex, "assets/models/sphere/sphere.jpg");
+	objloader.executeCallBackFunc();
+	//testTex = gl.createTexture();
+	//initializeTexture(testTex, "assets/models/sphere/sphere.jpg");
 
   // Register callback item
   CIS565WEBGLCORE.registerAsyncObj(gl, objloader);
@@ -784,6 +860,7 @@ var initShaders = function () {
       colorProg.aVertexPosLoc = gl.getAttribLocation(colorProg.ref(), "a_pos");
 
       colorProg.uMVPLoc = gl.getUniformLocation(colorProg.ref(), "u_mvp");
+	  colorProg.uDiffuseColorLoc = gl.getUniformLocation( colorProg.ref(), "u_diffuseColor");
     });
     CIS565WEBGLCORE.registerAsyncObj(gl, colorProg);
   }

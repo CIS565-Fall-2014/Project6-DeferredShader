@@ -34,7 +34,7 @@ KEYBOARDS
 * 7 - Bloom
 * 8 - Toon
 * 9 - Ambient Occulusion
-* 0 - Full deferred pipeline
+* 0 - Full deferred pipeline (AO+Lambert)
 
 * mouse - camera rotation
 
@@ -58,7 +58,7 @@ Stage 2 renders the lighting passes and accumulates to the P-Buffer
 * quad.vert
 * diffuse.frag
 * diagnostic.frag
-illumation
+
 Stage 3 renders the post processing
 * quad.vert
 * post.frag
@@ -96,20 +96,21 @@ SSAO was done based on hemisphere sampling, followed by a simple blur.
 First, randomly sample a position in the hemisphere oriented in normal direction. 
 Then project the sample position back into screen space, to find its texture coord and hence its depth on depth buffer.
 If the depth buffer is actually smaller than sample position's z, then occlusion accumulates.  
-![AO](/pics/AO2.png)
+![AO](/pics/AOfinal.png)
+![AO](/pics/AOfinal2.png)
 
 
 * Compare performance to a normal forward renderer with
   * No optimizations
   * Coarse sort geometry front-to-back for early-z
   * Z-prepass for early-z
-* Optimize g-buffer format, e.g., pack things together, quantize, reconstruct z from normal x and y (because it is normalized), etc.
-  * Must be accompanied with a performance analysis to count
-* Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
+    
+* Additional lighting 
 
 * **Some Interesting Debugging Images**
-![Normal](/pics/normal2.png)
+![Normal](/pics/normal3.png)
 ![Sample Bug](/pics/bug2.png)
+![Depth](/pics/depth.png)
 
 RUNNING THE CODE
 -------------------------------------------------------------------------------
@@ -124,7 +125,7 @@ change ``strict_origin_policy`` to false in about:config
 
 CHROME:  
 run with the following argument in cmd
- `chrome.exe --allow-file-access-from-files --enable-webgl-draft-extensions --enable-d3d11`
+ `"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --allow-file-access-from-files --enable-webgl-draft-extensions --enable-d3d11`
 
 OSX:
 `open -a "Google Chrome" --args --allow-file-access-from-files`

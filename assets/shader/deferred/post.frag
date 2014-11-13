@@ -47,7 +47,7 @@ void main()
 	  vec2 texcoord = v_texcoord;
 	  vec2 offset = vec2(u_offset, u_offset2);
 	  
-	  if(u_displayType==1 || u_displayType == 5 || u_displayType ==6){
+	  if(u_displayType == 5 || u_displayType ==6){
 		gl_FragColor = vec4(texture2D( u_shadeTex, texcoord).rgb, 1.0); 
 	  }
 	  else if (u_displayType == 7){   //naive bloom
@@ -154,10 +154,10 @@ void main()
 		}
 		gl_FragColor = vec4(AO,AO,AO, 1.0);*/
 		
-		gl_FragColor = vec4(texture2D( u_shadeTex, texcoord).rgb, 1.0);
+		//gl_FragColor = vec4(texture2D( u_shadeTex, texcoord).rgb, 1.0);
 		
 		//blurring
-	/*	float result = 0.0;
+		float result = 0.0;
 		vec2 hlim = vec2(float(-4.0) * 0.5 + 0.5);
 	   //4x4 blurring
 	   for (int i = 0; i < 4; i++) {
@@ -167,15 +167,24 @@ void main()
 		  }
 	   }
 	   result /= 16.0;
-	   gl_FragColor = vec4(result,result,result,1.0);*/
+	   gl_FragColor = vec4(result,result,result,1.0);
 	
+	}	
+	else if(u_displayType == 0){
+			//blurring
+		float result = 0.0;
+		vec2 hlim = vec2(float(-4.0) * 0.5 + 0.5);
+	   //4x4 blurring
+	   for (int i = 0; i < 4; i++) {
+		  for (int j = 0; j < 4; j++) {
+			 vec2 offset = ( hlim + vec2(float(i), float(j))) * offset;
+			 result += texture2D(u_shadeTex, texcoord + offset).a;
+		  }
+	   }
+	   result /= 16.0;
+	   vec3 color = texture2D(u_shadeTex, texcoord).rgb;
+	   gl_FragColor = vec4(color * vec3(result),1.0);
+
 	}
-	else if(u_displayType == 10){   //for fun
-	
-	
-		
-	}
-  
-	
 
 }
