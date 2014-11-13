@@ -36,6 +36,16 @@ var lamppos_w = vec3.create();
 vec3.set(lamppos_w, 0, 2, 4);
 var lamppos = vec3.create();
 
+var stats = new Stats();
+stats.setMode(1); // 0: fps, 1: ms
+
+// align top-left
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '8px';
+stats.domElement.style.top = '8px';
+
+document.body.appendChild( stats.domElement );
+
 var main = function (canvasId, messageId) {
   var canvas;
 
@@ -68,6 +78,7 @@ var renderLoop = function () {
 };
 
 var render = function () {
+  stats.begin();
   if (fbo.isMultipleTargets()) {
     renderPass();
   } else {
@@ -81,7 +92,9 @@ var render = function () {
     renderDiagnostic();
   }
 
+  gl.finish();
   gl.useProgram(null);
+  stats.end();
 };
 
 var drawModel = function (program, mask) {

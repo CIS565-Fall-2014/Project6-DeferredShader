@@ -1,5 +1,7 @@
 precision highp float;
 
+#define BLOOM 1
+
 uniform sampler2D u_shadeTex;
 uniform vec2 u_resolution;
 uniform int u_effect;
@@ -28,6 +30,7 @@ void main()
 {
     vec3 sum = texture2D(u_shadeTex, v_texcoord).rgb;
 
+#if BLOOM
     if (flagged(u_effect, 1)) {
         // Bloom
         if (bloom_rad > 0.0) {
@@ -42,6 +45,7 @@ void main()
             }
         }
     }
+#endif
 
     gl_FragColor = vec4(sum, 1.0);
 }

@@ -1,5 +1,9 @@
 precision highp float;
 
+#define DIFFSPEC 1
+#define TOON 1
+#define SSAO 1
+
 uniform sampler2D u_positionTex;
 uniform sampler2D u_normalTex;
 uniform sampler2D u_colorTex;
@@ -54,6 +58,7 @@ void main()
 
     // SSAO
     float aofact = 1.0;
+#if SSAO
     if (!flagged(u_effect, 3)) {
         aofact = 0.0;
         vec3 tang = cross(vec3(0, 1, 0), n);
@@ -75,31 +80,38 @@ void main()
         aofact /= SSAO_SAMPLES;
         aofact = 1.0 - aofact;
     }
+#endif
 
     float difffact = 1.0;
     float specfact = 0.0;
+#if DIFFSPEC
     if (!flagged(u_effect, 0)) {
         // Diffuse/specular
         vec3 lampdir = normalize(u_lamppos - p);
         difffact = max(0.0, dot(lampdir, n));
         specfact = pow(max(0.0, dot(n, lampdir)), specexp);
     }
+#endif
 
+#if TOON
     if (flagged(u_effect, 2)) {
         // Toon shading
         difffact = mix(0.0, 0.2, clamp((difffact - 0.1) * 50.0, 0.0, 1.0))
                  + mix(0.0, 0.5, clamp((difffact - 0.6) * 50.0, 0.0, 1.0));
         specfact = mix(0.0, 1.0, clamp((specfact - 0.1) * 10.0, 0.0, 1.0));
     }
+#endif
 
     vec3 color = (aofact * (ambfact + difffact + specfact)) * lampcol * c;
 
+#if TOON
     if (flagged(u_effect, 2)) {
         // Toon shading outline
         if (n.z < 0.6) {
             color = vec3(0.0);
         }
     }
+#endif
 
     gl_FragColor = vec4(color, 1);
 }

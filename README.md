@@ -4,10 +4,18 @@ CIS 565 Project 6: Deferred Shader
 * Kai Ninomiya (Arch Linux, Intel i5-2410M)
     (Performance numbers taken on Intel i5-4670, GTX 750)
 
+### [Live Demo](https://kainino0x.github.io/Project6-DeferredShader/)
 
-Keys
-----
+Demo image with bloom and SSAO enabled:
 
+![](images/bloom_ssao.png)
+
+
+Interface
+---------
+
+* WASDRF: Fly
+* Mouse or arrow keys: rotate camera
 * 1: View space positions
 * 2: View space normals
 * 3: Albedo color
@@ -19,11 +27,71 @@ Keys
   * 9: Disable/enable SSAO
 
 
+Effects
+-------
+
+### Diffuse & Specular lighting
+
+TODO
+
+![](images/diffuse.png)
+
+
+### Bloom effect
+
+TODO
+
+![](images/bloom.png)
+
+
+### Toon shading
+
+TODO
+
+![](images/toon.png)
+
+
+### Screen-Space Ambient Occlusion
+
+TODO
+
+![](images/with_ssao.png)
+
+
+Performance
+-----------
+
+### RUNTIME SWITCHES
+
+| Effects               | Frame time |
+|:--------------------- | ----------:|
+| No shading            |    10.5 ms |
+| Diffuse+specular only |    10.5 ms |
+| Bloom only            |    80.0 ms |
+| Toon only             |    10.5 ms |
+| SSAO only             |    14.5 ms |
+| Bloom & SSAO          |    84.5 ms |
+
+
+### COMPILE-TIME SWITCHES
+
+| Effects               | Frame time |
+|:--------------------- | ----------:|
+| No shading            |     9.0 ms |
+| Diffuse+specular only |    10.5 ms |
+| Bloom only            |    78.5 ms |
+| Toon only             |     9.5 ms |
+| SSAO only             |    14.0 ms |
+| Bloom & SSAO          |    83.5 ms |
+
+
 References
 ----------
 
-* John Chapman's SSAO implementation notes
+[1] John Chapman's SSAO implementation notes
     http://john-chapman-graphics.blogspot.com/2013/01/ssao-tutorial.html
+[2] stats.js. Copyright 2009-2012 Mr.doob. Used under MIT License.
+    https://github.com/mrdoob/stats.js
 
 
 Starter Code Acknowledgements
