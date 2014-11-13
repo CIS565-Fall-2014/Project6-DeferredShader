@@ -88,8 +88,9 @@ Performance
 References
 ----------
 
-[1] John Chapman's SSAO implementation notes
+[1] John Chapman's SSAO implementation notes.
     http://john-chapman-graphics.blogspot.com/2013/01/ssao-tutorial.html
+
 [2] stats.js. Copyright 2009-2012 Mr.doob. Used under MIT License.
     https://github.com/mrdoob/stats.js
 
