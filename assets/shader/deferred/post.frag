@@ -37,8 +37,9 @@ void main()
 		vec3 lineColor = vec3(0,0,0);
 		float lineThick = 0.3;
 		
+		vec3 normal = normalize(texture2D(u_normalTex, v_texcoord).rgb);
 		vec3 lightDir = normalize(texture2D(u_positionTex, v_texcoord).rgb - u_lightPos);
-		float intensity = dot(-lightDir, normalize(texture2D(u_normalTex, v_texcoord).rgb));
+		float intensity = dot(-lightDir, normal);
 	 
 		// Discretize color
 		if (intensity > 0.95)
@@ -50,7 +51,16 @@ void main()
 		else
 			color = vec3(0.1,0.1,0.1) * color;
 		
-		
+		//silhouetting
+		for (int i = -1; i <= 1; i++)
+		{
+			for (int j = -1; j <= 1; j++)
+			{
+				vec3 n = normalize(texture2D(u_normalTex, v_texcoord + vec2( float(i)/float(u_width), float(j)/float(u_height))).rgb);
+				if (dot(n, normal) < 0.5)
+					color = vec3(0,0,0);
+			}
+		}
 		
 		gl_FragColor = vec4(color, 1.0); 
 		
