@@ -147,7 +147,7 @@ void main()
 			
 		}
 	}
-	else if(u_displayType == 7 || u_displayType == 6){		
+	else if(u_displayType == 7 || u_displayType == 6|| u_displayType == 5){		
 		if(color.x == 1.0){
 			if(isSilhouet(normal, threshold))
 				gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);

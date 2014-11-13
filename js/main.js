@@ -460,7 +460,10 @@ var initCamera = function () {
         isDiagnostic = true;
         texToDisplay = 4;
         break;
-
+	  case 53://5
+        isDiagnostic = false;
+        texToDisplay = 5;
+        break;		
 
 	  case 54://6
         isDiagnostic = false;
