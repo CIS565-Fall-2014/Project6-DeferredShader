@@ -34,10 +34,10 @@ var isDiagnostic = true;
 var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
-
+var stats;
 var main = function (canvasId, messageId) {
   var canvas;
-
+  stats = initStats();
   // Initialize WebGL
   initGL(canvasId, messageId);
 
@@ -67,6 +67,8 @@ var renderLoop = function () {
 };
 
 var render = function () {
+  if (stats)
+    stats.update();
   if (fbo.isMultipleTargets()) {
     renderPass();
   } else {
@@ -373,11 +375,11 @@ var initCamera = function () {
         break;
       case 53:
         isDiagnostic = false;
-        texToDisplay = 5;//bloom
+        texToDisplay = 5;//blinn
         break;
       case 54:
         isDiagnostic = false;
-        texToDisplay = 6;
+        texToDisplay = 6;//bloom
         break;
       case 55:
         isDiagnostic = false;
@@ -386,6 +388,10 @@ var initCamera = function () {
       case 56:
         isDiagnostic = false;
         texToDisplay = 8;
+        break;
+      case 57:
+        isDiagnostic = false;
+        texToDisplay = 9;
         break;
     }
   }
@@ -574,3 +580,17 @@ var initKernel = function () {
   }
 
 };
+function initStats() {
+    stats = new Stats();
+    stats.setMode(0); // 0: fps, 1: ms
+
+    // Align top-left
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+
+    document.body.appendChild(stats.domElement);
+
+
+    return stats;
+}

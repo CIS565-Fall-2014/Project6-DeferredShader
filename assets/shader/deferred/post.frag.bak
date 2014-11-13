@@ -22,7 +22,7 @@ varying vec2 v_texcoord;
 #define DISPLAY_BLOOM 6
 #define DISPLAY_BLINN 5
 #define DISPLAY_SSAO 8
-#define DISPLAY_BLUR 9
+#define DISPLAY_DOF 9
 
 float w =  1.0 / float(u_width);
 float h =  1.0 / float(u_height);
@@ -100,6 +100,33 @@ vec4 SSAO(vec3 color) {
 
   return vec4(vec3(occlusion), 1.0);
 }
+vec4 Blur() {
+   float depth = texture2D(u_depthTex, v_texcoord).r;
+   depth = 1.0 -linearizeDepth( depth, u_zNear, u_zFar );
+   vec2 texelSize = vec2(1.0/w, 1.0/h);
+   vec3 result = vec3(0.0,0.0,0.0);
+
+   const int uBlurSize = 10;
+   int depB = int(float(uBlurSize) * depth);
+   
+   vec2 hlim = vec2(float(-uBlurSize) * 0.5 + 0.5);
+    for (int i = 0; i < uBlurSize; ++i) {
+        if(i<=depB) 
+        {
+            for (int j = 0; j < uBlurSize; ++j) {
+                if(j<=depB)
+                {
+                    vec2 offset = (hlim + vec2(float(i), float(j))) * texelSize;
+                    result += texture2D(u_shadeTex, v_texcoord + offset).rgb;
+                }
+            }
+        }
+
+    }
+
+   vec4 fResult = vec4(result / float(uBlurSize * uBlurSize),1.0);
+   return fResult;
+}
 void main()
 {
   // Currently acts as a pass filter that immmediately renders the shaded texture
@@ -113,6 +140,8 @@ void main()
   if(u_displayType == DISPLAY_TOON)
     gl_FragColor = toonShader(color, 3); 
   if(u_displayType == DISPLAY_SSAO)
-    gl_FragColor = SSAO; 
+    gl_FragColor = SSAO(color); 
+  if(u_displayType == DISPLAY_DOF)
+    gl_FragColor = Blur(); 
     
 }

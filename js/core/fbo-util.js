@@ -125,6 +125,7 @@ CIS565WEBGLCORE.createFBO = function(){
           // Set up GBuffer Normal
           fbo[FBO_GBUFFER_NORMAL] = gl.createFramebuffer();
           gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[FBO_GBUFFER_NORMAL]);
+
           gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[1], 0);
 
           FBOstatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
