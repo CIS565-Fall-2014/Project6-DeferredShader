@@ -41,11 +41,11 @@ What difficult here is to find the appropriate radius to cast our samples.
 
 #Performance Analysis
 
-When I am doing the experiment, I found something interesting. Because initially I wrote the bloom shaders with and without separable convolution in the same shader file and using keys to switch 
+When I am doing the experiment, I found something interesting. Because initially I wrote the bloom shaders with and without separable convolution in the same shader file and using number keys to switch 
 to different code pathes by passing in the uniform integer, and the FPS of these two methods are the same. It's weird for me because the code path without using separable convolution 
 should have much more computation loading than the other one. After I asked Cheng-Tso Lin, he told me that what I found is possible because of the WebGL compiling issue. Anyway, in order to 
 finish this experiment, I eventually wrote the bloom shaders with and without separable convolution in two different shader file.  
-From this chart we could obviously found that using separable convolution to do the bloom shading has huge benefit on performance. The benefit will become huger when the number of samples become larger.  
+From the belowing chart we could obviously found that using separable convolution to do the bloom shading has huge benefit on performance. The benefit will become huger when the number of samples become larger.  
 ![performance result](result/performance.jpg)
 ![performance result](result/performance2.jpg)
 #Video
