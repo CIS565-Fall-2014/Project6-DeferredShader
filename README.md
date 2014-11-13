@@ -19,7 +19,7 @@ Interface
 * 2: View space normals
 * 3: Albedo color
 * 4: Depth
-* 0: Deferred render, reset to diffuse+specular only
+* 0: Deferred render, reset to diffuse+specular & SSAO only
   * 6: Disable/enable diffuse+specular
   * 7: Enable/disable bloom
   * 8: Enable/disable toon
