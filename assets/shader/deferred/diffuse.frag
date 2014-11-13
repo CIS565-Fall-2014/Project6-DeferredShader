@@ -9,10 +9,26 @@ uniform float u_zFar;
 uniform float u_zNear;
 uniform int u_displayType;
 
+uniform mat4 u_projection;
+
 varying vec2 v_texcoord;
 
 const vec3 light_pos = vec3( 10.0, 0.0, 10.0 );
 const float light_intensity = 1.0;
+
+// Horizon-based AO constants.
+const int NUM_DIRECTIONS = 4;   // Number of direction vectors to walk for each pixel.
+const int NUM_SAMPLES = 6;      // Number of steps to take along each direction vector to determine horizon.
+const float STEP_SIZE = 0.001;  // Distance to move along a direction vector for each sample.
+
+// Screen-space AO constants.
+const float AO_NUM_SAMPLES = 8.0;
+const float AO_RADIUS = 0.005;
+
+// Math constants.
+const float PI = 3.1415926535;
+
+const float DEPTH_THRESHOLD = 0.99;
 
 float linearizeDepth( float exp_depth, float near, float far ){
     return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
@@ -26,6 +42,8 @@ void main()
     vec3 normal = texture2D( u_normalTex, v_texcoord ).xyz;
     vec3 position = texture2D( u_positionTex, v_texcoord ).xyz;
     vec3 color = texture2D( u_colorTex, v_texcoord ).rgb;
+
+    vec3 normal_screen_space = normalize( u_projection * vec4( normal, 0.0 ) ).xyz;
 
     float base_exp_depth = texture2D( u_depthTex, v_texcoord ).r;
     float base_depth = linearizeDepth( base_exp_depth, u_zNear, u_zFar );
@@ -97,16 +115,48 @@ void main()
     }
 
     vec3 ao_contribution = vec3( 1.0 - ao, 1.0 - ao, 1.0 - ao );
+    gl_FragColor = vec4( ao_contribution, 1.0 );
 */
 
 
     /*********** SCREEN-SPACE AMBIENT OCCLUSION ***********/
-    // Implementation inspired by: http://john-chapman-graphics.blogspot.co.uk/2013/01/ssao-tutorial.html
+    // Naive implementation inspired by: http://john-chapman-graphics.blogspot.co.uk/2013/01/ssao-tutorial.html
+/*
+    float ao_total_samples = 0.0;
+    float ao_visible_samples = 0.0;
 
-    // TODO: Implement this.
+    vec3 fragment_point = vec3( v_texcoord, texture2D( u_depthTex, v_texcoord ).r );
 
-    // DEBUG - Pass color through.
-    //gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb, 1.0 );
+    // Generate random points on surface of sphere centered at origin.
+    for ( float theta = -PI / 2.0; theta < PI / 2.0; theta += PI / AO_NUM_SAMPLES ) {
+        for ( float phi = 0.0; phi < 2.0 * PI; phi += ( 2.0 * PI ) / AO_NUM_SAMPLES ) {
+
+            // Convert spherical points to Cartesian points.
+            float x = AO_RADIUS * sin( phi ) * cos( theta );
+            float y = AO_RADIUS * sin( phi ) * sin( theta );
+            float z = AO_RADIUS * cos( phi );
+
+            vec3 spherical_point_dir = vec3( x, y, z );
+
+            // Skip point if it is not in the normal-aligned hemisphere.
+            if ( dot( spherical_point_dir, normal_screen_space ) >= 0.0 ) {
+
+                // Get position and depth of point.
+                vec3 hemisphere_point = fragment_point + spherical_point_dir;
+                float gbuffer_depth = texture2D( u_depthTex, hemisphere_point.xy ).r;
+
+                if ( hemisphere_point.z < gbuffer_depth && linearizeDepth( gbuffer_depth, u_zNear, u_zFar ) < DEPTH_THRESHOLD ) {
+                    ao_visible_samples += 1.0;
+                }
+
+                ao_total_samples += 1.0;
+            }
+        }
+    }
+
+    // More visible samples means fragment is less occluded and more light reaches it.
+    gl_FragColor = vec4( vec3( ao_visible_samples / ao_total_samples ), 1.0 );
+*/
 
 
     /*********** LAMBERTIAN SHADING ***********/

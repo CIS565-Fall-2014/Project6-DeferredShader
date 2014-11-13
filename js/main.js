@@ -491,6 +491,8 @@ var initShaders = function () {
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
     shadeProg.uDisplayTypeLoc = gl.getUniformLocation( shadeProg.ref(), "u_displayType" );
+
+    shadeProg.uPerspLoc = gl.getUniformLocation( shadeProg.ref(), "u_projection" );
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, shadeProg); 
 

@@ -12,15 +12,6 @@ uniform float u_zFar;
 
 varying vec2 v_texcoord;
 
-// Number of direction vectors to walk for each pixel.
-const int NUM_DIRECTIONS = 4;
-
-// Number of steps to take along each direction vector to determine horizon.
-const int NUM_SAMPLES = 6;
-
-// Distance to move along a direction vector for each sample.
-const float STEP_SIZE = 0.001;
-
 // Math constants.
 const float PI = 3.1415926535;
 const float EULER = 2.7182818284;
@@ -119,6 +110,8 @@ void main()
 
     // Set fragement color.
     gl_FragColor = vec4( toon_color * intensity, 1.0 );
+
+    // TODO: Use linearizeDepth() to avoid processing fragments that represent empty space.
 */
 
 
