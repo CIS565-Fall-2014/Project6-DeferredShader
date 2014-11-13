@@ -26,7 +26,7 @@ void main()
   // NOTE : You may need to add your own normals to fulfill the second's requirements
   
   vec3 lightDir = normalize(texture2D(u_positionTex, v_texcoord).rgb - u_lightPos);
-  float diffuseTerm = clamp(dot(-lightDir, texture2D(u_normalTex, v_texcoord).rgb), 0.0, 1.0);
+  float diffuseTerm = dot(-lightDir, normalize(texture2D(u_normalTex, v_texcoord).rgb));
   
   vec3 viewDir = normalize(texture2D(u_positionTex, v_texcoord).rgb - u_eyePos);
   vec3 refDir = normalize(reflect(lightDir, texture2D(u_normalTex, v_texcoord).rgb));
@@ -35,5 +35,5 @@ void main()
   vec3 diff = u_lightCol * diffuseTerm * texture2D(u_colorTex, v_texcoord).rgb;
   vec3 spec = u_lightCol * pow(specTerm, 100.0);
   
-  gl_FragColor = min(vec4(0.8 * diff + 3.0 * spec, 1.0), vec4(1,1,1,1));
+  gl_FragColor = min(vec4(0.5 * diff + 3.0 * spec, 1.0), vec4(1,1,1,1));
 }
