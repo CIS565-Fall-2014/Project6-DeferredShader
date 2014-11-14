@@ -28,8 +28,8 @@ Interface
   * 9: Disable/enable SSAO
 
 
-Effects
--------
+Features
+--------
 
 ### Diffuse & Specular lighting
 
