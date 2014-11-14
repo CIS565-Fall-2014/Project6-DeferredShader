@@ -16,7 +16,7 @@ uniform vec3 u_kernel[100];
 
 
 varying vec2 v_texcoord;
-#define SAMPLEKERNEL_SIZE 80
+#define SAMPLEKERNEL_SIZE 60
 #define KERNEL_SIZE 25  // has to be an odd number
 #define DISPLAY_TOON 7
 #define DISPLAY_BLOOM 6
@@ -116,20 +116,20 @@ vec4 SSAO(vec3 color) {
 	return vec4(vec3(occlusion), 1.0);
 }
 
-vec4 Blur() {
+vec4 Blur(vec3 color) {
    float depth = texture2D(u_depthTex, v_texcoord).r;
    depth = 1.0 -linearizeDepth( depth, u_zNear, u_zFar );
+   if(depth < 0.99){
    vec2 texelSize = vec2(1.0/w, 1.0/h);
    vec3 result = vec3(0.0,0.0,0.0);
 
    const int uBlurSize = 5;
-   int depB = int(float(uBlurSize) * depth);
    
    vec2 hlim = vec2(float(-uBlurSize) * 0.5 + 0.5);
     for (int i = 0; i < uBlurSize; ++i) {
-        if(i<=depB) {
+        if(true) {
             for (int j = 0; j < uBlurSize; ++j) {
-                if(j<=depB){
+                if(true){
                     vec2 offset = (hlim + vec2(float(i), float(j))) * texelSize;
                     result += texture2D(u_shadeTex, v_texcoord + offset).rgb;
                 }
@@ -140,6 +140,11 @@ vec4 Blur() {
 
    vec4 fResult = vec4(result / float(uBlurSize * uBlurSize),1.0);
    return fResult;
+   }
+   else{
+        return vec4(color, 1.0);
+   }
+  
 }
 void main()
 {
@@ -156,6 +161,6 @@ void main()
   if(u_displayType == DISPLAY_SSAO)
     gl_FragColor = SSAO(color); 
   if(u_displayType == DISPLAY_DOF)
-    gl_FragColor = Blur(); 
+    gl_FragColor = Blur(color); 
     
 }
