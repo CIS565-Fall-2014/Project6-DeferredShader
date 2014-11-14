@@ -65,16 +65,26 @@ TODO
 Performance
 -----------
 
-### Runtime Switches
+Tests taken on the initial scene (without developer tools open).
+
+As seen in the data below, removing features at compile time (using
+preprocessor flags) gave slightly better performance than disabling at runtime.
+The difference is fairly minimal, though (1.5 ms maximum difference). I suspect
+this is due to block locality: since the flag is uniform, all threads in a
+block will skip, and only a few comparison operations are introduced into the
+machine instruction trace.
+
+
+### Runtime Flags
 
 | Effects               | Frame time |
 |:--------------------- | ----------:|
 | No shading            |    10.5 ms |
-| Diffuse+specular only |    10.5 ms |
-| Bloom only            |    80.0 ms |
-| Toon only             |    10.5 ms |
-| SSAO only             |    14.5 ms |
-| Bloom & SSAO          |    84.5 ms |
+| Diffuse+specular only |    +0.0 ms |
+| Bloom only            |   +69.5 ms |
+| Toon only             |    +0.0 ms |
+| SSAO only             |    +4.0 ms |
+| Bloom & SSAO          |   +74.0 ms |
 
 
 ### Compile-Time Switches
@@ -82,11 +92,11 @@ Performance
 | Effects               | Frame time |
 |:--------------------- | ----------:|
 | No shading            |     9.0 ms |
-| Diffuse+specular only |    10.5 ms |
-| Bloom only            |    78.5 ms |
-| Toon only             |     9.5 ms |
-| SSAO only             |    14.0 ms |
-| Bloom & SSAO          |    83.5 ms |
+| Diffuse+specular only |    +1.5 ms |
+| Bloom only            |   +69.5 ms |
+| Toon only             |    +0.5 ms |
+| SSAO only             |    +5.0 ms |
+| Bloom & SSAO          |   +74.5 ms |
 
 
 References
