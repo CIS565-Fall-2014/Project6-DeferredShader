@@ -653,11 +653,11 @@ var initGL = function (canvasId, messageId) {
 
   var ControllerText = function() {
     this.DebugShader = 'normal';
-    this.AdvancedShader = 'diffuse';
+    this.AdvancedShader = 'lambert+AO';
     this.DiffuseColor = [ 255, 0,0 ]; // RGB array
 	this.Near = 20;
 	this.Far = 2000;
-	this.ChangeModel = 'suzanne';
+	this.ChangeModel = 'village';
 	this.ChangeRender = 'deferred';
 	this.Acceleration = 'none';
   };
