@@ -16,7 +16,7 @@ uniform vec3 u_kernel[100];
 
 
 varying vec2 v_texcoord;
-
+#define SAMPLEKERNEL_SIZE 80
 #define KERNEL_SIZE 25  // has to be an odd number
 #define DISPLAY_TOON 7
 #define DISPLAY_BLOOM 6
@@ -29,7 +29,12 @@ float h =  1.0 / float(u_height);
 float linearizeDepth( float exp_depth, float near, float far ){
     return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
 }
-
+float hash( float n ){ //Borrowed from voltage
+    return fract(sin(n)*43758.5453);
+}
+float rand(float co){
+    return fract(sin(dot(vec2(co,co) ,vec2(12.9898,78.233))) * 43758.5453);
+}
 float gaussian2d(int x,int y,int n) {
     float sigma = 2.0;
     float fx = float(x) - (float(n) - 1.0) / 2.0;
@@ -71,42 +76,53 @@ vec4 toonShader(vec3 color, int numColors) {
   // Sharpen the edges
   return abs(detectEdge()) > 0.005 ? vec4(vec3(0.0), 1.0) : vec4(p_color, 1.0);
 }
-
 vec4 SSAO(vec3 color) {
-  float occlusion = 0.0;
+    float radius = 0.1;
+	vec3 normal = texture2D(u_normalTex, v_texcoord).xyz;
+	vec3 position = texture2D(u_positionTex, v_texcoord).xyz;
+	float depth = texture2D(u_depthTex, v_texcoord).r;
+	depth = linearizeDepth( depth, u_zNear, u_zFar );
+	float occlusion = 0.0;
+	vec3 origin = vec3(position.x, position.y, depth);	
+		
+	for(int i = 0; i < SAMPLEKERNEL_SIZE; ++i){		
+		
+		vec3 rvec = normalize(u_kernel[i]);			
+		vec3 tangent = normalize(rvec - normal * dot(rvec, normal));
+		vec3 bitangent = cross(normal, tangent);
+		mat3 tbn = mat3(tangent, bitangent, normal);
 
-  vec3 normal = texture2D(u_normalTex, v_texcoord).xyz;
-  vec3 position = texture2D(u_positionTex, v_texcoord).xyz;
+		vec3 kernelv = vec3(rand(position.x),rand(position.y),(rand(position.z)+1.0) / 2.0);		  
+		kernelv = normalize(kernelv);
+		float scale = float(i) / float(SAMPLEKERNEL_SIZE);
+		scale = mix(0.1, 1.0, scale * scale);
+		kernelv = kernelv * scale ;
 
-  vec3 rvec = vec3(1.0, 0.0, 0.0);
-  vec3 tangent = normalize(rvec - normal * dot(rvec, normal));
-  vec3 bitangent = cross(normal, tangent);
-  mat3 tbn = mat3(tangent, bitangent, normal);
+		vec3 sample = tbn * kernelv;										
+		float sampleDepth = texture2D(u_depthTex, v_texcoord + vec2(sample.x,sample.y)* radius).r;
+		sampleDepth = linearizeDepth( sampleDepth, u_zNear, u_zFar );
+	
+	    float samplez = origin.z  - (sample * radius).z / 2.0;
 
-  float thisDepth = linearizeDepth(texture2D(u_depthTex, v_texcoord).x, u_zNear, u_zFar);
+		//rangeCheck helps to prevent erroneous occlusion between large depth discontinuities:
+		float rangeCheck = abs(origin.z - sampleDepth) < radius ? 1.0 : 0.0;
 
-  for (int i = 0; i < 100; i++) {
-   vec3 sample = tbn * u_kernel[i];
-   vec2 offset = sample.xy;
-   offset.x *= w;
-   offset.y *= h;
+		if(sampleDepth <= samplez)
+		    occlusion += 1.0 * rangeCheck;			
+	}
+			
+	occlusion = 1.0 - (occlusion / float(SAMPLEKERNEL_SIZE));
 
-   float sampleDepth = linearizeDepth(texture2D(u_depthTex, v_texcoord + offset.xy).x, u_zNear, u_zFar);
-
-   occlusion += (thisDepth - sample.z > sampleDepth) ? 1.0 : 0.0;
-  }
-
-  occlusion = 1.0 - (occlusion / float(100));
-
-  return vec4(vec3(occlusion), 1.0);
+	return vec4(vec3(occlusion), 1.0);
 }
+
 vec4 Blur() {
    float depth = texture2D(u_depthTex, v_texcoord).r;
    depth = 1.0 -linearizeDepth( depth, u_zNear, u_zFar );
    vec2 texelSize = vec2(1.0/w, 1.0/h);
    vec3 result = vec3(0.0,0.0,0.0);
 
-   const int uBlurSize = 10;
+   const int uBlurSize = 5;
    int depB = int(float(uBlurSize) * depth);
    
    vec2 hlim = vec2(float(-uBlurSize) * 0.5 + 0.5);

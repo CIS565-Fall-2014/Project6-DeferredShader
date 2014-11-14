@@ -162,7 +162,7 @@ var renderMulti = function () {
   fbo.bind(gl, FBO_GBUFFER_POSITION);
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.clear(gl.COLOR_BUFFER_BIT);//add
+  //gl.clear(gl.COLOR_BUFFER_BIT);//add
   gl.enable(gl.DEPTH_TEST);
 
   gl.useProgram(posProg.ref());
@@ -561,24 +561,13 @@ var initFramebuffer = function () {
   }
 };
 var initKernel = function () {
- 
-  for (var i = 0; i < kernelSize ; i++) {
-    var x = Math.random() * 2.0 - 1.0;
-    var y = Math.random() * 2.0 - 1.0;
-    var z = Math.random();
-    //Normalize and rescale
-    var len = x * x + y * y + z * z;
-    var scale1 = Math.random();
-    var scale2 = (i * 1.0) / (kernelSize * 1.0);
-    if (len > 0) {
-        len = 1 / Math.sqrt(len);
-        x = x * len * scale1 * (0.1 + 0.9 * scale2);
-        y = y * len * scale1 * (0.1 + 0.9 * scale2);
-        x = z * len * scale1 * (0.1 + 0.9 * scale2);
-    }
-    kernel = kernel.concat([x, y, z]);
-  }
+    for (var i = 0; i < kernelSize; i++) {
+        var x = Math.random() * 2.0 - 1.0;
+        var y = Math.random() * 2.0 - 1.0;
+        var z = Math.random();
 
+        kernel[i] = [Math.random() * x, Math.random() * y, Math.random() * z];
+    }
 };
 function initStats() {
     stats = new Stats();
