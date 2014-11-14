@@ -34,7 +34,7 @@ var zNear = 20.0;
 var zFar = 2000.0;
 var deferredRender = true;
 var texToDisplay = 0;
-var modelToLoad = 4;   //0=suzanne, 1=village, 2=teapot,3= suzanne&friends,4=sponza
+var modelToLoad = 1;   //0=suzanne, 1=village, 2=teapot,3= suzanne&friends,4=sponza
 var earlyZ = 0;   //0=none, 1=sort, 2=zprepass 
 
 var lightcolor;
@@ -677,8 +677,8 @@ var initGUI = function(){
     var advancedShaderController = f1.add(cText, 'AdvancedShader',['lambert','blinn','bloom','toon','AO', 'lambert+AO']);
 	
 	var diffuseColorController = gui.addColor(cText, 'DiffuseColor');
-	var nearController =  gui.add(cText, 'Near', 20, 1000);
-	var farController =  gui.add(cText, 'Far', 2000, 30000);
+	var nearController =  gui.add(cText, 'Near', 2, 1000);
+	var farController =  gui.add(cText, 'Far', 1000, 40000);
 	//gui.remember(cText);
 	
 	renderController.onChange(function(value){
@@ -821,16 +821,22 @@ var initObjs = function () {
   if(modelToLoad == 0){
 	console.log("load suzanne");
 	objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+	camera.goHome([0, 0, 3]);
   }else if (modelToLoad == 1){
 	console.log("load village");
 	objloader.loadFromFile(gl, "assets/models/myScene3.obj",null);
+	camera.goHome([0, 1, 6]);
   }else if(modelToLoad == 2){
 	objloader.loadFromFile(gl, "assets/models/teapot/hteapot.obj", null);
+	camera.goHome([0, 8, 20]);
   }else if(modelToLoad == 3){
 	objloader.loadFromFile(gl, "assets/models/myScene2.obj",null);
+	camera.goHome([0, 0, 4]);
   }else if(modelToLoad == 4){
 	objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj",null);
+	camera.goHome([-300, 320, 0]);
 	zFar = 25000.0;
+	zNear = 2.0;
   }
   
  

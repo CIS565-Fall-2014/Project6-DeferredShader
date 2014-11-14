@@ -47,7 +47,7 @@ CIS565WEBGLCORE.createOBJLoader = function(){
         var loader;
 
         var eventlistener = function(object){
-            $('#loader').html("Some Assets take long to load, keep waiting, and don't kill the program. <strong>Loading...</strong>");
+            $('#loader').html("Some Assets take long to load, keep waiting, and don't kill the program. Loading...");
             content = object;
             console.log("load file: "+filename);
             console.log("children count: " + object.children.length );

@@ -32,6 +32,10 @@ CIS565WEBGLCORE.createCamera = function(t) {
         }
     };
     update = function(){
+		console.log("camera position: ");
+		for(var i=0; i<position.length; i++){
+			console.log(position[i]+",");
+		}
         if (type == CAMERA_TRACKING_TYPE){
             mat4.identity(matrix);
             mat4.translate( matrix, matrix, position );
@@ -58,6 +62,7 @@ CIS565WEBGLCORE.createCamera = function(t) {
     };
     setPosition = function(p){
         vec3.set( position, p[0], p[1], p[2] );
+		//console.log("camera position: " +position);
         update();
     };
 
