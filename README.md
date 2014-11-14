@@ -51,7 +51,13 @@ require a convolution kernel texture).
 ### Toon shading
 
 Toon shading is performed using a ramp shading transformation on the diffuse
-color output: mapping the diffuse factor range [0, 1] to a
+and specular color outputs, mapping those [0, 1] ranges using ramp functions:
+
+    input diff  0.00  0.10 0.12  0.60 0.62  1.00
+     toon diff  0.00  0.00 0.20  0.20 0.70  0.70
+
+    input spec  0.00  0.10 0.20  1.00
+     toon spec  0.00  0.00 1.00  1.00
 
 Toon outlines are added by overwriting pixels with near-tangent view-space
 normals. This method doesn't look very good, but avoids the need for additional
