@@ -50,14 +50,24 @@ require a convolution kernel texture).
 
 ### Toon shading
 
-TODO
+Toon shading is performed using a ramp shading transformation on the diffuse
+color output: mapping the diffuse factor range [0, 1] to a
+
+Toon outlines are added by overwriting pixels with near-tangent view-space
+normals. This method doesn't look very good, but avoids the need for additional
+outputs to the post-processing stage and is considerably cheaper than a
+post-processed effect which reads multiple input pixels.
 
 ![](images/toon.png)
 
 
 ### Screen-Space Ambient Occlusion
 
-TODO
+Screen-space ambient occlusion is calculated using a hemisphere method:
+pseudorandom points in a center-weighted hemisphere are sampled to find out
+whether they are occluded from the camera's perspective. I used John Chapman's
+SSAO implementation notes to understand the general sampling methodology, then
+implemented it from that understanding.
 
 ![](images/with_ssao.png)
 
