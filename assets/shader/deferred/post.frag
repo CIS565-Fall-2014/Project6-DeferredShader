@@ -29,15 +29,17 @@ const float HORIZONTAL_STEP = 1.0 / WIDTH;
 const float VERTICAL_STEP = 1.0 / HEIGHT;
 
 // Edge detection constants.
-const float EDGE_DETECTION_THRESHOLD = 0.65;
+const float EDGE_DETECTION_THRESHOLD = 0.85;
 const vec3 EDGE_COLOR = vec3( 0.0, 0.0, 0.0 );
 
 // Blur constants.
 const int CONVOLUTION_KERNEL_SIZE = 7;
-const float GLOW_FACTOR_BLOOM = 0.3;
+const float GLOW_FACTOR_BLOOM = 1.0;
 const float GLOW_FACTOR_BLUR = 1.0;
 const int GLOW_WIDTH = 5;
 const int GLOW_HEIGHT = 5;
+
+const float DEPTH_THRESHOLD = 0.99;
 
 float linearizeDepth( float exp_depth, float near, float far )
 {
@@ -60,8 +62,14 @@ void main()
     vec3 position = texture2D( u_positionTex, v_texcoord ).xyz;
     vec3 normal = texture2D( u_normalTex, v_texcoord ).xyz;
     vec3 color = texture2D( u_colorTex, v_texcoord ).rgb;
-    float base_exp_depth = texture2D( u_depthTex, v_texcoord ).r;
-    float base_depth = linearizeDepth( base_exp_depth, u_zNear, u_zFar );
+    float depth = texture2D( u_depthTex, v_texcoord ).r;
+    vec3 shade = texture2D( u_shadeTex, v_texcoord ).rgb;
+
+    // If fragment is part of the background, then just pass the color through.
+    if ( linearizeDepth( depth, u_zNear, u_zFar ) >= DEPTH_THRESHOLD ) {
+        gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb, 1.0 );
+        return;
+    }
 
 
     /*********** TOON SHADER ***********/
@@ -111,8 +119,6 @@ void main()
 
     // Set fragement color.
     gl_FragColor = vec4( toon_color * intensity, 1.0 );
-
-    // TODO: Use linearizeDepth() to avoid processing fragments that represent empty space.
 */
 
 
@@ -148,7 +154,7 @@ void main()
         }
     }
 
-    //gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb + blur_summation, 1.0 );
+    gl_FragColor = vec4( texture2D( u_shadeTex, v_texcoord ).rgb + blur_summation, 1.0 );
 */
 
 

@@ -29,6 +29,7 @@ const float STEP_SIZE = 0.001;  // Distance to move along a direction vector for
 // Screen-space AO constants.
 const float AO_NUM_SAMPLES = 8.0;
 const float AO_RADIUS = 0.005;
+const float AO_BOOST_FACTOR = 2.0;
 
 // Math constants.
 const float PI = 3.1415926535;
@@ -50,8 +51,13 @@ void main()
 
     vec3 normal_screen_space = normalize( u_projection * vec4( normal, 0.0 ) ).xyz;
 
-    float base_exp_depth = texture2D( u_depthTex, v_texcoord ).r;
-    float base_depth = linearizeDepth( base_exp_depth, u_zNear, u_zFar );
+    float base_depth = texture2D( u_depthTex, v_texcoord ).r;
+
+    // If fragment is part of the background, then just pass the color through.
+    if ( linearizeDepth( base_depth, u_zNear, u_zFar ) >= DEPTH_THRESHOLD ) {
+        gl_FragColor = vec4( texture2D( u_colorTex, v_texcoord ).rgb, 1.0 );
+        return;
+    }
 
 
     /*********** IMAGE-SPACE HORIZON-BASED AMBIENT OCCLUSION ***********/
@@ -66,8 +72,7 @@ void main()
 
     // Define tangent vector to normal of current fragment.
     // Second vector of cross product is view direction.
-    // Currently, view direction is assumed to point down the positive z-axis.
-    vec3 t_vec = cross( normal, vec3( 0.0, 0.0, 1.0 ) );
+    vec3 t_vec = cross( normal, -position );
     vec2 t_dir = normalize( vec2( t_vec.x, t_vec.y ) );
 
     float ao = 0.0;
@@ -96,8 +101,7 @@ void main()
             vec2 curr_pos = v_texcoord + ( float( step ) * direction );
 
             // Compute depth at current step along direction vector.
-            float exp_depth = texture2D( u_depthTex, curr_pos ).r;
-            float depth = linearizeDepth( exp_depth, u_zNear, u_zFar );
+            float depth = texture2D( u_depthTex, curr_pos ).r;
 
             // If difference in depth compared to depth of current fragment is the largest seen so far.
             if ( abs( depth - base_depth ) > largest_depth_diff ) {
@@ -109,8 +113,7 @@ void main()
 
                 // Update tangent variables.
                 t_xy = v_texcoord + ( float( step ) * t_dir );
-                exp_depth = texture2D( u_depthTex, t_xy ).r;
-                t_z = linearizeDepth( exp_depth, u_zNear, u_zFar );
+                t_z = texture2D( u_depthTex, t_xy ).r;
             }
         }
 
@@ -126,7 +129,7 @@ void main()
 
     /*********** SCREEN-SPACE AMBIENT OCCLUSION ***********/
     // Naive implementation inspired by: http://john-chapman-graphics.blogspot.co.uk/2013/01/ssao-tutorial.html
-/*
+
     float ao_total_samples = 0.0;
     float ao_visible_samples = 0.0;
 
@@ -159,9 +162,10 @@ void main()
         }
     }
 
+    vec3 ao_contribution = vec3( ( ao_visible_samples / ao_total_samples ) * AO_BOOST_FACTOR );
+
     // More visible samples means fragment is less occluded and more light reaches it.
-    gl_FragColor = vec4( vec3( ao_visible_samples / ao_total_samples ), 1.0 );
-*/
+    //gl_FragColor = vec4( vec3( ao_visible_samples / ao_total_samples ) * AO_BOOST_FACTOR, 1.0 );
 
 
     /*********** LAMBERTIAN SHADING ***********/
@@ -179,8 +183,12 @@ void main()
         specular = pow( spec_angle, SPECULAR_EXPONENT );
     }
 
-    gl_FragColor = vec4( AMBIENT_COLOR + diffuse * color + specular * SPECULAR_COLOR, 1.0 );
+    vec3 blinn_phong_color = AMBIENT_COLOR + diffuse * color + specular * SPECULAR_COLOR;
+    gl_FragColor = vec4( blinn_phong_color * ao_contribution, 1.0 );
 
-    //float diffuse = max( dot( normal, normalize( light_pos - position ) ), 0.0 );
-    //gl_FragColor = vec4( diffuse * color * light_intensity, 1.0 );
+/*
+    float diffuse = max( dot( normal, normalize( LIGHT_POS - position ) ), 0.0 );
+    vec3 lambertian_color = diffuse * color * LIGHT_INTENSITY;
+    gl_FragColor = vec4( lambertian_color * ao_contribution, 1.0 );
+*/
 }
