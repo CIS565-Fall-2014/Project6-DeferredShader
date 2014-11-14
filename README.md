@@ -39,7 +39,7 @@ A median filter or other anti-aliasing method could be useful to smooth out the 
  
 
 
-* **Screen Space Ambient Occlusion** 
+* **Screen Space Ambient Occlusion**   
 SSAO was done based on hemisphere sampling, followed by a simple blur.
 First, randomly sample a position in the hemisphere oriented in normal direction. 
 Then project the sample position back into screen space, to find its texture coord and hence its depth on depth buffer.
@@ -50,11 +50,11 @@ If the depth buffer is actually smaller than sample position's z, then occlusion
 From the above comparison, it is obvious that AO creates creases and enhances the rendering of 3D objects.
 What's more important is that SSAO is cheap, is done right away in the screen space, and dosen't pose extra load to the deferred shader.
 
-* GUI Control
+* GUI Control  
 Dynamically load obj, dynamically change diffuse color, and many other settings
 
 
-* **Some Interesting Debugging Images**
+* **Some Interesting Debugging Images**  
 ![Normal](/pics/normal3.png)  
 ![Sample Bug](/pics/bug2.png)  
 ![Depth](/pics/depth.png)  
@@ -67,7 +67,8 @@ PERFORMANCE EVALUATION
 A forward shader is of O(no. of vertex * no. of light)  
 A deferred shader is of O(screen resolution * no. of light)  
 
-* Deferred Shader vs Forward Shader    
+* **Deferred Shader vs Forward Shader**      
+
 I noticed that the performance of Deferred Shader is influenced by the resolution of output, so I changed the canvas size 
 and did the following analysis. It shows that the bigger the resolution, the poorer the performance of deferred shader. While, 
 forward shader performance is not affected by canvas size. Also, the complexity of scene has influence on both shaders, the more
@@ -77,9 +78,11 @@ Deferred Shader decouples light from geometry, and probably with more lights, th
 ![Smaller Reso] (/pics/200x100.png)
 ![Bigger Reso] (/pics/960x540.png)
 
-* FX's effect on Deferred Shader Performance
+* **FX's effect on Deferred Shader Performance**    
+
 It is cheap to do FX in deferred Shader, almost all of the shadings poses no extra work on the shader. While for forward shader, the
  effects would be very expensive to do.  
+ 
 ![FX] (/pics/FX.png)
 
 INTERACTION
