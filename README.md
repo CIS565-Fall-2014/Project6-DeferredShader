@@ -28,8 +28,8 @@ Interface
   * 9: Disable/enable SSAO
 
 
-Effects
--------
+Features
+--------
 
 ### Diffuse & Specular lighting
 
@@ -78,6 +78,18 @@ SSAO implementation notes to understand the general sampling methodology, then
 implemented it from that understanding.
 
 ![](images/with_ssao.png)
+
+
+### G-buffer format optimization
+
+Rearranging the G-buffer formats allows carrying less unnecessary data between
+deferred shading stages. Between the render pass and the shading pass, some
+optimizations are possible:
+
+| Method | Test render time |
+|:------ | ----------------:|
+| D, Px Py Pz, Cr Cg Cb, Nx Ny | 10.5 ms |
+| D, Px Py Pz Nx, Cr Cg Cb Ny  | 10.0 ms |
 
 
 Performance

@@ -8,7 +8,7 @@ precision highp float;
 uniform sampler2D u_depthTex;    // d
 uniform sampler2D u_positionTex; // px py pz
 uniform sampler2D u_colorTex;    // r g b
-uniform sampler2D u_normalTex;   // nx ny (nz)
+//uniform sampler2D u_normalTex;   // nx ny (nz)
 
 uniform float u_zFar;
 uniform float u_zNear;
@@ -47,10 +47,14 @@ bool flagged(int v, int f) {
 
 void main()
 {
-    vec3  n = texture2D(u_normalTex  , v_texcoord).rgb;
-    vec3  p = texture2D(u_positionTex, v_texcoord).rgb;
-    vec3  c = texture2D(u_colorTex   , v_texcoord).rgb;
     float d = texture2D(u_depthTex   , v_texcoord).r;
+    vec4 tp = texture2D(u_positionTex, v_texcoord);
+    vec4 tc = texture2D(u_colorTex   , v_texcoord);
+    //vec4 tn = texture2D(u_normalTex  , v_texcoord);
+    vec3  p = tp.xyz;
+    vec3  c = tc.rgb;
+    float nx = tp.w, ny = tc.w;
+    vec3  n = vec3(nx, ny, sqrt(1.0 - nx * nx - ny * ny));
 
 #if LAYOUTTEST
 

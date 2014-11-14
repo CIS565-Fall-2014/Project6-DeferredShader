@@ -248,9 +248,11 @@ var renderShade = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( shadeProg.uColorSamplerLoc, 2 );
 
+  /*
   gl.activeTexture( gl.TEXTURE3 );
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(3) );
   gl.uniform1i( shadeProg.uNormalSamplerLoc, 3 );
+  */
 
   // Bind necessary uniforms 
   gl.uniform1f( shadeProg.uZNearLoc, zNear );
@@ -288,9 +290,11 @@ var renderDiagnostic = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( diagProg.uColorSamplerLoc, 2 );
 
+  /*
   gl.activeTexture( gl.TEXTURE3 );  //depth
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(3) );
   gl.uniform1i( diagProg.uNormalSamplerLoc, 3 ); 
+  */
 
   // Bind necessary uniforms 
   gl.uniform1f( diagProg.uZNearLoc, zNear );
@@ -485,7 +489,7 @@ var initShaders = function () {
     diagProg.aVertexTexcoordLoc = gl.getAttribLocation( diagProg.ref(), "a_texcoord" );
 
     diagProg.uPosSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_positionTex");
-    diagProg.uNormalSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_normalTex");
+    //diagProg.uNormalSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_normalTex");
     diagProg.uColorSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_colorTex");
     diagProg.uDepthSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_depthTex");
 
@@ -503,7 +507,7 @@ var initShaders = function () {
     shadeProg.aVertexTexcoordLoc = gl.getAttribLocation( shadeProg.ref(), "a_texcoord" );
 
     shadeProg.uPosSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_positionTex");
-    shadeProg.uNormalSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_normalTex");
+    //shadeProg.uNormalSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_normalTex");
     shadeProg.uColorSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_colorTex");
     shadeProg.uDepthSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_depthTex");
 
