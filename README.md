@@ -80,8 +80,25 @@ implemented it from that understanding.
 ![](images/with_ssao.png)
 
 
-Performance
------------
+### G-buffer format optimization
+
+Rearranging the G-buffer formats allows carrying less unnecessary data between
+deferred shading stages. Between the render pass and the shading pass, here are
+some possible rearrangements:
+
+| G-buffer texture formats   | Test render time | SSAO render time |
+|:-------------------------- | ----------------:| ----------------:|
+| D, PxPyPz,   CrCgCb,  NxNy |          10.5 ms |          14.5 ms |
+| D, PxPyPzNx, CrCgCbNy      |          10.0 ms |          14.0 ms |
+|    PxPyPz,   CrCgCbD, NxNy |          10.0 ms |          61.0 ms |
+
+Since SSAO reads many times from the depth texture, it turns out that combining
+this with a larger texture is a very bad idea: this means that for every
+depth value texture fetch, 4 times as much data is being loaded each time.
+
+
+Effect Performance
+------------------
 
 Tests taken on the initial scene (without developer tools open).
 
