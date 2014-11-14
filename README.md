@@ -5,6 +5,8 @@ CIS 565 Project 6: Deferred Shader
 
 ### [Live Demo](https://kainino0x.github.io/Project6-DeferredShader/)
 
+### [Demo Video](http://youtu.be/15UsLDPgzYw)
+
 Demo image with bloom and SSAO enabled:
 
 ![](images/bloom_ssao.png)
