@@ -71,6 +71,7 @@ Bloom is a post processing effects. Normally, Bloom effects is implemented with 
 -------------------------------------------------------------------------------
 
 Toon shading is a non-photorealistic rendering technique that is used to achieve a cartoonish or hand-drawn appearance of three-dimensional models. To make is cartoonish we don't want many color in the final rendering so I round the colors in the scene to a certain color set. Basic silhouetting is achieved by compare the depth of the object with the background to get the edge.
+
 -------------------------------------------------------------------------------
 Screen Space Ambient Occlusion
 -------------------------------------------------------------------------------
