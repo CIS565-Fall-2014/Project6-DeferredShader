@@ -666,7 +666,7 @@ var initGUI = function(){
     var cText = new ControllerText();
     var gui = new dat.GUI( );
 	
-	var modelController = gui.add(cText, 'ChangeModel',['suzanne','village','teapot','suzanne&friends','sponza']);
+	var modelController = gui.add(cText, 'ChangeModel',['village','suzanne','teapot','suzanne&friends','sponza']);
 	var renderController = gui.add(cText, 'ChangeRender',['deferred','forward']);
 	var f1 = gui.addFolder('DeferredShader');
 	//var f2 = gui.addFolder('ForwardShader');
@@ -674,7 +674,7 @@ var initGUI = function(){
 	//f2.open();
 	
     var debugShaderController = f1.add(cText, 'DebugShader',['normal','color','depth','position']);
-    var advancedShaderController = f1.add(cText, 'AdvancedShader',['lambert','blinn','bloom','toon','AO', 'lambert+AO']);
+    var advancedShaderController = f1.add(cText, 'AdvancedShader',['lambert+AO','lambert','blinn','bloom','toon','AO']);
 	
 	var diffuseColorController = gui.addColor(cText, 'DiffuseColor');
 	var nearController =  gui.add(cText, 'Near', 2, 1000);
