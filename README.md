@@ -69,6 +69,7 @@ Bloom is a post processing effects. Normally, Bloom effects is implemented with 
 -------------------------------------------------------------------------------
 "Toon" Shading (with basic silhouetting)
 -------------------------------------------------------------------------------
+
 Toon shading is a non-photorealistic rendering technique that is used to achieve a cartoonish or hand-drawn appearance of three-dimensional models. To make is cartoonish we don't want many color in the final rendering so I round the colors in the scene to a certain color set. Basic silhouetting is achieved by compare the depth of the object with the background to get the edge.
 -------------------------------------------------------------------------------
 Screen Space Ambient Occlusion
@@ -95,6 +96,7 @@ performance differences.
 Reference
 ---
 BLOOM: http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html
+
 SSAO: http://john-chapman-graphics.blogspot.co.uk/2013/01/ssao-tutorial.html
 
 Many thanks to Cheng-Tso Lin, whose framework for CIS700 we used for this
