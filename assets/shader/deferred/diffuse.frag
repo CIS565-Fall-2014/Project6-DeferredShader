@@ -5,10 +5,10 @@ precision highp float;
 #define TOON 1
 #define SSAO 1
 
-uniform sampler2D u_positionTex; // px py pz
-uniform sampler2D u_normalTex;   // nx ny (nz)
-uniform sampler2D u_colorTex;    // r g b
 uniform sampler2D u_depthTex;    // d
+uniform sampler2D u_positionTex; // px py pz
+uniform sampler2D u_colorTex;    // r g b
+uniform sampler2D u_normalTex;   // nx ny (nz)
 
 uniform float u_zFar;
 uniform float u_zNear;

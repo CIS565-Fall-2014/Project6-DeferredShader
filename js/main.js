@@ -236,21 +236,21 @@ var renderShade = function () {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Bind necessary textures
-  gl.activeTexture( gl.TEXTURE0 );  //position
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
-  gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
+  gl.activeTexture( gl.TEXTURE0 );
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( shadeProg.uDepthSamplerLoc, 0 );
 
-  gl.activeTexture( gl.TEXTURE1 );  //normal
+  gl.activeTexture( gl.TEXTURE1 );
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
+  gl.uniform1i( shadeProg.uPosSamplerLoc, 1 );
 
-  gl.activeTexture( gl.TEXTURE2 );  //color
+  gl.activeTexture( gl.TEXTURE2 );
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( shadeProg.uColorSamplerLoc, 2 );
 
-  gl.activeTexture( gl.TEXTURE3 );  //depth
-  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
+  gl.activeTexture( gl.TEXTURE3 );
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(3) );
+  gl.uniform1i( shadeProg.uNormalSamplerLoc, 3 );
 
   // Bind necessary uniforms 
   gl.uniform1f( shadeProg.uZNearLoc, zNear );
@@ -277,20 +277,20 @@ var renderDiagnostic = function () {
 
   // Bind necessary textures
   gl.activeTexture( gl.TEXTURE0 );  //position
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
-  gl.uniform1i( diagProg.uPosSamplerLoc, 0 );
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( diagProg.uDepthSamplerLoc, 0 );
 
   gl.activeTexture( gl.TEXTURE1 );  //normal
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  gl.uniform1i( diagProg.uNormalSamplerLoc, 1 );
+  gl.uniform1i( diagProg.uPosSamplerLoc, 1 );
 
   gl.activeTexture( gl.TEXTURE2 );  //color
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( diagProg.uColorSamplerLoc, 2 );
 
   gl.activeTexture( gl.TEXTURE3 );  //depth
-  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  gl.uniform1i( diagProg.uDepthSamplerLoc, 3 ); 
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(3) );
+  gl.uniform1i( diagProg.uNormalSamplerLoc, 3 ); 
 
   // Bind necessary uniforms 
   gl.uniform1f( diagProg.uZNearLoc, zNear );
