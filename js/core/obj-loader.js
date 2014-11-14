@@ -261,7 +261,7 @@ var Model = function (gl, objLoader) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
     iboLength.push(objLoader.indices(i).length);
-	console.log("creating Model with indices: "+ objLoader.indices(i).length);
+	//console.log("creating Model with indices: "+ objLoader.indices(i).length);
   }
 
   return {

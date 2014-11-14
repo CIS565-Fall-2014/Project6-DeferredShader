@@ -98,14 +98,9 @@ Then project the sample position back into screen space, to find its texture coo
 If the depth buffer is actually smaller than sample position's z, then occlusion accumulates.  
 ![AO](/pics/AOfinal.png)
 ![AO](/pics/AOfinal2.png)
-
-
-* Compare performance to a normal forward renderer with
-  * No optimizations
-  * Coarse sort geometry front-to-back for early-z
-  * Z-prepass for early-z
     
-* Additional lighting 
+* GUI Control
+
 
 * **Some Interesting Debugging Images**
 ![Normal](/pics/normal3.png)
@@ -141,7 +136,13 @@ machine from the root directory of this repository with the following command:
 
 PERFORMANCE EVALUATION
 -------------------------------------------------------------------------------
+A forward shader is of O(no. of vertex * no. of light)  
+A deferred shader is of O(screen resolution * no. of light)  
 
+* Compare performance to a normal forward renderer with
+  * No optimizations
+  * Coarse sort geometry front-to-back for early-z
+  * Z-prepass for early-z
 
 REFERRENCES
 -------------------------------------------------------------------------------

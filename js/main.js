@@ -22,6 +22,7 @@ var passProg;     // Shader program for G-Buffer
 var shadeProg;    // Shader program for P-Buffer
 var diagProg;     // Shader program from diagnostic 
 var postProg;     // Shader for post-process effects
+var forwardProg;   //forward shader
 
 // Multi-Pass programs
 var posProg;
@@ -31,8 +32,10 @@ var colorProg;
 var isDiagnostic = false;
 var zNear = 20.0;
 var zFar = 2000.0;
+var deferredRender = true;
 var texToDisplay = 0;
-var modelToLoad = 0;
+var modelToLoad = 4;   //0=suzanne, 1=village, 2=teapot,3= suzanne&friends,4=sponza
+var earlyZ = 0;   //0=none, 1=sort, 2=zprepass 
 
 var lightcolor;
 var lightdir;
@@ -87,6 +90,7 @@ var main = function (canvasId, messageId) {
 
   // Set up shaders
   initShaders();
+  initShadersForward();
 
   // Register our render callbacks
   CIS565WEBGLCORE.render = render;
@@ -119,21 +123,26 @@ var renderLoop = function () {
 };
 
 var render = function () {
+  if(deferredRender){
+	  if (fbo.isMultipleTargets()) {
+		renderPass();
+	  } else {
+		renderMulti();
+	  }
 
-  if (fbo.isMultipleTargets()) {
-    renderPass();
-  } else {
-    renderMulti();
+	  if (!isDiagnostic) {
+		renderShade();
+		renderPost();
+	  } else {
+		renderDiagnostic();
+	  }
   }
-
-  if (!isDiagnostic) {
-    renderShade();
-    renderPost();
-  } else {
-    renderDiagnostic();
+  else{
+	renderForward();
   }
 
   gl.useProgram(null);
+  
 };
 
 function initializeTexture(texture, src) {
@@ -160,8 +169,12 @@ function initLoadedTexture(texture){
 
 
 var drawModel = function (program, mask) {
+	if(earlyZ == 1){   //sort geometry
+//	for(var i = 0; i < model.numGroups(); i++) {
+//	}
+		
+	}
   // Bind attributes
- 
   for(var i = 0; i < model.numGroups(); i++) {
     if (mask & 0x1) {
       gl.bindBuffer(gl.ARRAY_BUFFER, model.vbo(i));
@@ -401,8 +414,6 @@ var renderPost = function () {
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
 
 
-  
-
   /*gl.activeTexture(gl.TEXTURE5);
   gl.bindTexture(gl.TEXTURE_2D, filter1[0]);
   gl.uniform1i(postProg.uBloomSamplerLoc0,5);
@@ -429,10 +440,44 @@ var renderPost = function () {
   gl.uniform1i( postProg.uDisplayTypeLoc, texToDisplay ); 
   gl.uniformMatrix4fv( postProg.uPerspMatLoc, false, persp);
 
-
-
   drawQuad(postProg);
 };
+
+
+var renderForward = function(){
+//console.log("forward rendering");
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST);
+   // gl.disable(gl.DEPTH_TEST);
+ 
+  gl.useProgram(forwardProg.ref());
+
+  
+  gl.uniformMatrix4fv( forwardProg.uModelViewMatLoc, false, camera.getViewTransform());    
+  gl.uniformMatrix4fv( forwardProg.uPerspMatLoc, false, persp);   
+  
+  drawModel(forwardProg,0x3);
+  
+  // Bind attributes
+  /*for(var i = 0; i < model.numGroups(); i++) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, model.vbo(i));
+    gl.vertexAttribPointer(forwardProg.aVertexPosLoc, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(forwardProg.aVertexPosLoc);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, model.nbo(i));
+    gl.vertexAttribPointer(forwardProg.aVertexNormalLoc, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(forwardProg.aVertexNormalLoc);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.ibo(i));
+    gl.drawElements(gl.TRIANGLES, model.iboLength(i), gl.UNSIGNED_SHORT, 0);
+  }
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);*/
+  
+  //console.log("forward rendering end");
+};
+
 
 var initKernel = function(){   //normalize kenel
   kernel = [
@@ -612,20 +657,39 @@ var initGL = function (canvasId, messageId) {
     this.DiffuseColor = [ 255, 0,0 ]; // RGB array
 	this.Near = 20;
 	this.Far = 2000;
-	this.ChangeModel = 0;
+	this.ChangeModel = 'suzanne';
+	this.ChangeRender = 'deferred';
+	this.Acceleration = 'none';
   };
 
 var initGUI = function(){
     var cText = new ControllerText();
     var gui = new dat.GUI( );
+	
 	var modelController = gui.add(cText, 'ChangeModel',['suzanne','village','teapot','suzanne&friends','sponza']);
-    var debugShaderController = gui.add(cText, 'DebugShader',['normal','color','depth','position']);
-    var advancedShaderController = gui.add(cText, 'AdvancedShader',['lambert','blinn','bloom','toon','AO', 'lambert+AO']);
+	var renderController = gui.add(cText, 'ChangeRender',['deferred','forward']);
+	var f1 = gui.addFolder('DeferredShader');
+	//var f2 = gui.addFolder('ForwardShader');
+	f1.open();
+	//f2.open();
+	
+    var debugShaderController = f1.add(cText, 'DebugShader',['normal','color','depth','position']);
+    var advancedShaderController = f1.add(cText, 'AdvancedShader',['lambert','blinn','bloom','toon','AO', 'lambert+AO']);
+	
 	var diffuseColorController = gui.addColor(cText, 'DiffuseColor');
 	var nearController =  gui.add(cText, 'Near', 20, 1000);
-	var farController =  gui.add(cText, 'Far', 2000, 20000);
-	gui.remember(cText);
+	var farController =  gui.add(cText, 'Far', 2000, 30000);
+	//gui.remember(cText);
 	
+	renderController.onChange(function(value){
+      if(value == 'deferred'){
+			deferredRender = true;
+	  }else{
+	  		deferredRender = false;
+			//initShadersForward();
+			//initCamera();
+	  }
+    });
 	nearController.onChange(function(value){
       zNear = parseFloat(value);
     });
@@ -705,10 +769,10 @@ var initCamera = function () {
   window.onkeydown = function (e) {
     interactor.onKeyDown(e);
     switch(e.keyCode) {
-      case 48:   //0  = shade + post effects
+      case 48:   //0 = SSAO + diffuse
         isDiagnostic = false;
-        texToDisplay = 5;
-        break;
+        texToDisplay = 0;
+		break;
       case 49:    //1   =  position shading
         isDiagnostic = true;
         texToDisplay = 1;
@@ -745,10 +809,6 @@ var initCamera = function () {
         isDiagnostic = false;
         texToDisplay = 9;
         break;
-	  case 58:  //10 = SSAO + diffuse
-        isDiagnostic = false;
-        texToDisplay = 0;
-        break;
     }
   }
 };
@@ -770,7 +830,9 @@ var initObjs = function () {
 	objloader.loadFromFile(gl, "assets/models/myScene2.obj",null);
   }else if(modelToLoad == 4){
 	objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj",null);
+	zFar = 25000.0;
   }
+  
  
   //objloader.loadFromFile(gl, "assets/models/myScene.obj",null);
 //  objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", "assets/models/crytek-sponza/sponza.mtl")
@@ -780,7 +842,11 @@ var initObjs = function () {
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
     model = new Model(gl, objloader);
-	console.log ("model number of indices: " + model.iboLength(0));
+	var sum = 0;
+	for(var i=0; i<model.numGroups(); i++){
+		sum+= model.iboLength(i);
+	}
+	console.log ("model created with number of indices: " + sum);
   });
 	objloader.executeCallBackFunc();
 	//testTex = gl.createTexture();
@@ -804,6 +870,25 @@ var initObjs = function () {
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, quad.ibo);
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(screenQuad.indices), gl.STATIC_DRAW);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+};
+
+var initShadersForward = function(){
+// Create shader program for forward render
+  forwardProg = CIS565WEBGLCORE.createShaderProgram();
+  forwardProg.loadShader(gl, "assets/shader/forward.vert", "assets/shader/forward.frag");
+  
+  forwardProg.addCallback( function() { 
+	gl.useProgram(forwardProg.ref());
+	
+	forwardProg.aVertexPosLoc = gl.getAttribLocation( forwardProg.ref(), "a_position" );
+    forwardProg.aVertexNormalLoc = gl.getAttribLocation( forwardProg.ref(), "a_normal" );
+	//passProg.aVertexTexcoordLoc = gl.getAttribLocation( forwardProg.ref(), "a_texcoord" );
+
+	forwardProg.uPerspMatLoc = gl.getUniformLocation( forwardProg.ref(), "u_persp");
+    forwardProg.uModelViewMatLoc = gl.getUniformLocation( forwardProg.ref(), "u_modelView" );
+   });
+   
+  CIS565WEBGLCORE.registerAsyncObj(gl, forwardProg); 
 };
 
 var initShaders = function () {
@@ -941,6 +1026,7 @@ var initShaders = function () {
     
       });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
+  
 };
 
 var initFramebuffer = function () {
