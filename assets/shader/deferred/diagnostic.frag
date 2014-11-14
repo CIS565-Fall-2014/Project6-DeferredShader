@@ -26,13 +26,14 @@ void main()
 	vec3 position = texture2D( u_positionTex, v_texcoord ).xyz;
 	vec4 color = texture2D( u_colorTex, v_texcoord );
 	float depth = texture2D( u_depthTex, v_texcoord ).x;
+  float d2 = texture2D( u_positionTex, v_texcoord ).z;
 
 	depth = linearizeDepth( depth, u_zNear, u_zFar );
 
   if( u_displayType == DISPLAY_DEPTH )
 	    gl_FragColor = vec4( depth, depth, depth, 1 );
 	else if( u_displayType == DISPLAY_COLOR )
-	    gl_FragColor = color;
+	    gl_FragColor = vec4(d2, d2, d2, 1);//color;
 	else if( u_displayType == DISPLAY_NORMAL )
 	    gl_FragColor = vec4( normal, 1 );
 	else
