@@ -97,6 +97,7 @@ PERFORMANCE EVALUATION
 In diagnostic mode(show normal, position, etc) I just output the color read from G buffer without light accumulation or post processing. From the chart above we can see the stage 2 and 3 of deferred shading is quite computational intense. And I think the performance is not that good because I implement the deferred shader with simple one-pass pipline. So every part get computed no matter is is used or not. I think  Implementing separable convolution will definetely help improving the performance.  
 
 ![blinn](https://raw.githubusercontent.com/XJMa/Project6-DeferredShader/master/screenshots/performance2.jpg)
+
 Apparently use more sample kernels to compute SSAO will slow down the computation process, but the result is not as obvious as I expect. I want to test with more kernel computed but my laptop can't handle it when the kernel size exceed 90. 
 
 ---
