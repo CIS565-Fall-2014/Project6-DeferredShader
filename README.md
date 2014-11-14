@@ -85,10 +85,14 @@ Tests taken on the initial scene (without developer tools open).
 
 As seen in the data below, removing features at compile time (using
 preprocessor flags) gave slightly better performance than disabling at runtime.
-The difference is fairly minimal, though (1.5 ms maximum difference). I suspect
-this is due to block locality: since the flag is uniform, all threads in a
-block will skip, and only a few comparison operations are introduced into the
-machine instruction trace.
+The difference is fairly minimal, though (1.5 ms maximum difference).
+
+I suspect the lack of improvement is due to block locality: since the flag is
+uniform, all threads in a block will skip, and only a few comparison operations
+are introduced into the machine instruction trace.
+The source of the slightly decayed performance using runtime flags is probably
+compiler optimizations which remove unused varyings. Without code which uses
+the textures, less memory access is performed.
 
 
 ### Runtime Flags

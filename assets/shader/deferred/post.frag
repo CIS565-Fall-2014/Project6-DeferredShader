@@ -1,5 +1,6 @@
 precision highp float;
 
+#define LAYOUTTEST 0
 #define BLOOM 1
 
 uniform sampler2D u_shadeTex;
@@ -28,9 +29,16 @@ bool flagged(int v, int f) {
 
 void main()
 {
-    vec3 sum = texture2D(u_shadeTex, v_texcoord).rgb;
+    vec3 c = texture2D(u_shadeTex, v_texcoord).rgb;
+
+#if LAYOUTTEST
+
+    vec3 sum = c + vec3(u_resolution + v_texcoord, 0.0) * float(u_effect);
+
+#else // LAYOUTTEST
 
 #if BLOOM
+    vec3 sum = c;
     if (flagged(u_effect, 1)) {
         // Bloom
         float radsq = bloom_rad * bloom_rad;
@@ -47,6 +55,8 @@ void main()
         }
     }
 #endif
+
+#endif // LAYOUTTEST
 
     gl_FragColor = vec4(sum, 1.0);
 }

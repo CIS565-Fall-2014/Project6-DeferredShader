@@ -1,13 +1,14 @@
 precision highp float;
 
+#define LAYOUTTEST 0
 #define DIFFSPEC 1
 #define TOON 1
 #define SSAO 1
 
-uniform sampler2D u_positionTex;
-uniform sampler2D u_normalTex;
-uniform sampler2D u_colorTex;
-uniform sampler2D u_depthTex;
+uniform sampler2D u_positionTex; // px py pz
+uniform sampler2D u_normalTex;   // nx ny (nz)
+uniform sampler2D u_colorTex;    // r g b
+uniform sampler2D u_depthTex;    // d
 
 uniform float u_zFar;
 uniform float u_zNear;
@@ -50,6 +51,15 @@ void main()
     vec3  p = texture2D(u_positionTex, v_texcoord).rgb;
     vec3  c = texture2D(u_colorTex   , v_texcoord).rgb;
     float d = texture2D(u_depthTex   , v_texcoord).r;
+
+#if LAYOUTTEST
+
+    // This layout performance test uses all of the uniforms and varyings
+    vec3 color = linearizeDepth(d, u_zNear, u_zFar)
+        * float(u_effect) * float(u_displayType)
+        * (n + p + c + u_lamppos + vec3(v_texcoord, 0.0));
+
+#else // LAYOUTTEST
 
     if (d > 0.999) {
         gl_FragColor = vec4(u_bgcolor, 1);
@@ -112,6 +122,8 @@ void main()
         }
     }
 #endif
+
+#endif // LAYOUTTEST
 
     gl_FragColor = vec4(color, 1);
 }
