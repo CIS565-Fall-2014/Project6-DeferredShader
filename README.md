@@ -15,7 +15,7 @@ Recommendation is to use latest Firefox / Chrome running on GPU, and with D3D11.
 
 FEATURES
 -------------------------------------------------------------------------------
-Click Here for [Live Demo Page](https://github.com/dblsai/Project5-WebGL/vert_wave.html)
+Click Here for [Live Demo Page](http://dblsai.github.io/Project6-DeferredShader/)
 
 * **Diffuse Shading**  
 ![Lambert](/pics/lambert.png)
