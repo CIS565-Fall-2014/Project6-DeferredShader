@@ -86,11 +86,11 @@ Rearranging the G-buffer formats allows carrying less unnecessary data between
 deferred shading stages. Between the render pass and the shading pass, here are
 some possible rearrangements:
 
-| G-buffer texture formats   | Test render time | SSAO render time |
-|:-------------------------- | ----------------:| ----------------:|
-| D, PxPyPz,   CrCgCb,  NxNy |          10.5 ms |          14.5 ms |
-| D, PxPyPzNx, CrCgCbNy      |          10.0 ms |          14.0 ms |
-|    PxPyPz,   CrCgCbD, NxNy |          10.0 ms |          61.0 ms |
+| G-buffer textures               | Test render time | SSAO render time |
+|:------------------------------- | ----------------:| ----------------:|
+| 4: D, PxPyPz,   CrCgCb,  NxNyNz |          10.5 ms |          14.5 ms |
+| 3: D, PxPyPzNx, CrCgCbNy        |          10.0 ms |          14.0 ms |
+| 3:    PxPyPz,   CrCgCbD, NxNyNz |          10.0 ms |          61.0 ms |
 
 Since SSAO reads many times from the depth texture, it turns out that combining
 this with a larger texture is a very bad idea: this means that for every
