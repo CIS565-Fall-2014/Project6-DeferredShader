@@ -32,7 +32,19 @@ The simplest in terms of computation.  It simply floors pixel coordinates to giv
 
 ![pixel][pixel]
 
+-SSAO
+
+A fast method for ambient occlusion.  Quite slow with larger kernel sizes
+
+![ao][ao]
+
+A graph comparing the timing for different kernel sizes.
+
+![graph][graph]
+
 [bloom]:https://raw.githubusercontent.com/jeremynewlin/Project6-DeferredShader/master/bloom.png
 [toon]:https://raw.githubusercontent.com/jeremynewlin/Project6-DeferredShader/master/toon.png
 [diffuse]:https://raw.githubusercontent.com/jeremynewlin/Project6-DeferredShader/master/diffuse.png
 [pixel]:https://raw.githubusercontent.com/jeremynewlin/Project6-DeferredShader/master/pixel.png
+[ao]:https://2.bp.blogspot.com/-4rRv0OW9FJc/VGWtyEtWQVI/AAAAAAAACjI/VWCaoa4Y6ho/s1600/ao.png
+[graph]:https://1.bp.blogspot.com/-vdXQtOvs0ww/VGWucammJUI/AAAAAAAACjQ/ZgYhOdSk9Q4/s1600/image.png

@@ -79,6 +79,24 @@ void toon(float linearDepth, vec3 lightPosition, vec3 lightColor, vec3 position,
 void ssao(){
 	float depth = texture2D(u_depthTex, v_texcoord).r;
 	float linearDepth = linearizeDepth(depth, u_zNear, u_zFar);
+	
+	float occlusion = 1.0;
+	
+	for (int i=-4; i<4; i+=1){
+		for (int j=-4; j<4; j+=1){
+			vec2 offset = v_texcoord + vec2(1.0/float(u_width)*float(i), 1.0/float(u_height)*float(j));
+			float otherDepth = texture2D(u_depthTex, offset).r;
+			float otherLinearDepth = linearizeDepth(otherDepth, u_zNear, u_zFar);
+			
+			if (abs(otherLinearDepth - linearDepth) < 0.001){
+				occlusion -= 1.0/(8.0*8.0);
+			}
+		}
+	}
+	
+	occlusion = 1.0-occlusion;
+	
+	gl_FragColor *= occlusion*vec4(1,1,1,1);
 }
 
 void main()
@@ -99,6 +117,6 @@ void main()
   gl_FragColor = vec4(normal,1.0);
   
   diffuseShader(lightPosition, lightColor, position, normal, color);
-  //toon(linearDepth, lightPosition, lightColor, position, normal, color);
+  toon(linearDepth, lightPosition, lightColor, position, normal, color);
   //ssao();
 }
