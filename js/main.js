@@ -822,16 +822,24 @@ var initObjs = function () {
 	console.log("load suzanne");
 	objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
 	camera.goHome([0, 0, 3]);
+	zFar = 2000.0;
+	zNear = 20.0;
   }else if (modelToLoad == 1){
 	console.log("load village");
 	objloader.loadFromFile(gl, "assets/models/myScene3.obj",null);
 	camera.goHome([0, 1, 6]);
+	zFar = 2000.0;
+	zNear = 20.0;
   }else if(modelToLoad == 2){
 	objloader.loadFromFile(gl, "assets/models/teapot/hteapot.obj", null);
 	camera.goHome([0, 8, 20]);
+	zFar = 20000.0;
+	zNear = 20.0;
   }else if(modelToLoad == 3){
 	objloader.loadFromFile(gl, "assets/models/myScene2.obj",null);
 	camera.goHome([0, 0, 4]);
+	zFar = 2000.0;
+	zNear = 20.0;
   }else if(modelToLoad == 4){
 	objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj",null);
 	camera.goHome([-300, 320, 0]);
