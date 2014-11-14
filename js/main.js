@@ -37,6 +37,7 @@ var lightPos = [0.0, 0.5, 0.5];
 
 var eyePos = [0.0, 1.0, 1.0];
 
+
 var main = function (canvasId, messageId) {
   var canvas;
 
@@ -314,9 +315,16 @@ var renderPost = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
   gl.uniform1i( postProg.uNormalSamplerLoc, 1 );
   
+  gl.activeTexture( gl.TEXTURE3 );  //depth
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( postProg.uDepthSamplerLoc, 3 ); 
+  
   gl.activeTexture( gl.TEXTURE4 );
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
+  
+  gl.uniform1f( postProg.uZNearLoc, zNear );
+  gl.uniform1f( postProg.uZFarLoc, zFar );
   
   gl.uniform1i( postProg.uDisplayTypeLoc, texToDisplay ); 
   
@@ -326,6 +334,10 @@ var renderPost = function () {
   gl.uniform3fv(postProg.uLightColLoc, lightColor);
   gl.uniform3fv(postProg.uLightPosLoc, lightPos);
   gl.uniform3fv(postProg.uEyePosLoc, eyePos);
+  
+  var mvpMat = mat4.create();
+  mat4.multiply( mvpMat, persp, camera.getViewTransform() );
+  gl.uniformMatrix4fv( postProg.uMVPLoc, false, mvpMat );
   
   drawQuad(postProg);
 };
@@ -546,7 +558,12 @@ var initShaders = function () {
     postProg.aVertexTexcoordLoc = gl.getAttribLocation( postProg.ref(), "a_texcoord" );
 	postProg.uPosSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_positionTex");
 	postProg.uNormalSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_normalTex");
+	postProg.uDepthSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_depthTex");
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
+	
+	postProg.uZNearLoc = gl.getUniformLocation( postProg.ref(), "u_zNear" );
+    postProg.uZFarLoc = gl.getUniformLocation( postProg.ref(), "u_zFar" );
+	
 	postProg.uDisplayTypeLoc = gl.getUniformLocation( postProg.ref(), "u_displayType" );
 	postProg.uWidthLoc = gl.getUniformLocation( postProg.ref(), "u_width" );
 	postProg.uHeightLoc = gl.getUniformLocation( postProg.ref(), "u_height" );
@@ -554,6 +571,8 @@ var initShaders = function () {
 	postProg.uLightColLoc = gl.getUniformLocation( postProg.ref(), "u_lightCol" );
 	postProg.uLightPosLoc = gl.getUniformLocation( postProg.ref(), "u_lightPos" );
 	postProg.uEyePosLoc = gl.getUniformLocation( postProg.ref(), "u_eyePos" );
+	
+	postProg.uMVPLoc = gl.getUniformLocation( postProg.ref(), "u_mvp" );
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };
