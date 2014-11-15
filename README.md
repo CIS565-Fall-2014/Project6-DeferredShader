@@ -3,216 +3,100 @@ CIS565: Project 6 -- Deferred Shader
 -------------------------------------------------------------------------------
 Fall 2014
 -------------------------------------------------------------------------------
-Due Wed, 11/12/2014 at Noon
+Jiatong He
 -------------------------------------------------------------------------------
 
--------------------------------------------------------------------------------
-NOTE:
--------------------------------------------------------------------------------
-This project requires any graphics card with support for a modern OpenGL 
-pipeline. Any AMD, NVIDIA, or Intel card from the past few years should work 
-fine, and every machine in the SIG Lab and Moore 100 is capable of running 
-this project.
+![sample render](https://raw.githubusercontent.com/JivingTechnostic/Project6-DeferredShader/master/images/sponza_composite.jpg)
 
-This project also requires a WebGL capable browser. The project is known to 
-have issues with Chrome on windows, but Firefox seems to run it fine.
+Implemented several features into a skeleton deferred shader pipeline in webGL.
 
--------------------------------------------------------------------------------
-INTRODUCTION:
--------------------------------------------------------------------------------
+###Implemented Features
+#### Diffuse + Blinn-Phong Shading
+![diffuse + blinn-phong](https://raw.githubusercontent.com/JivingTechnostic/Project6-DeferredShader/master/images/suz_diff.jpg)
+Implemented diffuse and blinn-phong shading.
 
-In this project, you will get introduced to the basics of deferred shading. You will write GLSL and OpenGL code to perform various tasks in a deferred lighting pipeline such as creating and writing to a G-Buffer.
+#### Toon Shading + Silhouetting
+![toon + border](https://raw.githubusercontent.com/JivingTechnostic/Project6-DeferredShader/master/images/suz_toonborder.jpg)
+Implemented a toon shader by clamping the diffuse+specular term to some value.  The values I chose were ones I saw several times online, and seem to work well.
 
--------------------------------------------------------------------------------
-CONTENTS:
--------------------------------------------------------------------------------
-The Project5 root directory contains the following subdirectories:
-	
-* js/ contains the javascript files, including external libraries, necessary.
-* assets/ contains the textures that will be used in the second half of the
-  assignment.
-* resources/ contains the screenshots found in this readme file.
+![border](https://raw.githubusercontent.com/JivingTechnostic/Project6-DeferredShader/master/images/suz_border.jpg)
+Silhouetting is a little hacky in this implementation.  I do it post-processing, by reading a depth value in the shade texture that I saved as the alpha channel.  If the current fragment has a fragment close by that is closer to the camera, the current fragment color is set to black.  This way, outlines don't overlay on the object they're outlining.
 
- This Readme file edited as described above in the README section.
+#### Screen Space Ambient Occlusion
+![ao10](https://raw.githubusercontent.com/JivingTechnostic/Project6-DeferredShader/master/images/suz_ao10.jpg)
+I cheated a little with this one as well.  Instead of pseudorandomly sampling a sphere/hemisphere around the point, I take a grid sample of the adjacent points along the tangent plane, and check if the saved depth at those fragments are in front of or behind the plane.  The results come out pretty convincing, but it's definitely not faster than hemisphere sampling.
+![ao1](https://raw.githubusercontent.com/JivingTechnostic/Project6-DeferredShader/master/images/suz_ao1.jpg)
+Radius 1 (~9 samples)
+![ao5](https://raw.githubusercontent.com/JivingTechnostic/Project6-DeferredShader/master/images/suz_ao5.jpg)
+Radius 5 (~121 samples)
+![ao10](https://raw.githubusercontent.com/JivingTechnostic/Project6-DeferredShader/master/images/suz_ao10.jpg)
+Radius 10 (>400 samples)
+![ao20](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/suz_ao20.jpg)
+Radius 20 (>1600 samples)
 
--------------------------------------------------------------------------------
-OVERVIEW:
--------------------------------------------------------------------------------
-The deferred shader you will write will have the following stages:
+#### Bloom
+![bloom](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/suz_bloom.jpg)
+Simple bloom effect using a simplified version of the method described at (http://kalogirou.net/2006/05/20/how-to-do-good-bloom-for-hdr-rendering/).
+The process is as follows:
+* take a brightpass of the image
+* blur the brightpass
+* add it back into the image
+My implementation takes a weighted sampling of the neighboring fragments and processes them accordingly to get the blurred brightpass.  The effect looks pretty good:
+![no bloom](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/suz_diff.jpg)
+No Bloom
+![bloom](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/suz_diffaobloom.jpg)
++Bloom
 
-Stage 1 renders the scene geometry to the G-Buffer
-* pass.vert
-* pass.frag
+###Final Image
+![composite](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/suz_composite.jpg)
 
-Stage 2 renders the lighting passes and accumulates to the P-Buffer
-* quad.vert
-* diffuse.frag
-* diagnostic.frag
+#### Optimized g-buffer
+![orig g](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/old-g.jpg)
 
-Stage 3 renders the post processing
-* post.vert
-* post.frag
+Original g-buffer
+In order to compress the g-buffer and reduce memory reads, I took note of the following:
+* The alpha channel on the color is never used (this will change if I do further work on this, but it's fine for now for performance tests)
+* An alternative depth value can be calculated with the z value of position.
+* The normal can be reconstructed from the x and y components.
+* The alpha channel on the position texture is never used.
 
-The keyboard controls are as follows:
-WASDRF - Movement (along w the arrow keys)
-* W - Zoom in
-* S - Zoom out
-* A - Left
-* D - Right
-* R - Up
-* F - Down
-* ^ - Up
-* v - Down
-* < - Left
-* > - Right
-* 1 - World Space Position
-* 2 - Normals
-* 3 - Color
-* 4 - Depth
-* 0 - Full deferred pipeline
+With these in mind, I made the following changes to the g-buffer:
+![new g](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/new-g.jpg)
 
-There are also mouse controls for camera rotation.
+And split the normal across the color and position textures.  This cuts down the number of textures from four to two.
 
--------------------------------------------------------------------------------
-REQUIREMENTS:
--------------------------------------------------------------------------------
+#####Performance Change
+Unfortunately, the performance appears to be unimpacted by the change.  After looking at my code, I have some ideas as to why:
+* Because I do a plane-based AO, I never actually used the depth buffer.  Instead, I calculated my own depth equivalent using position.z.  As a result, removing the depth buffer didn't have much of an impact.
+* Only the local normals are ever used.  Splitting it into the other buffers saves at most 1 memory read, and it's definitely not the bottleneck at the moment.
+I ran the most of the combinations of effects with both g-buffer types, and the results were nearly equal.
+![g perf](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/runtime_gbuffer.jpg)
+With all the effects active, there is a slight improvement in performance, but it's not significant.  Note that these are also estimates so they may be slightly off.
 
-In this project, you are given code for:
-* Loading .obj file
-* Deferred shading pipeline
-* GBuffer pass
+###Flaws
+* Cannot process materials with transparency.
+* User cannot control the image output.
+* everything
 
-You are required to implement:
-* Either of the following effects
-  * Bloom
-  * "Toon" Shading (with basic silhouetting)
-* Screen Space Ambient Occlusion
-* Diffuse and Blinn-Phong shading
+###Performance
+It's easy to tell where the performance problems are.  AO, silhouetting, and bloom all involve loops that sample the appropriate textures several times each.  The number of samples is determined by a sample radius, and is equal to (1 + 2 * radius)^2.  This is because I currently sample every single fragment within a square defined by that radius, which means that increasing the radius results in a n^2 increase in runtime for that single effect.
 
-**NOTE**: Implementing separable convolution will require another link in your pipeline and will count as an extra feature if you do performance analysis with a standard one-pass 2D convolution. The overhead of rendering and reading from a texture _may_ offset the extra computations for smaller 2D kernels.
+![ao perf](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/runtime_AO.jpg)
+You can see the changes in runtime due to increase in radius (quadratic increase in number of samples taken)
 
-You must implement two of the following extras:
-* The effect you did not choose above
-* Compare performance to a normal forward renderer with
-  * No optimizations
-  * Coarse sort geometry front-to-back for early-z
-  * Z-prepass for early-z
-* Optimize g-buffer format, e.g., pack things together, quantize, reconstruct z from normal x and y (because it is normalized), etc.
-  * Must be accompanied with a performance analysis to count
-* Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
+An alternative implementation is to use a pseudorandom number generator to take a set number of random samples within some radius.  However, this method will likely require a separate convolution of the results (since the random samples may be unreliable), which means another step in the render pipeline.
 
--------------------------------------------------------------------------------
-RUNNING THE CODE:
--------------------------------------------------------------------------------
-
-Since the code attempts to access files that are local to your computer, you
-will either need to:
-
-* Run your browser under modified security settings, or
-* Create a simple local server that serves the files
-
-
-FIREFOX: change ``strict_origin_policy`` to false in about:config 
-
-CHROME:  run with the following argument : `--allow-file-access-from-files`
-
-(You can do this on OSX by running Chrome from /Applications/Google
-Chrome/Contents/MacOS with `open -a "Google Chrome" --args
---allow-file-access-from-files`)
-
-* To check if you have set the flag properly, you can open chrome://version and
-  check under the flags
-
-RUNNING A SIMPLE SERVER: 
-
-If you have Python installed, you can simply run a simple HTTP server off your
-machine from the root directory of this repository with the following command:
-
-`python -m SimpleHTTPServer`
-
--------------------------------------------------------------------------------
-RESOURCES:
--------------------------------------------------------------------------------
-
-The following are articles and resources that have been chosen to help give you
-a sense of each of the effects:
-
-* Bloom : [GPU Gems](http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html) 
-* Screen Space Ambient Occlusion : [Floored
-  Article](http://floored.com/blog/2013/ssao-screen-space-ambient-occlusion.html)
-
--------------------------------------------------------------------------------
-README
--------------------------------------------------------------------------------
-All students must replace or augment the contents of this Readme.md in a clear 
-manner with the following:
-
-* A brief description of the project and the specific features you implemented.
-* At least one screenshot of your project running.
-* A 30 second or longer video of your project running.  To create the video you
-  can use [Open Broadcaster Software](http://obsproject.com) 
-* A performance evaluation (described in detail below).
-
--------------------------------------------------------------------------------
-PERFORMANCE EVALUATION
--------------------------------------------------------------------------------
-The performance evaluation is where you will investigate how to make your 
-program more efficient using the skills you've learned in class. You must have
-performed at least one experiment on your code to investigate the positive or
-negative effects on performance. 
-
-We encourage you to get creative with your tweaks. Consider places in your code
-that could be considered bottlenecks and try to improve them. 
-
-Each student should provide no more than a one page summary of their
-optimizations along with tables and or graphs to visually explain any
-performance differences.
-
--------------------------------------------------------------------------------
-THIRD PARTY CODE POLICY
--------------------------------------------------------------------------------
-* Use of any third-party code must be approved by asking on the Google groups.  
-  If it is approved, all students are welcome to use it.  Generally, we approve 
-  use of third-party code that is not a core part of the project.  For example, 
-  for the ray tracer, we would approve using a third-party library for loading 
-  models, but would not approve copying and pasting a CUDA function for doing 
-  refraction.
-* Third-party code must be credited in README.md.
-* Using third-party code without its approval, including using another 
-  student's code, is an academic integrity violation, and will result in you 
-  receiving an F for the semester.
-
--------------------------------------------------------------------------------
-SELF-GRADING
--------------------------------------------------------------------------------
-* On the submission date, email your grade, on a scale of 0 to 100, to Harmony,
-  harmoli+cis565@seas.upenn.edu, with a one paragraph explanation.  Be concise and 
-  realistic.  Recall that we reserve 30 points as a sanity check to adjust your 
-  grade.  Your actual grade will be (0.7 * your grade) + (0.3 * our grade).  We 
-  hope to only use this in extreme cases when your grade does not realistically 
-  reflect your work - it is either too high or too low.  In most cases, we plan 
-  to give you the exact grade you suggest.
-* Projects are not weighted evenly, e.g., Project 0 doesn't count as much as 
-  the path tracer.  We will determine the weighting at the end of the semester 
-  based on the size of each project.
-
-
----
-SUBMISSION
----
-As with the previous projects, you should fork this project and work inside of
-your fork. Upon completion, commit your finished project back to your fork, and
-make a pull request to the master repository.  You should include a README.md
-file in the root directory detailing the following
-
-* A brief description of the project and specific features you implemented
-* At least one screenshot of your project running.
-* A link to a video of your project running.
-* Instructions for building and running your project if they differ from the
-  base code.
-* A performance writeup as detailed above.
-* A list of all third-party code used.
-* This Readme file edited as described above in the README section.
+###Composite Image Example: Crytek-Sponza
+#####Diffuse and Blinn-Phong
+![sponza diffuse](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/sponza_diffuse.jpg)
+#####AO
+![sponza ao](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/sponza_ao.jpg)
+#####Bloom
+![sponza bloom](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/suz_bloom.jpg)
+#####Outline
+![sponza outline](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/sponza_outline.jpg)
+#####Composite
+![sponza composite](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/sponza_composite.jpg)
 
 ---
 ACKNOWLEDGEMENTS
