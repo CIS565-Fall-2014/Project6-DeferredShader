@@ -5,11 +5,13 @@ precision highp float;
 #define DISPLAY_SSAO        8
 
 #define KernelSize          11
+#define SampleSize          100
 uniform sampler2D u_shadeTex;
 uniform sampler2D u_positionTex;
 uniform sampler2D u_normalTex;
 uniform sampler2D u_colorTex;
 uniform sampler2D u_depthTex;
+uniform vec3 u_kernel[100];
 uniform float u_zFar;
 uniform float u_zNear;
 uniform int u_displayType;
@@ -20,10 +22,7 @@ float linearizeDepth( float exp_depth, float near, float far ){
 	return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
 }
 
-//SSAO
-float rand(float co){
-    return fract(sin(dot(vec2(co,co) ,vec2(12.9898,78.233))) * 43758.5453);
-}
+
 
 float Gblur(int x,int y,int n) {
     float sigma = 1.0;
@@ -45,6 +44,36 @@ vec4 bloom() {
     }
     return vec4(color,1.0);
 }
+float rand(float co){
+    return fract(sin(dot(vec2(co,co) ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+vec4 SSAO() {
+    vec3 center=vec3(v_texcoord,texture2D(u_depthTex,v_texcoord).r);
+    float radius=0.01;
+    vec3 normal=texture2D(u_normalTex,v_texcoord).xyz;
+    float depth=texture2D(u_depthTex,v_texcoord).r;
+    float occlusion=0.0;
+    for(int i=0;i<=SampleSize;i++)
+    {
+        float x=rand(1.0+float(i)+sin(float(i)));
+        float y=rand(2.0+float(i));
+        float z=rand(3.0+float(i));
+        vec3 r=normalize(vec3(x,y,z));
+        vec3 tangent=normalize(r-normal*dot(r,normal));
+        vec3 bitangent=cross(normal,tangent);
+        vec3 position=center+radius*(tangent*r.x+bitangent*r.y+normal*r.z);
+        float depthS=texture2D(u_depthTex,position.xy).r;
+        if (depthS>depth) {
+            occlusion+=1.0/float(SampleSize);
+        }
+    }
+    if(depth>0.99)
+    {
+        occlusion=1.0;
+    }
+    return vec4(occlusion,occlusion,occlusion,1.0);
+}
 
 
 void main()
@@ -60,7 +89,10 @@ void main()
         gl_FragColor=bloom();
         
     }
-    //gl_FragColor = vec4(texture2D(u_shadeTex, v_texcoord).rgb, 1.0);
+    else if(u_displayType==DISPLAY_SSAO)
+    {
+        gl_FragColor=SSAO();
+    }
 
     
     

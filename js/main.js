@@ -32,6 +32,8 @@ var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
 
+var kernelSize=100;
+var kernel=[];
 
 
 var main = function (canvasId, messageId) {
@@ -42,6 +44,8 @@ var main = function (canvasId, messageId) {
 
   // Set up camera
   initCamera(canvas);
+
+  initKernel();
 
   // Set up FBOs
   initFramebuffer();
@@ -73,6 +77,13 @@ function initStats() {
     
     return stats;
 }
+
+var initKernel = function () {
+    for (var i = 0; i < kernelSize; i++) {
+        kernel[i] = [Math.random()*2.0-1.0 , Math.random()*2.0-1.0 , Math.random() ];
+    }
+};
+
 
 var renderLoop = function () {
   window.requestAnimationFrame(renderLoop);
@@ -330,6 +341,7 @@ var renderPost = function () {
     gl.uniform1f( postProg.uZNearLoc, zNear );
     gl.uniform1f( postProg.uZFarLoc, zFar );
     gl.uniform1i( postProg.uDisplayTypeLoc, texToDisplay );
+    gl.uniform3fv(postProg.uKernelLoc,kernel);
     
 
   drawQuad(postProg);
@@ -552,7 +564,7 @@ var initShaders = function () {
                        postProg.uDepthSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_depthTex");
                        postProg.uZNearLoc = gl.getUniformLocation( postProg.ref(), "u_zNear" );
                        postProg.uZFarLoc = gl.getUniformLocation( postProg.ref(), "u_zFar" );
-                       
+                       postProg.uKernelLoc=gl.getUniformLocation(postProg.ref(),"u_kernel");
 
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
