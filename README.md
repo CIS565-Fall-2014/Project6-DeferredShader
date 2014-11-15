@@ -37,7 +37,7 @@ Some of the results from this project:
 ![All effects in sequence](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/AllEffects.gif)
 ![Debug View](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/DebugView.gif)
 ![Blinn-Phong](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Blinn_Phong.gif)
-![More Visual Effects](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Blinn_Phong.gif)
+![More Visual Effects](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/VisualEffects.gif)
 ![Blinn-Phong VS. Unsharp](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/BlinnPhongVsUnsharp.gif)
 -------------------------------------------------------------------------------
 OVERVIEW:
