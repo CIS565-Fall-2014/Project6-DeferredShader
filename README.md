@@ -47,6 +47,9 @@ No Bloom
 ![bloom](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/suz_diffaobloom.jpg)
 +Bloom
 
+###Final Image
+![composite](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/suz_composite.jpg)
+
 #### Optimized g-buffer
 ![orig g](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/old-g.jpg)
 
