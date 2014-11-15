@@ -6,12 +6,11 @@ CIS565: Project 6 -- Deferred Shader
 
 
 ###Diffuse & Blinn-Phong lighting
-
 ![](diffuse_blinn-phong.png)
 
 ###Toon Shading with silhouetting
-
 To implement toon shader, I calculated the dot product of the light and the normal of each screen point. Then I assigned different colors according to their dot product value, which is divided into 5 bins. For silhouetting, I just check the depth of each neighbours of a pixel, and make it black if the depth is larger than a threshold.
+
 ![](Toon.png)
 
 ###Bloom
