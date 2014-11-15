@@ -94,7 +94,7 @@ PERFORMANCE EVALUATION
 
 ![blinn](https://raw.githubusercontent.com/XJMa/Project6-DeferredShader/master/screenshots/performance1.jpg)
 
-In diagnostic mode(show normal, position, etc) I just output the color read from G buffer without light accumulation or post processing. From the chart above we can see the stage 2 and 3 of deferred shading is quite computational intense. And I think the performance is not that good because I implement the deferred shader with simple one-pass pipline. So every part get computed no matter is is used or not. I think  Implementing separable convolution will definetely help improving the performance.  
+In diagnostic mode(show normal, position, etc) I just output the color read from G buffer without light accumulation or post processing. From the chart above we can see the stage 2 and 3 of deferred shading is quite computational intense. And I think the performance is not that good because I implement the deferred shader with simple one-pass pipline and my browser does not support drawbuffer. So every part get computed no matter is is used or not. I think  Implementing separable convolution will definetely help improving the performance.  
 
 ![blinn](https://raw.githubusercontent.com/XJMa/Project6-DeferredShader/master/screenshots/performance2.jpg)
 
