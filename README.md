@@ -6,7 +6,7 @@ Fall 2014
 
 [Youtube](https://www.youtube.com/watch?v=ggUH_oqFYuo&feature=youtu.be)
 
-[Live Demo]()
+[Live Demo](http://xjma.github.io/Project6-DeferredShader/)
 
 -------------------------------------------------------------------------------
 INTRODUCTION:
