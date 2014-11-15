@@ -3,10 +3,18 @@ precision highp float;
 #define DISPLAY_TOON 6
 #define DISPLAY_BLOOM 7
 #define DISPLAY_SSAO 8
+
 uniform sampler2D u_shadeTex;
+uniform sampler2D u_positionTex;
+uniform sampler2D u_normalTex;
+uniform sampler2D u_colorTex;
+uniform sampler2D u_depthTex;
+uniform float u_zFar;
+uniform float u_zNear;
+uniform int u_displayType;
 
 varying vec2 v_texcoord;
-uniform int u_displayType;
+
 float linearizeDepth( float exp_depth, float near, float far ){
 	return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
 }
