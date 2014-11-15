@@ -7,6 +7,7 @@ Diffuse & Blinn-Phong lighting
 
 Toon Shading
 
+To implement toon shader, I calculated the dot product of the light and the normal of each screen point. Then I assigned different colors according to their dot product value, which is divided into 5 bins. 
 ![](Toon.png)
 
 Bloom
