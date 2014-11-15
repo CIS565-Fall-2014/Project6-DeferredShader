@@ -23,6 +23,8 @@ INTRODUCTION:
 
 In this project, I implemented the basic deferred shader. I write GLSL and OpenGL code to perform various tasks in a deferred lighting pipeline such as creating and writing to a G-Buffer.
 
+The live demo can be found here:
+[Live demo](https://cdn.rawgit.com/chiwsy/Project6-DeferredShader/master/index.html)
 
 -------------------------------------------------------------------------------
 OVERVIEW:
@@ -58,6 +60,11 @@ WASDRF - Movement (along w the arrow keys)
 * 2 - Normals
 * 3 - Color
 * 4 - Depth
+* 5 - Blinn-Phong
+* 6 - Bloom
+* 7 - Toon
+* 8 - SSAO
+* 9 - Unsharp
 * 0 - Full deferred pipeline
 
 There are also mouse controls for camera rotation.
