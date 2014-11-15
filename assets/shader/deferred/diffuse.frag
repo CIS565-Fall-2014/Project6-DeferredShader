@@ -12,19 +12,13 @@ uniform vec3 u_lPos;
 
 varying vec2 v_texcoord;
 
-#define OUTLINE_RADIUS 3.0
-#define AO_RADIUS 4.0
+#define AO_RADIUS 5.0
 
 #define WIDTH 960.0
 #define HEIGHT 540.0
 
 float linearizeDepth( float exp_depth, float near, float far ){
 	return ( 2.0 * near ) / ( far + near - exp_depth * ( far - near ) );
-}
-
-// Found this rand function online.
-float rand(vec2 co){
-  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
 void main()
@@ -34,6 +28,11 @@ void main()
   vec3 pos = texture2D(u_positionTex, v_texcoord).rgb;
   vec3 norm = texture2D(u_normalTex, v_texcoord).rgb;
   vec3 col = texture2D(u_colorTex, v_texcoord).rgb;
+  float depth = linearizeDepth(texture2D(u_depthTex, v_texcoord).r, u_zNear, u_zFar);  
+  float zdepth = -1.0;
+  if (pos.z < 0.0) {
+    zdepth = pos.z / u_zFar;
+  }
   
   vec3 lDir = normalize(u_lPos - pos);
   vec3 vdir = vec3(0, 0, 1.0);
@@ -81,20 +80,11 @@ void main()
   AO = 1.0 - AO / pow(2.0 * AO_RADIUS + 1.0, 2.0);
   
   
-  //-------------------------
-  // Outlines
-  float outline = 1.0;
-  for (float i = -OUTLINE_RADIUS; i <= OUTLINE_RADIUS + 0.1; i++) {
-    for (float j = -OUTLINE_RADIUS; j <= OUTLINE_RADIUS + 0.1; j++) {
-      if ( pos.z - texture2D(u_positionTex, v_texcoord + i * dx + j * dy).z >= 0.2){//2.0 * (texture2D(u_normalTex, v_texcoord + i * dx + j * dy).z - norm.z) * length(texture2D(u_positionTex, v_texcoord + i * dx + j * dy).rgb - pos)) {
-          outline = 0.0;
-      }
-    }
-  }
-  
-  //gl_FragColor = vec4(texture2D(u_colorTex, v_texcoord).rgb, 1.0);
-  gl_FragColor = vec4(col * (diffuse + spec) * AO * outline, 1.0);
-  //gl_FragColor = vec4(col * (toonDiffuse), 1.0);
-  gl_FragColor = vec4(vec3(outline), 1.0);
-    //gl_FragColor = vec4(vec3(abs(dot(norm, normalize(pos - vdir)))), 1);
+  // NOTE: Writing depth into the shade buffer as the alpha value because the alpha is always 1.
+  // Uses a different depth value since the one saved in the depth texture is weird for large scenes.
+  //  (possibly due to the linearizeDepth() function).
+  //gl_FragColor = vec4(texture2D(u_colorTex, v_texcoord).rgb, -zdepth);
+  gl_FragColor = vec4(col * (diffuse + spec) * AO, -zdepth);
+  //gl_FragColor = vec4(col * (toonDiffuse), -zdepth);
+    //gl_FragColor = vec4(vec3(abs(dot(norm, normalize(pos - vdir)))), -zdepth);
 }
