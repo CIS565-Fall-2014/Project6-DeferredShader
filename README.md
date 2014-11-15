@@ -2,6 +2,8 @@
 CIS565: Project 6 -- Deferred Shader
 -------------------------------------------------------------------------------
 
+![Video demo](https://www.youtube.com/watch?v=rO3hkOwMkNg&feature=youtu.be)
+
 
 ###Diffuse & Blinn-Phong lighting
 
