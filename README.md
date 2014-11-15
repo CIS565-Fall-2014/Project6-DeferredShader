@@ -27,18 +27,18 @@ The live demo can be found here:
 [Live demo](https://cdn.rawgit.com/chiwsy/Project6-DeferredShader/master/index.html)
 
 Some of the result from this project:
-[Blinn-Phong](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/BlinnPhong.png)
-[Unsharp](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Unsharp.png)
-[Comparing Bling-Phong with Unsharp](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Compare.png)
-[Bloom](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Bloom.png)
-[Toon](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Toon.png)
-[SSAO](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/SSAO.png)
+![Blinn-Phong](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/BlinnPhong.png)
+![Unsharp](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Unsharp.png)
+![Comparing Bling-Phong with Unsharp](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Compare.png)
+![Bloom](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Bloom.png)
+![Toon](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Toon.png)
+![SSAO](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/SSAO.png)
 
-[All effects in sequence](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/AllEffects.gif)
-[Debug View](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/DebugView.gif)
-[Blinn-Phong](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Blinn_Phong.gif)
-[More Visual Effects](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Blinn_Phong.gif)
-[Blinn-Phong VS. Unsharp](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/BlinnPhongVsUnsharp.gif)
+![All effects in sequence](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/AllEffects.gif)
+![Debug View](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/DebugView.gif)
+![Blinn-Phong](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Blinn_Phong.gif)
+![More Visual Effects](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/Blinn_Phong.gif)
+![Blinn-Phong VS. Unsharp](https://github.com/chiwsy/Project6-DeferredShader/blob/master/Image/BlinnPhongVsUnsharp.gif)
 -------------------------------------------------------------------------------
 OVERVIEW:
 -------------------------------------------------------------------------------
