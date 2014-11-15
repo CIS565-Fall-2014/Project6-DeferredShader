@@ -7,10 +7,10 @@ varying vec2 v_texcoord;
 #define WIDTH 960.0
 #define HEIGHT 540.0
 
-#define OUTLINE_RADIUS 3.0
+#define OUTLINE_RADIUS 5.0
 #define BLOOM_THRESHOLD 0.9
 // Despite being called radius, these values actually sample in squares.
-#define BLOOM_RADIUS 2.0
+#define BLOOM_RADIUS 5.0
 #define DOF_DISTANCE 10.0;
 #define DOF_RADIUS 5.0;
 
@@ -29,11 +29,6 @@ void main()
   
   vec2 dx = vec2(1.0/WIDTH, 0);
   vec2 dy = vec2(0, 1.0/HEIGHT);
-  //-------------------------
-  // Bloom
-  // Note that bloom also appears to require a rng for blur
-  vec3 bloomCol;
-  float totalT = 0.0;
   
   //-------------------------
   // Outlines
@@ -46,6 +41,11 @@ void main()
     }
   }
   
+  //-------------------------
+  // Bloom
+  // Note that bloom also appears to require a rng for blur
+  vec3 bloomCol;
+  float totalT = 0.0;
   for (float i = -BLOOM_RADIUS; i <= BLOOM_RADIUS + 0.1; i++) {
     for (float j = -BLOOM_RADIUS; j <= BLOOM_RADIUS + 0.1; j++) {
       //Bloom with pow(2) falloff.
