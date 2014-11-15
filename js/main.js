@@ -429,8 +429,8 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", "assets/models/crytek-sponza/sponza.mtl");
-	//objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  //objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", "assets/models/crytek-sponza/sponza.mtl");
+	objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
 	//objloader.loadFromFile(gl, "assets/models/teapot.obj", null);
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {

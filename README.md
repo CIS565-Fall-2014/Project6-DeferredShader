@@ -77,17 +77,10 @@ I have implemented:
 * Screen Space Ambient Occlusion
 * Diffuse and Blinn-Phong shading
 
-**NOTE**: Implementing separable convolution will require another link in your pipeline and will count as an extra feature if you do performance analysis with a standard one-pass 2D convolution. The overhead of rendering and reading from a texture _may_ offset the extra computations for smaller 2D kernels.
+And one additional post effect:
+* Unsharp Mask
 
-You must implement two of the following extras:
-* The effect you did not choose above
-* Compare performance to a normal forward renderer with
-  * No optimizations
-  * Coarse sort geometry front-to-back for early-z
-  * Z-prepass for early-z
-* Optimize g-buffer format, e.g., pack things together, quantize, reconstruct z from normal x and y (because it is normalized), etc.
-  * Must be accompanied with a performance analysis to count
-* Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
+
 
 -------------------------------------------------------------------------------
 RUNNING THE CODE:
