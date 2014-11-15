@@ -19,6 +19,17 @@ I used the color from Diffuse and Blinn-Phong and made a gaussian convolution to
 Screen Space Ambient Occlusion
 For SSAO, I sampled 100 points around each screen points and check if their depth is larger than the screen point's depth. The ratio of points has larger depth is used as the color.
 ![](SSAO.png)
+
+
+###Performance
+| planets #|     Block Size=128    |  Block Size=256  | Block Size=512|
+|:---------:|:-----------------:|:-----------------:|:-----------:|
+|    1000     |         60       |       60       |  60|
+|    2000     |         40        |       40       | 40|
+|   5000     |         20        |       20        | 20|
+
+
+
 -------------------------------------------------------------------------------
 OVERVIEW:
 -------------------------------------------------------------------------------
