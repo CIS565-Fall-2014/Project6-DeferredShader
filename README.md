@@ -48,6 +48,7 @@ WASDRF - Movement (along w the arrow keys)
 * 4 - Depth
 * 5 - Diffuse&Blinn-Phong
 * 6 - Toon shading
+* 7 - Bloom shading
 * 0 - Full deferred pipeline
 
 There are also mouse controls for camera rotation.
