@@ -7,17 +7,17 @@ CIS565: Project 6 -- Deferred Shader
 
 ![](diffuse_blinn-phong.png)
 
-Toon Shading
+###Toon Shading with silhouetting
 
-To implement toon shader, I calculated the dot product of the light and the normal of each screen point. Then I assigned different colors according to their dot product value, which is divided into 5 bins. 
+To implement toon shader, I calculated the dot product of the light and the normal of each screen point. Then I assigned different colors according to their dot product value, which is divided into 5 bins. For silhouetting, I just check the depth of each neighbours of a pixel, and make it black if the depth is larger than a threshold.
 ![](Toon.png)
 
-Bloom
-
+###Bloom
+I used the color from Diffuse and Blinn-Phong and made a gaussian convolution to add glow.
 ![](Bloom.png)
 
 Screen Space Ambient Occlusion
-
+For SSAO, I sampled 100 points around each screen points and check if their depth is larger than the screen point's depth. The ratio of points has larger depth is used as the color.
 ![](SSAO.png)
 -------------------------------------------------------------------------------
 OVERVIEW:
