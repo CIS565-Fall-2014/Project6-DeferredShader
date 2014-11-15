@@ -3,86 +3,17 @@ CIS565: Project 6 -- Deferred Shader
 -------------------------------------------------------------------------------
 Fall 2014
 -------------------------------------------------------------------------------
-Due Wed, 11/12/2014 at Noon
+Jiatong He
 -------------------------------------------------------------------------------
 
--------------------------------------------------------------------------------
-NOTE:
--------------------------------------------------------------------------------
-This project requires any graphics card with support for a modern OpenGL 
-pipeline. Any AMD, NVIDIA, or Intel card from the past few years should work 
-fine, and every machine in the SIG Lab and Moore 100 is capable of running 
-this project.
+Implemented Features
+### Bloom
+### Toon Shading + Silhouetting
+### Diffuse + Blinn-Phong Shading
+### Screen Space Ambient Occlusion
+### Optimized g-buffer
 
-This project also requires a WebGL capable browser. The project is known to 
-have issues with Chrome on windows, but Firefox seems to run it fine.
 
--------------------------------------------------------------------------------
-INTRODUCTION:
--------------------------------------------------------------------------------
-
-In this project, you will get introduced to the basics of deferred shading. You will write GLSL and OpenGL code to perform various tasks in a deferred lighting pipeline such as creating and writing to a G-Buffer.
-
--------------------------------------------------------------------------------
-CONTENTS:
--------------------------------------------------------------------------------
-The Project5 root directory contains the following subdirectories:
-	
-* js/ contains the javascript files, including external libraries, necessary.
-* assets/ contains the textures that will be used in the second half of the
-  assignment.
-* resources/ contains the screenshots found in this readme file.
-
- This Readme file edited as described above in the README section.
-
--------------------------------------------------------------------------------
-OVERVIEW:
--------------------------------------------------------------------------------
-The deferred shader you will write will have the following stages:
-
-Stage 1 renders the scene geometry to the G-Buffer
-* pass.vert
-* pass.frag
-
-Stage 2 renders the lighting passes and accumulates to the P-Buffer
-* quad.vert
-* diffuse.frag
-* diagnostic.frag
-
-Stage 3 renders the post processing
-* post.vert
-* post.frag
-
-The keyboard controls are as follows:
-WASDRF - Movement (along w the arrow keys)
-* W - Zoom in
-* S - Zoom out
-* A - Left
-* D - Right
-* R - Up
-* F - Down
-* ^ - Up
-* v - Down
-* < - Left
-* > - Right
-* 1 - World Space Position
-* 2 - Normals
-* 3 - Color
-* 4 - Depth
-* 0 - Full deferred pipeline
-
-There are also mouse controls for camera rotation.
-
--------------------------------------------------------------------------------
-REQUIREMENTS:
--------------------------------------------------------------------------------
-
-In this project, you are given code for:
-* Loading .obj file
-* Deferred shading pipeline
-* GBuffer pass
-
-You are required to implement:
 * Either of the following effects
   * Bloom
   * "Toon" Shading (with basic silhouetting)
