@@ -31,6 +31,7 @@ var isDiagnostic = true;
 var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
+var stats = new Stats();
 
 var main = function (canvasId, messageId) {
   var canvas;
@@ -50,6 +51,9 @@ var main = function (canvasId, messageId) {
   // Set up shaders
   initShaders();
 
+  stats.setMode(0);
+  document.body.appendChild(stats.domElement);
+  
   // Register our render callbacks
   CIS565WEBGLCORE.render = render;
   CIS565WEBGLCORE.renderLoop = renderLoop;
@@ -59,8 +63,10 @@ var main = function (canvasId, messageId) {
 };
 
 var renderLoop = function () {
+stats.begin();
   window.requestAnimationFrame(renderLoop);
   render();
+  stats.end();
 };
 
 var render = function () {
@@ -282,22 +288,6 @@ var renderPost = function () {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Bind necessary textures
-  gl.activeTexture( gl.TEXTURE0 );  //position
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
-  gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
-
-  gl.activeTexture( gl.TEXTURE1 );  //normal
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
-
-  gl.activeTexture( gl.TEXTURE2 );  //color
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
-  gl.uniform1i( shadeProg.uColorSamplerLoc, 2 );
-
-  gl.activeTexture( gl.TEXTURE3 );  //depth
-  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
-  
   gl.activeTexture( gl.TEXTURE4 );
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
@@ -365,7 +355,7 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  objloader.loadFromFile(gl, "assets/models/sponza.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
@@ -495,7 +485,6 @@ var initShaders = function () {
   postProg.addCallback( function() { 
     postProg.aVertexPosLoc = gl.getAttribLocation( postProg.ref(), "a_pos" );
     postProg.aVertexTexcoordLoc = gl.getAttribLocation( postProg.ref(), "a_texcoord" );
-
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
