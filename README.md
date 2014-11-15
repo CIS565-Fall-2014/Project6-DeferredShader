@@ -76,34 +76,6 @@ You must implement two of the following extras:
   * Must be accompanied with a performance analysis to count
 * Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
 
--------------------------------------------------------------------------------
-RUNNING THE CODE:
--------------------------------------------------------------------------------
-
-Since the code attempts to access files that are local to your computer, you
-will either need to:
-
-* Run your browser under modified security settings, or
-* Create a simple local server that serves the files
-
-
-FIREFOX: change ``strict_origin_policy`` to false in about:config 
-
-CHROME:  run with the following argument : `--allow-file-access-from-files`
-
-(You can do this on OSX by running Chrome from /Applications/Google
-Chrome/Contents/MacOS with `open -a "Google Chrome" --args
---allow-file-access-from-files`)
-
-* To check if you have set the flag properly, you can open chrome://version and
-  check under the flags
-
-RUNNING A SIMPLE SERVER: 
-
-If you have Python installed, you can simply run a simple HTTP server off your
-machine from the root directory of this repository with the following command:
-
-`python -m SimpleHTTPServer`
 
 -------------------------------------------------------------------------------
 RESOURCES:
