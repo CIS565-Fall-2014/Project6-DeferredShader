@@ -37,6 +37,11 @@ var sampler = [];
 var kernelSize = 80;
 var radius=0.05;
 
+var FPS=0;
+var ticks=0;
+var lastFPS=0;
+
+	
 var main = function (canvasId, messageId) {
   var canvas;
 
@@ -68,6 +73,14 @@ var main = function (canvasId, messageId) {
 var renderLoop = function () {
   window.requestAnimationFrame(renderLoop);
   render();
+  var now=Date.now();
+	if(now-lastFPS>=1000){
+		lastFPS=now;
+		FPS=ticks;
+		ticks=0;
+		document.getElementById("FPS").innerHTML='FPS='+FPS;
+	}
+	ticks++;
 };
 
 var render = function () {
