@@ -28,7 +28,6 @@ varying vec2 v_texcoord;
 uniform float u_rad;
 uniform vec3 u_sampler[80];
 
-
 float gaussian(int x,int y,int n) {
     float sigma = 2.0;
     float fx = float(x) - (float(n) - 1.0) / 2.0;
@@ -69,8 +68,8 @@ float rand(float co){
     return fract(sin(dot(vec2(co,co) ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
-//http://john-chapman-graphics.blogspot.co.uk/2013/01/ssao-tutorial.html
-vec4 Ssao() {
+vec4 Ssao(){
+	//vec3 clr = texture2D( u_colorTex, v_texcoord ).xyz;
 	vec3 nml = texture2D( u_normalTex, v_texcoord ).xyz;
 	vec3 pos = texture2D(u_positionTex, v_texcoord).xyz;
 	float dp = texture2D(u_depthTex, v_texcoord).r;
@@ -107,16 +106,21 @@ vec4 Ssao() {
 
 void main()
 {
-   vec3 color = texture2D( u_shadeTex, v_texcoord).rgb;
-
-   if (u_displayType == BLOOM)
-      gl_FragColor = Bloom();
-   else if(u_displayType == SSAO)
-      gl_FragColor = Ssao();
-   else if(u_displayType == ALL)
-	  gl_FragColor =clamp(Bloom()/3.0+Ssao()/3.0+Toon()/3.0,0.0,1.0);
-   else
-      gl_FragColor = vec4(texture2D( u_shadeTex, v_texcoord).rgb, 1.0); 
+  // Currently acts as a pass filter that immmediately renders the shaded texture
+  // Fill in post-processing as necessary HERE
+  // NOTE : You may choose to use a key-controlled switch system to display one feature at a time
+	if(u_displayType==DIFFUSE)
+		gl_FragColor = vec4(texture2D( u_shadeTex, v_texcoord).rgb, 1.0); 
+	else if(u_displayType==BLOOM){
+		gl_FragColor=Bloom();
+	}
+	else if(u_displayType==TOON){
+		gl_FragColor=Toon();
+	}
+	else if(u_displayType==SSAO){
+		gl_FragColor=Ssao();
+	}
+	else if(u_displayType==ALL){
+		gl_FragColor=clamp(Bloom()+Toon()+Ssao(),0.0,1.0);
+	}
 }
-
-
