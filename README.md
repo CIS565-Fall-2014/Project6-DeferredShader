@@ -83,6 +83,18 @@ You can see the changes in runtime due to increase in radius (quadratic increase
 
 An alternative implementation is to use a pseudorandom number generator to take a set number of random samples within some radius.  However, this method will likely require a separate convolution of the results (since the random samples may be unreliable), which means another step in the render pipeline.
 
+###Composite Image Example: Crytek-Sponza
+#####Diffuse and Blinn-Phong
+![sponza diffuse](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/sponza_diffuse.jpg)
+#####AO
+![sponza ao](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/sponza_ao.jpg)
+#####Bloom
+![sponza bloom](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/suz_bloom.jpg)
+#####Outline
+![sponza outline](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/sponza_outline.jpg)
+#####Composite
+![sponza composite](https://github.com/JivingTechnostic/Project6-DeferredShader/blob/master/images/sponza_composite.jpg)
+
 ---
 ACKNOWLEDGEMENTS
 ---
