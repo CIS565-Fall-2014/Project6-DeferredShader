@@ -132,6 +132,9 @@ CIS565WEBGLCORE.createCamera = function(t){
         mat4.invert( m, matrix );
         return m;
     };
+    getPos=function(){
+        return position;
+    };
 
     moveForward = function(){ 
         vec3.scaleAndAdd( position, position, normal, -1.1 );
@@ -180,6 +183,6 @@ CIS565WEBGLCORE.createCamera = function(t){
     newObj.moveRight = moveRight; 
     newObj.moveUp = moveUp;
     newObj.moveDown = moveDown;
-
+    newObj.getPos=getPos;
     return newObj;
 };
