@@ -1,40 +1,17 @@
 ------------------------------------------------------------------------------
 CIS565: Project 6 -- Deferred Shader
 -------------------------------------------------------------------------------
-Fall 2014
--------------------------------------------------------------------------------
-Due Wed, 11/12/2014 at Noon
--------------------------------------------------------------------------------
+Diffuse & Blinn-Phong lighting
 
--------------------------------------------------------------------------------
-NOTE:
--------------------------------------------------------------------------------
-This project requires any graphics card with support for a modern OpenGL 
-pipeline. Any AMD, NVIDIA, or Intel card from the past few years should work 
-fine, and every machine in the SIG Lab and Moore 100 is capable of running 
-this project.
+![](diffuse_blinn-phong.png)
 
-This project also requires a WebGL capable browser. The project is known to 
-have issues with Chrome on windows, but Firefox seems to run it fine.
+Toon Shading
 
--------------------------------------------------------------------------------
-INTRODUCTION:
--------------------------------------------------------------------------------
+![](Toon.png)
 
-In this project, you will get introduced to the basics of deferred shading. You will write GLSL and OpenGL code to perform various tasks in a deferred lighting pipeline such as creating and writing to a G-Buffer.
+Bloom
 
--------------------------------------------------------------------------------
-CONTENTS:
--------------------------------------------------------------------------------
-The Project5 root directory contains the following subdirectories:
-	
-* js/ contains the javascript files, including external libraries, necessary.
-* assets/ contains the textures that will be used in the second half of the
-  assignment.
-* resources/ contains the screenshots found in this readme file.
-
- This Readme file edited as described above in the README section.
-
+![](Bloom.png)
 -------------------------------------------------------------------------------
 OVERVIEW:
 -------------------------------------------------------------------------------
@@ -69,6 +46,8 @@ WASDRF - Movement (along w the arrow keys)
 * 2 - Normals
 * 3 - Color
 * 4 - Depth
+* 5 - Diffuse&Blinn-Phong
+* 6 - Toon shading
 * 0 - Full deferred pipeline
 
 There are also mouse controls for camera rotation.
@@ -101,34 +80,6 @@ You must implement two of the following extras:
   * Must be accompanied with a performance analysis to count
 * Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
 
--------------------------------------------------------------------------------
-RUNNING THE CODE:
--------------------------------------------------------------------------------
-
-Since the code attempts to access files that are local to your computer, you
-will either need to:
-
-* Run your browser under modified security settings, or
-* Create a simple local server that serves the files
-
-
-FIREFOX: change ``strict_origin_policy`` to false in about:config 
-
-CHROME:  run with the following argument : `--allow-file-access-from-files`
-
-(You can do this on OSX by running Chrome from /Applications/Google
-Chrome/Contents/MacOS with `open -a "Google Chrome" --args
---allow-file-access-from-files`)
-
-* To check if you have set the flag properly, you can open chrome://version and
-  check under the flags
-
-RUNNING A SIMPLE SERVER: 
-
-If you have Python installed, you can simply run a simple HTTP server off your
-machine from the root directory of this repository with the following command:
-
-`python -m SimpleHTTPServer`
 
 -------------------------------------------------------------------------------
 RESOURCES:
