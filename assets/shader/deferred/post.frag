@@ -10,7 +10,7 @@ varying vec2 v_texcoord;
 #define OUTLINE_RADIUS 3.0
 #define BLOOM_THRESHOLD 0.9
 // Despite being called radius, these values actually sample in squares.
-#define BLOOM_RADIUS 10.0
+#define BLOOM_RADIUS 2.0
 #define DOF_DISTANCE 10.0;
 #define DOF_RADIUS 5.0;
 

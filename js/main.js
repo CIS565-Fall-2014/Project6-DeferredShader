@@ -24,10 +24,9 @@ var postProg;     // Shader for post-process effects
 
 // Multi-Pass programs
 var posProg;
-var normProg;
 var colorProg;
 
-var isDiagnostic = true;
+var isDiagnostic = false;
 var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
@@ -51,7 +50,7 @@ var main = function (canvasId, messageId) {
   // Set up shaders
   initShaders();
 
-  stats.setMode(0);
+  stats.setMode(1);
   document.body.appendChild(stats.domElement);
   
   // Register our render callbacks
@@ -63,10 +62,10 @@ var main = function (canvasId, messageId) {
 };
 
 var renderLoop = function () {
+  stats.end();
 stats.begin();
   window.requestAnimationFrame(renderLoop);
   render();
-  stats.end();
 };
 
 var render = function () {
@@ -95,18 +94,16 @@ var drawModel = function (program, mask) {
       gl.enableVertexAttribArray(program.aVertexPosLoc);
     }
 
-    if (mask & 0x2) {
-      gl.bindBuffer(gl.ARRAY_BUFFER, model.nbo(i));
-      gl.vertexAttribPointer(program.aVertexNormalLoc, 3, gl.FLOAT, false, 0, 0);
-      gl.enableVertexAttribArray(program.aVertexNormalLoc);
-    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, model.nbo(i));
+    gl.vertexAttribPointer(program.aVertexNormalLoc, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(program.aVertexNormalLoc);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.ibo(i));
     gl.drawElements(gl.TRIANGLES, model.iboLength(i), gl.UNSIGNED_SHORT, 0);
   }
 
   if (mask & 0x1) gl.disableVertexAttribArray(program.aVertexPosLoc);
-  if (mask & 0x2) gl.disableVertexAttribArray(program.aVertexNormalLoc);
+  gl.disableVertexAttribArray(program.aVertexNormalLoc);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
@@ -167,6 +164,13 @@ var renderMulti = function () {
 
   gl.useProgram(posProg.ref());
  
+  //update the normal matrix
+  var nmlMat = mat4.create();
+  mat4.invert( nmlMat, camera.getViewTransform() );
+  mat4.transpose( nmlMat, nmlMat);
+  
+  gl.uniformMatrix4fv(posProg.uNormalMatLoc, false, nmlMat);
+  
   //update the model-view matrix
   var mvpMat = mat4.create();
   mat4.multiply( mvpMat, persp, camera.getViewTransform() );
@@ -177,24 +181,6 @@ var renderMulti = function () {
   drawModel(posProg, 1);
 
 //  gl.disable(gl.DEPTH_TEST);
-  fbo.unbind(gl);
-  gl.useProgram(null);
-
-  fbo.bind(gl, FBO_GBUFFER_NORMAL);
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.enable(gl.DEPTH_TEST);
-
-  gl.useProgram(normProg.ref());
-
-  //update the normal matrix
-  var nmlMat = mat4.create();
-  mat4.invert( nmlMat, camera.getViewTransform() );
-  mat4.transpose( nmlMat, nmlMat);
-  
-  gl.uniformMatrix4fv(normProg.uMVPLoc, false, mvpMat);
-  gl.uniformMatrix4fv(normProg.uNormalMatLoc, false, nmlMat);
-
-  drawModel(normProg, 3);
 
   gl.useProgram(null);
   fbo.unbind(gl);
@@ -206,6 +192,7 @@ var renderMulti = function () {
   gl.useProgram(colorProg.ref());
 
   gl.uniformMatrix4fv(colorProg.uMVPLoc, false, mvpMat);
+  gl.uniformMatrix4fv(colorProg.uNormalMatLoc, false, nmlMat);
 
   drawModel(colorProg, 1);
 
@@ -227,17 +214,9 @@ var renderShade = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
   gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
 
-  gl.activeTexture( gl.TEXTURE1 );  //normal
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
-
   gl.activeTexture( gl.TEXTURE2 );  //color
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( shadeProg.uColorSamplerLoc, 2 );
-
-  gl.activeTexture( gl.TEXTURE3 );  //depth
-  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
 
   // Bind necessary uniforms 
   gl.uniform1f( shadeProg.uZNearLoc, zNear );
@@ -261,18 +240,10 @@ var renderDiagnostic = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
   gl.uniform1i( diagProg.uPosSamplerLoc, 0 );
 
-  gl.activeTexture( gl.TEXTURE1 );  //normal
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  gl.uniform1i( diagProg.uNormalSamplerLoc, 1 );
-
   gl.activeTexture( gl.TEXTURE2 );  //color
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( diagProg.uColorSamplerLoc, 2 );
-
-  gl.activeTexture( gl.TEXTURE3 );  //depth
-  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  gl.uniform1i( diagProg.uDepthSamplerLoc, 3 ); 
-
+  
   // Bind necessary uniforms 
   gl.uniform1f( diagProg.uZNearLoc, zNear );
   gl.uniform1f( diagProg.uZFarLoc, zFar );
@@ -412,31 +383,23 @@ var initShaders = function () {
     posProg.loadShader(gl, "assets/shader/deferred/posPass.vert", "assets/shader/deferred/posPass.frag");
     posProg.addCallback(function() {
       posProg.aVertexPosLoc = gl.getAttribLocation(posProg.ref(), "a_pos");
+      posProg.aVertexNormalLoc = gl.getAttribLocation(posProg.ref(), "a_normal");
 
       posProg.uModelViewLoc = gl.getUniformLocation(posProg.ref(), "u_modelview");
       posProg.uMVPLoc = gl.getUniformLocation(posProg.ref(), "u_mvp");
+      posProg.uNormalMatLoc = gl.getUniformLocation(posProg.ref(), "u_normalMat");
     });
 
     CIS565WEBGLCORE.registerAsyncObj(gl, posProg);
-
-    normProg = CIS565WEBGLCORE.createShaderProgram();
-    normProg.loadShader(gl, "assets/shader/deferred/normPass.vert", "assets/shader/deferred/normPass.frag");
-    normProg.addCallback(function() {
-      normProg.aVertexPosLoc = gl.getAttribLocation(normProg.ref(), "a_pos");
-      normProg.aVertexNormalLoc = gl.getAttribLocation(normProg.ref(), "a_normal");
-
-      normProg.uMVPLoc = gl.getUniformLocation(normProg.ref(), "u_mvp");
-      normProg.uNormalMatLoc = gl.getUniformLocation(normProg.ref(), "u_normalMat");
-    });
-
-    CIS565WEBGLCORE.registerAsyncObj(gl, normProg);
 
     colorProg = CIS565WEBGLCORE.createShaderProgram();
     colorProg.loadShader(gl, "assets/shader/deferred/colorPass.vert", "assets/shader/deferred/colorPass.frag");
     colorProg.addCallback(function(){
       colorProg.aVertexPosLoc = gl.getAttribLocation(colorProg.ref(), "a_pos");
+      colorProg.aVertexNormalLoc = gl.getAttribLocation(colorProg.ref(), "a_normal");
 
       colorProg.uMVPLoc = gl.getUniformLocation(colorProg.ref(), "u_mvp");
+      colorProg.uNormalMatLoc = gl.getUniformLocation(colorProg.ref(), "u_normalMat");
     });
 
     CIS565WEBGLCORE.registerAsyncObj(gl, colorProg);
@@ -450,9 +413,7 @@ var initShaders = function () {
     diagProg.aVertexTexcoordLoc = gl.getAttribLocation( diagProg.ref(), "a_texcoord" );
 
     diagProg.uPosSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_positionTex");
-    diagProg.uNormalSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_normalTex");
     diagProg.uColorSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_colorTex");
-    diagProg.uDepthSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_depthTex");
 
     diagProg.uZNearLoc = gl.getUniformLocation( diagProg.ref(), "u_zNear" );
     diagProg.uZFarLoc = gl.getUniformLocation( diagProg.ref(), "u_zFar" );
@@ -468,9 +429,7 @@ var initShaders = function () {
     shadeProg.aVertexTexcoordLoc = gl.getAttribLocation( shadeProg.ref(), "a_texcoord" );
 
     shadeProg.uPosSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_positionTex");
-    shadeProg.uNormalSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_normalTex");
     shadeProg.uColorSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_colorTex");
-    shadeProg.uDepthSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_depthTex");
 
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );

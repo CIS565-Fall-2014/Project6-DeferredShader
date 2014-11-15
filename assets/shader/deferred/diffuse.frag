@@ -1,9 +1,7 @@
 precision highp float;
 
 uniform sampler2D u_positionTex;
-uniform sampler2D u_normalTex;
 uniform sampler2D u_colorTex;
-uniform sampler2D u_depthTex;
 
 uniform float u_zFar;
 uniform float u_zNear;
@@ -25,10 +23,13 @@ void main()
 {
   // Write a diffuse shader and a Blinn-Phong shader
   // NOTE : You may need to add your own normals to fulfill the second's requirements
-  vec3 pos = texture2D(u_positionTex, v_texcoord).rgb;
-  vec3 norm = texture2D(u_normalTex, v_texcoord).rgb;
-  vec3 col = texture2D(u_colorTex, v_texcoord).rgb;
-  float depth = linearizeDepth(texture2D(u_depthTex, v_texcoord).r, u_zNear, u_zFar);  
+  vec4 position4 = texture2D( u_positionTex, v_texcoord );
+  vec4 color4 = texture2D( u_colorTex, v_texcoord );
+  // Reconstruct the normal.
+  // Note that the normal should always be pointing towards the camera.
+	vec3 norm = vec3(position4.w, color4.w,  sqrt(1.0 - position4.w * position4.w - color4.w * color4.w));
+  vec3 pos = position4.xyz;
+	vec3 col = color4.rgb;
   float zdepth = -1.0;
   if (pos.z < 0.0) {
     zdepth = pos.z / u_zFar;
@@ -72,7 +73,7 @@ void main()
       texcoordSample = v_texcoord + i * dx + j * dy;
       vec3 p2 = texture2D(u_positionTex, texcoordSample).xyz;
       if ( p2.z < 0.0 &&
-        p2.z > -(norm.x * p2.x + norm.y * p2.y + D) / norm.z + 0.01){//pos.z){//} + 1.0 - norm.z) {
+        p2.z > -(norm.x * p2.x + norm.y * p2.y + D) / norm.z + 0.01){
         AO += 1.0;
       }
     }
