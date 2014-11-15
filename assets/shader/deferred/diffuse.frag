@@ -86,6 +86,8 @@ void main()
   //  (possibly due to the linearizeDepth() function).
   //gl_FragColor = vec4(texture2D(u_colorTex, v_texcoord).rgb, -zdepth);
   gl_FragColor = vec4(col * (diffuse + spec) * AO, -zdepth);
+  //gl_FragColor = vec4(col * (diffuse + spec), -zdepth);
   //gl_FragColor = vec4(col * (toonDiffuse), -zdepth);
-    //gl_FragColor = vec4(vec3(abs(dot(norm, normalize(pos - vdir)))), -zdepth);
+  //gl_FragColor = vec4(vec3(AO), -zdepth);
+  //gl_FragColor = vec4(vec3(abs(dot(norm, normalize(pos - vdir)))), -zdepth);
 }

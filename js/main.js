@@ -51,7 +51,7 @@ var main = function (canvasId, messageId) {
   initShaders();
 
   stats.setMode(1);
-  document.body.appendChild(stats.domElement);
+  //document.body.appendChild(stats.domElement);
   
   // Register our render callbacks
   CIS565WEBGLCORE.render = render;
@@ -326,7 +326,7 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  objloader.loadFromFile(gl, "assets/models/sponza.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
