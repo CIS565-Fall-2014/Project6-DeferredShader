@@ -3,7 +3,7 @@ CIS565: Project 6 -- Deferred Shader
 -------------------------------------------------------------------------------
 
 
-*Diffuse & Blinn-Phong lighting
+###Diffuse & Blinn-Phong lighting
 
 ![](diffuse_blinn-phong.png)
 
