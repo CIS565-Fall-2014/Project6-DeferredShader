@@ -3,7 +3,7 @@ precision highp float;
 #define BLOOM 		6
 #define TOON 		7
 #define SSAO 		8
-#define ALL			9
+#define UNSHARP		9
 
 
 
@@ -104,6 +104,34 @@ vec4 Ssao() {
 	return vec4(vec3(occ), 1.0); 
 }
 
+vec4 Unsharp() {
+   float depth = texture2D(u_depthTex, v_texcoord).r;
+   depth = 1.0 -linearizeDepth( depth, u_zNear, u_zFar );
+   vec2 texelSize = vec2(1.0/960.0,1.0/540.0);
+   vec3 result = vec3(0.0,0.0,0.0);
+
+   const int uBlurSize = 10;
+   int depB = int(float(uBlurSize) * depth);
+   
+   vec2 hlim = vec2(float(-uBlurSize) * 0.5 + 0.5);
+	for (int i = 0; i < uBlurSize; ++i) {
+		if(i<=depB) 
+		{
+			for (int j = 0; j < uBlurSize; ++j) {
+				if(j<=depB)
+				{
+					vec2 offset = (hlim + vec2(float(i), float(j))) * texelSize;
+					result += texture2D(u_shadeTex, v_texcoord + offset).rgb;
+				}
+			}
+		}
+
+	}
+   vec3 clr=texture2D(u_shadeTex,v_texcoord).rgb;
+   vec4 fResult = vec4(2.0*clr-result / float(uBlurSize * uBlurSize),1.0);
+   return fResult;
+}
+
 
 void main()
 {
@@ -113,8 +141,8 @@ void main()
       gl_FragColor = Bloom();
    else if(u_displayType == SSAO)
       gl_FragColor = Ssao();
-   else if(u_displayType == ALL)
-	  gl_FragColor =clamp(Bloom()/3.0+Ssao()/3.0+Toon()/3.0,0.0,1.0);
+   else if(u_displayType == UNSHARP)
+	  gl_FragColor =Unsharp();
    else
       gl_FragColor = vec4(texture2D( u_shadeTex, v_texcoord).rgb, 1.0); 
 }

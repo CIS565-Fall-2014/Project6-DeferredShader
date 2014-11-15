@@ -21,24 +21,13 @@ have issues with Chrome on windows, but Firefox seems to run it fine.
 INTRODUCTION:
 -------------------------------------------------------------------------------
 
-In this project, you will get introduced to the basics of deferred shading. You will write GLSL and OpenGL code to perform various tasks in a deferred lighting pipeline such as creating and writing to a G-Buffer.
+In this project, I implemented the basic deferred shader. I write GLSL and OpenGL code to perform various tasks in a deferred lighting pipeline such as creating and writing to a G-Buffer.
 
--------------------------------------------------------------------------------
-CONTENTS:
--------------------------------------------------------------------------------
-The Project5 root directory contains the following subdirectories:
-	
-* js/ contains the javascript files, including external libraries, necessary.
-* assets/ contains the textures that will be used in the second half of the
-  assignment.
-* resources/ contains the screenshots found in this readme file.
-
- This Readme file edited as described above in the README section.
 
 -------------------------------------------------------------------------------
 OVERVIEW:
 -------------------------------------------------------------------------------
-The deferred shader you will write will have the following stages:
+The deferred shader here will have the following stages:
 
 Stage 1 renders the scene geometry to the G-Buffer
 * pass.vert
@@ -74,7 +63,7 @@ WASDRF - Movement (along w the arrow keys)
 There are also mouse controls for camera rotation.
 
 -------------------------------------------------------------------------------
-REQUIREMENTS:
+Functions:
 -------------------------------------------------------------------------------
 
 In this project, you are given code for:
@@ -82,10 +71,9 @@ In this project, you are given code for:
 * Deferred shading pipeline
 * GBuffer pass
 
-You are required to implement:
-* Either of the following effects
-  * Bloom
-  * "Toon" Shading (with basic silhouetting)
+I have implemented:
+* Bloom
+* "Toon" Shading (with basic silhouetting)
 * Screen Space Ambient Occlusion
 * Diffuse and Blinn-Phong shading
 
