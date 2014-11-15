@@ -17,7 +17,7 @@ To implement toon shader, I calculated the dot product of the light and the norm
 I used the color from Diffuse and Blinn-Phong and made a gaussian convolution to add glow.
 ![](Bloom.png)
 
-Screen Space Ambient Occlusion
+###Screen Space Ambient Occlusion
 For SSAO, I sampled 100 points around each screen points and check if their depth is larger than the screen point's depth. The ratio of points has larger depth is used as the color.
 ![](SSAO.png)
 
