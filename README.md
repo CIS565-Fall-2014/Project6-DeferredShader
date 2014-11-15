@@ -22,11 +22,12 @@ For SSAO, I sampled 100 points around each screen points and check if their dept
 
 
 ###Performance
-| planets #|     Block Size=128    |  Block Size=256  | Block Size=512|
-|:---------:|:-----------------:|:-----------------:|:-----------:|
-|    1000     |         60       |       60       |  60|
-|    2000     |         40        |       40       | 40|
-|   5000     |         20        |       20        | 20|
+| shader|     FPS   |  
+|:---------:|:-----------------:|
+|    Diffuse Blinn-Phong     |         60       |    
+|    Toon     |         59        |    
+|   Bloom    |         13       |     
+|   SSAO     |   18|
 
 
 
