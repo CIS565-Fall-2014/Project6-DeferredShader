@@ -2,11 +2,9 @@
 CIS565: Project 6 -- Deferred Shader
 -------------------------------------------------------------------------------
 
--------------------------------------------------------------------------------
 INTRODUCTION:
 -------------------------------------------------------------------------------
-In this project, I wrote a basic deferred shading with GLSL and OpenGL. In this deferred lighting pipeline, I implemented some simple effect, including 
-Diffuse and Blinn-Phong shading, Bloom, "Toon" shading, and Screen Space Ambient Occlusion.
+In this project, I wrote a basic deferred shading with GLSL and OpenGL. In this deferred lighting pipeline, I implemented some simple effects, including Diffuse and Blinn-Phong shading, Bloom, "Toon" shading, and Screen Space Ambient Occlusion.
 
 ![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/p_bloom1(fps%201).PNG)
 
@@ -19,6 +17,7 @@ The root directory contains the following subdirectories:
 * assets/ contains the textures that will be used in the second half of the
   assignment.
 * resources/ contains the screenshots found in this readme file.
+
 -------------------------------------------------------------------------------
 Control:
 -------------------------------------------------------------------------------
@@ -33,9 +32,9 @@ WASDRF - Movement (along w the arrow keys)
 * ^ - Up
 * v - Down
 * < - Left
-* \> - Right
+* > - Right
 
-
+Effect switch control:
 * 1 - World Space Position
 * 2 - Normals
 * 3 - Color
@@ -55,9 +54,9 @@ Basic Features:
 I've implemented the following basic features:
 * Diffuse and Blinn-Phong shading
 
-It's simple for diffuse and blinn-phong shading, just pass the vertex normal, light position and camera position to the shader file, which are used to calculate the the shader color.
+It's simple for diffuse and blinn-phong shading, just passing the vertex normal, light position and camera position to the shader file, which are used to calculate the the shader color.
 
-suzanne.obj: normal of each vertex
+Following is the normal of each vertex of suzanne.obj: 
 
 ![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/s_normal(fps%2060).PNG)
 
@@ -68,9 +67,9 @@ Diffuse and Blinn-Phong shading:
 * Bloom (one-pass 2D convolution and two-pass separable convolution)  
 http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html
 
-First, I use a 3*3 sobel operator to extra the edge of the model, which are used as the glowing part. Then use a 11 * 11 blur filter to do convolution for the glowing part; then add the flowing texture to the original image.
+First, use a 3*3 sobel operator to extra the edges of the model, which are used as the glowing part. Then use a 11 * 11 blur filter to do convolution for the glowing part; lastly add the flowing texture to the original image.
 
-I also implemented a two-pass convolution operators. I added another post fragment shader to handle the second pass. The two-pass convolution is of higher efficiency compared with the 2D convoluiton operator. 
+I also implemented a two-pass convolution operators. I added another post fragment shader to handle the second pass. The two-pass convolution is of higher efficiency compared with the 2D convolution operator. 
 
 Bloom (5 * 5 blur filter):
 
@@ -83,7 +82,7 @@ Bloom (11*11 blur filter):
 
 * "Toon" Shading (with basic silhouetting)
 
-First, I decretized the color based on the diffuse shading. Then, I used sobel operator to extra the edge and added a dark color to the edge. Finally, combined the reuslts of this two parts.
+First, discretize the color based on the diffuse shading. Then, use sobel operator to extra the edge and added a dark color to the edge. Finally, combine the results of this two parts.
 
 ![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/s_tooon.PNG)
 
