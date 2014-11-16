@@ -124,13 +124,13 @@ Bloom:
 -------------------------------------------------------------------------------
 PERFORMANCE EVALUATION
 -------------------------------------------------------------------------------
-The following table shows the FPS for each featurs:
+The following chart shows the FPS for each featurs:
 
-![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/p_toon(fps%201).PNG)
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/FPS.JPG)
 
 I also compared the performance of one-pass and two-pass bloom effect with different-size filter. The following chart shows that, two-pass bloom is of higher efficiency than one-pass bloom.
 
-![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/p_toon(fps%201).PNG)
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/chart%20bloom.JPG)
 
 -------------------------------------------------------------------------------
 THIRD PARTY CODE POLICY
