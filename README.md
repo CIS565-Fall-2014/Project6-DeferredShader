@@ -6,6 +6,10 @@ Fall 2014
 RESULTS:
 -------------------------------------------------------------------------------
 
+[Run The Demo](http://diracsea3921.github.io/Project6-DeferredShader/)
+
+
+
 * Diffuse and Blinn-Phong shading
 
 ![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled6.png)
