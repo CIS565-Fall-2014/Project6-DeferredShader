@@ -6,6 +6,7 @@ uniform sampler2D u_positionTex;
 uniform sampler2D u_depthTex;
 uniform float u_bloom;
 uniform float u_sihouete;
+uniform float u_ssao;
 uniform float u_zFar;
 uniform float u_zNear;
 
@@ -68,7 +69,8 @@ void main()
 		gl_FragColor = vec4(value, 1.0); 
 		
 	//SSAO
-    float radius = 0.005;
+	if(u_ssao>0.0){
+    float radius = 0.01;
 	vec3 position = texture2D(u_positionTex,v_texcoord).rgb;
 	vec3 normal = texture2D(u_normalTex, v_texcoord).rgb;
 	float depth = texture2D(u_depthTex,v_texcoord).r;
@@ -77,19 +79,20 @@ void main()
 	float count = 0.0;
 	
 	for(int i = 0; i<50; ++i){
-		vec3 kernel = normalize(vec3(rand(position.x * float(i)), rand(position.y + float(i)), (rand(position.z + float(i))+1.0)/2.0)) * 0.1;
-		vec3 rvec = normalize(vec3(0.0, rand(position.y + float(i)*0.5), rand(position.z + float(i)*0.5)));
+		vec3 kernel = normalize(vec3(rand(position.x+ float(i)), rand(position.y+ float(i)), (rand(position.z + float(i))+1.0)/2.0))*0.2;
+		vec3 rvec = normalize(vec3(0.0, rand(position.y + float(i)), rand(position.z+ float(i))));
 		vec3 tangent = normalize(rvec - normal * dot(rvec, normal));
 		vec3 bitangent = cross(normal, tangent);
 		mat3 tbn = mat3(tangent, bitangent, normal);
-		vec3 sample = tbn * kernel;
-		sample = origin + vec3((sample * radius).x, (sample * radius).y, -(sample * radius).z / 2.0);
-		float sampleDepth = texture2D(u_depthTex, v_texcoord + (sample * radius).xy ).r;
+		vec3 sampleVector = tbn * kernel;		
+		float sampleDepth = texture2D(u_depthTex, v_texcoord + (sampleVector * radius).xy ).r;
 		sampleDepth = linearizeDepth( sampleDepth, u_zNear, u_zFar );
+		vec3 samplePoint = origin + vec3((sampleVector * radius).x, (sampleVector * radius).y, -(sampleVector * radius).z / 2.0);
 		
-		if(sampleDepth <= sample.z)
+		if(sampleDepth <= samplePoint.z)
 			count+= 1.0;
 	}
-	gl_FragColor = vec4(1.0 - count/50.0, 1.0 - count/50.0, 1.0 - count/50.0, 1.0);
+	gl_FragColor = vec4(value* (1.0-count/50.0), 1.0); // vec4(1.0 - count/50.0, 1.0 - count/50.0, 1.0 - count/50.0, 1.0);
+	}
 
 }

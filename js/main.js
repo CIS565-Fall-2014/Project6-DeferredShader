@@ -33,6 +33,7 @@ var zFar = 2000;
 var texToDisplay = 1;
 var bloom = 0.0;
 var sihouete = 0.0;
+var ssao = 0.0;
 
 var main = function (canvasId, messageId) {
   var canvas;
@@ -304,6 +305,7 @@ var renderPost = function () {
   
   gl.uniform1f( postProg.uSihoueteLoc, sihouete );
   gl.uniform1f( postProg.uBloomLoc, bloom );
+  gl.uniform1f( postProg.uSSAOLoc, ssao );
   gl.uniform1f( postProg.uZNearLoc, zNear );
   gl.uniform1f( postProg.uZFarLoc, zFar );
   
@@ -367,7 +369,9 @@ var initCamera = function () {
 	  case 54:
         sihouete = 1.0 - sihouete;
         break;
-		
+	  case 55:
+        ssao = 1.0 - ssao;
+        break;
     }
   }
 };
@@ -516,6 +520,7 @@ var initShaders = function () {
 	postProg.uDepthSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_depthTex");
 	postProg.uBloomLoc = gl.getUniformLocation( postProg.ref(), "u_bloom" );
 	postProg.uSihoueteLoc = gl.getUniformLocation( postProg.ref(), "u_sihouete" );
+	postProg.uSSAOLoc = gl.getUniformLocation( postProg.ref(), "u_ssao" );
 	postProg.uZNearLoc = gl.getUniformLocation( postProg.ref(), "u_zNear" );
     postProg.uZFarLoc = gl.getUniformLocation( postProg.ref(), "u_zFar" );
   });
