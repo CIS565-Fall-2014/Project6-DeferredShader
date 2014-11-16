@@ -3,55 +3,40 @@ CIS565: Project 6 -- Deferred Shader
 -------------------------------------------------------------------------------
 Fall 2014
 -------------------------------------------------------------------------------
-Due Wed, 11/12/2014 at Noon
+RESULTS:
 -------------------------------------------------------------------------------
 
+[Run The Demo](http://diracsea3921.github.io/Project6-DeferredShader/)
+
+
+
+* Diffuse and Blinn-Phong shading
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled6.png)
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled2.png)
+
+* Bloom
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled7.png)
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled3.png)
+
+* "Toon" Shading (with normal based silhouetting)
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled8.png)
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled4.png)
+
+* Screen Space Ambient Occlusion
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled5.png)
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled1.png)
+
 -------------------------------------------------------------------------------
-NOTE:
+CONTROLS:
 -------------------------------------------------------------------------------
-This project requires any graphics card with support for a modern OpenGL 
-pipeline. Any AMD, NVIDIA, or Intel card from the past few years should work 
-fine, and every machine in the SIG Lab and Moore 100 is capable of running 
-this project.
-
-This project also requires a WebGL capable browser. The project is known to 
-have issues with Chrome on windows, but Firefox seems to run it fine.
-
--------------------------------------------------------------------------------
-INTRODUCTION:
--------------------------------------------------------------------------------
-
-In this project, you will get introduced to the basics of deferred shading. You will write GLSL and OpenGL code to perform various tasks in a deferred lighting pipeline such as creating and writing to a G-Buffer.
-
--------------------------------------------------------------------------------
-CONTENTS:
--------------------------------------------------------------------------------
-The Project5 root directory contains the following subdirectories:
-	
-* js/ contains the javascript files, including external libraries, necessary.
-* assets/ contains the textures that will be used in the second half of the
-  assignment.
-* resources/ contains the screenshots found in this readme file.
-
- This Readme file edited as described above in the README section.
-
--------------------------------------------------------------------------------
-OVERVIEW:
--------------------------------------------------------------------------------
-The deferred shader you will write will have the following stages:
-
-Stage 1 renders the scene geometry to the G-Buffer
-* pass.vert
-* pass.frag
-
-Stage 2 renders the lighting passes and accumulates to the P-Buffer
-* quad.vert
-* diffuse.frag
-* diagnostic.frag
-
-Stage 3 renders the post processing
-* post.vert
-* post.frag
 
 The keyboard controls are as follows:
 WASDRF - Movement (along w the arrow keys)
@@ -69,77 +54,28 @@ WASDRF - Movement (along w the arrow keys)
 * 2 - Normals
 * 3 - Color
 * 4 - Depth
+* 5 - Bloom
+* 6 - Toon Shading
+* 7 - SSAO
 * 0 - Full deferred pipeline
 
-There are also mouse controls for camera rotation.
-
 -------------------------------------------------------------------------------
-REQUIREMENTS:
+PERFORMANCE:
 -------------------------------------------------------------------------------
 
-In this project, you are given code for:
-* Loading .obj file
-* Deferred shading pipeline
-* GBuffer pass
+I did some test for Bloom and SSAO effect with different samples number. For the Bloom effect the fps drop very quickly with the samples number increasing.
+I think it will be better to separate this step into two passes, which will greatly benefit the efficiency.
+ 
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/image.png)
 
-You are required to implement:
-* Either of the following effects
-  * Bloom
-  * "Toon" Shading (with basic silhouetting)
-* Screen Space Ambient Occlusion
-* Diffuse and Blinn-Phong shading
-
-**NOTE**: Implementing separable convolution will require another link in your pipeline and will count as an extra feature if you do performance analysis with a standard one-pass 2D convolution. The overhead of rendering and reading from a texture _may_ offset the extra computations for smaller 2D kernels.
-
-You must implement two of the following extras:
-* The effect you did not choose above
-* Compare performance to a normal forward renderer with
-  * No optimizations
-  * Coarse sort geometry front-to-back for early-z
-  * Z-prepass for early-z
-* Optimize g-buffer format, e.g., pack things together, quantize, reconstruct z from normal x and y (because it is normalized), etc.
-  * Must be accompanied with a performance analysis to count
-* Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/image2.png)
 
 -------------------------------------------------------------------------------
-RUNNING THE CODE:
+REFERENCES:
 -------------------------------------------------------------------------------
-
-Since the code attempts to access files that are local to your computer, you
-will either need to:
-
-* Run your browser under modified security settings, or
-* Create a simple local server that serves the files
-
-
-FIREFOX: change ``strict_origin_policy`` to false in about:config 
-
-CHROME:  run with the following argument : `--allow-file-access-from-files`
-
-(You can do this on OSX by running Chrome from /Applications/Google
-Chrome/Contents/MacOS with `open -a "Google Chrome" --args
---allow-file-access-from-files`)
-
-* To check if you have set the flag properly, you can open chrome://version and
-  check under the flags
-
-RUNNING A SIMPLE SERVER: 
-
-If you have Python installed, you can simply run a simple HTTP server off your
-machine from the root directory of this repository with the following command:
-
-`python -m SimpleHTTPServer`
-
--------------------------------------------------------------------------------
-RESOURCES:
--------------------------------------------------------------------------------
-
-The following are articles and resources that have been chosen to help give you
-a sense of each of the effects:
 
 * Bloom : [GPU Gems](http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html) 
-* Screen Space Ambient Occlusion : [Floored
-  Article](http://floored.com/blog/2013/ssao-screen-space-ambient-occlusion.html)
+* Screen Space Ambient Occlusion : (http://john-chapman-graphics.blogspot.com/2013/01/ssao-tutorial.html)
 
 -------------------------------------------------------------------------------
 README
