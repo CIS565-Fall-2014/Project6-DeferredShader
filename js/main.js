@@ -43,6 +43,10 @@ var gaussian5x5 = [
   ];
 var randArray = [];
 
+//stats
+var stats = new Stats();
+stats.setMode( 0 );
+document.body.appendChild( stats.domElement );
 
 var main = function (canvasId, messageId) {
   var canvas;
@@ -72,7 +76,9 @@ var main = function (canvasId, messageId) {
 
 var renderLoop = function () {
   window.requestAnimationFrame(renderLoop);
+  stats.begin();
   render();
+  stats.end();
 };
 
 var render = function () {
@@ -84,7 +90,8 @@ var render = function () {
 
   if (!isDiagnostic) {
     renderAmbient();// Calculate Ambient Occlusion Before next rendering step!
-    renderShade();
+    //renderShade();
+    renderToon();
     renderPost();
   } else {
     renderDiagnostic();
@@ -183,12 +190,13 @@ var renderMulti = function () {
 
   drawModel(posProg, 1);
 
-  gl.disable(gl.DEPTH_TEST);
+  //gl.disable(gl.DEPTH_TEST);
   fbo.unbind(gl);
   gl.useProgram(null);
 
   fbo.bind(gl, FBO_GBUFFER_NORMAL);
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST);
 
   gl.useProgram(normProg.ref());
 
@@ -206,7 +214,8 @@ var renderMulti = function () {
   fbo.unbind(gl);
 ////////////////////////////////////////////////////////////////////
   fbo.bind(gl, FBO_GBUFFER_COLOR);
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST);
 
   gl.useProgram(colorProg.ref());
 
@@ -270,7 +279,7 @@ var renderShade = function () {
   fbo.unbind(gl);
 };
 ////////////////////////////////////////////////////////////////////////////////////////
-// NEW PIPELINE STAGE!!!
+// NEW PIPELINE STAGES!!!
 ///////////////////////////////////////////////////////////////////////////////////////
 var renderAmbient = function () {
   gl.useProgram(ambientProg.ref());
@@ -299,12 +308,6 @@ var renderAmbient = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
   gl.uniform1i( ambientProg.uDepthSamplerLoc, 3 );
 
-/////////////////////////////////////////////////////////////
-//  gl.activeTexture( gl.TEXTURE5 );  //occlusion
-//  gl.bindTexture( gl.TEXTURE_2D, fbo.occlusionTexture() );
-//  gl.uniform1i( ambientProg.uExtraLoc, 4 );///////////////////////////////////
-////////////////////////////////////////////////////////////
-
   // Bind necessary uniforms 
   gl.uniform1f( ambientProg.uZNearLoc, zNear );
   gl.uniform1f( ambientProg.uZFarLoc, zFar );
@@ -323,6 +326,58 @@ var renderAmbient = function () {
   // Unbind FBO
   fbo.unbind(gl);
 };
+
+var renderToon = function () {
+  gl.useProgram(toonProg.ref());
+  gl.disable(gl.DEPTH_TEST);
+
+  // Bind FBO
+  fbo.bind(gl, FBO_PBUFFER);
+  
+
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // Bind necessary textures
+  gl.activeTexture( gl.TEXTURE0 );  //position
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
+  gl.uniform1i( toonProg.uPosSamplerLoc, 0 );
+
+  gl.activeTexture( gl.TEXTURE1 );  //normal
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
+  gl.uniform1i( toonProg.uNormalSamplerLoc, 1 );
+
+  gl.activeTexture( gl.TEXTURE2 );  //color
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
+  gl.uniform1i( toonProg.uColorSamplerLoc, 2 );
+
+  gl.activeTexture( gl.TEXTURE3 );  //depth
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( toonProg.uDepthSamplerLoc, 3 );
+
+/////////////////////////////////////////////////////////////
+  gl.activeTexture( gl.TEXTURE5 );  //occlusion
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(5) );
+  gl.uniform1i( toonProg.uExtraLoc, 5 );
+////////////////////////////////////////////////////////////
+
+  // Bind necessary uniforms 
+  gl.uniform1f( toonProg.uZNearLoc, zNear );
+  gl.uniform1f( toonProg.uZFarLoc, zFar );
+  
+  gl.uniform2f(toonProg.uTexSizeLoc, canvas.width, canvas.height)////////add texture size
+  var randomNum = Math.random();
+  randArray = [];
+  for (var i = 0; i < 64; i ++){
+    randArray.push(randomNum);
+    randomNum = Math.random();
+  }
+  gl.uniform1fv(toonProg.uRandNoiseLoc , randArray);//randomNoise
+  drawQuad(toonProg);
+
+  // Unbind FBO
+  fbo.unbind(gl);
+};
+
 
 var renderDiagnostic = function () {
   gl.useProgram(diagProg.ref());
@@ -443,8 +498,10 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
-  //objloader.loadFromFile(gl, "assets/models/Trex.obj", null);
+  //objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  //objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", null);
+  objloader.loadFromFile(gl, "assets/models/Trex.obj", null);
+  //objloader.loadFromFile(gl, "assets/models/Dilpoh/Full.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
@@ -571,7 +628,30 @@ var initShaders = function () {
     shadeProg.uTexSizeLoc = gl.getUniformLocation( shadeProg.ref(), "u_textureSize");
     shadeProg.uRandNoiseLoc = gl.getUniformLocation( postProg.ref(), "u_randomNoise");//randomNoise
   });
-  CIS565WEBGLCORE.registerAsyncObj(gl, shadeProg); 
+  CIS565WEBGLCORE.registerAsyncObj(gl, shadeProg);
+  
+  
+    // Create shader program for TOON
+  toonProg = CIS565WEBGLCORE.createShaderProgram();
+  toonProg.loadShader(gl, "assets/shader/deferred/quad.vert", "assets/shader/deferred/toon.frag");
+  toonProg.addCallback( function() { 
+    toonProg.aVertexPosLoc = gl.getAttribLocation( toonProg.ref(), "a_pos" );
+    toonProg.aVertexTexcoordLoc = gl.getAttribLocation( toonProg.ref(), "a_texcoord" );
+
+    toonProg.uPosSamplerLoc    = gl.getUniformLocation( toonProg.ref(), "u_positionTex");
+    toonProg.uNormalSamplerLoc = gl.getUniformLocation( toonProg.ref(), "u_normalTex");
+    toonProg.uColorSamplerLoc  = gl.getUniformLocation( toonProg.ref(), "u_colorTex");
+    toonProg.uDepthSamplerLoc  = gl.getUniformLocation( toonProg.ref(), "u_depthTex");
+    toonProg.uExtraLoc         = gl.getUniformLocation( toonProg.ref(), "u_extraTex");
+
+    toonProg.uZNearLoc = gl.getUniformLocation( toonProg.ref(), "u_zNear" );
+    toonProg.uZFarLoc = gl.getUniformLocation( toonProg.ref(), "u_zFar" );
+    toonProg.uDisplayTypeLoc = gl.getUniformLocation( toonProg.ref(), "u_displayType" );
+    ////////////////////////////////////////////////////////////////////////////////////////new stuff
+    toonProg.uTexSizeLoc = gl.getUniformLocation( toonProg.ref(), "u_textureSize");
+    toonProg.uRandNoiseLoc = gl.getUniformLocation( postProg.ref(), "u_randomNoise");//randomNoise
+  });
+  CIS565WEBGLCORE.registerAsyncObj(gl, toonProg); 
   
   // Create shader program for AMBIENT OCCLUSION
   ambientProg = CIS565WEBGLCORE.createShaderProgram();

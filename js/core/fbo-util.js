@@ -10,7 +10,7 @@ var FBO_GBUFFER_NORMAL = 1;
 var FBO_GBUFFER_COLOR = 2;
 var FBO_GBUFFER_DEPTH = 3;
 var FBO_GBUFFER_TEXCOORD = 4;
-///////////////extra buffer//////
+///////////////extra buffers//////
 var FBO_EXTRA = 5;
 
 
@@ -140,6 +140,7 @@ CIS565WEBGLCORE.createFBO = function(){
           // Set up GBuffer Normal
           fbo[FBO_GBUFFER_NORMAL] = gl.createFramebuffer();
           gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[FBO_GBUFFER_NORMAL]);
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTex, 0);
           gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[1], 0);
 
           FBOstatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
@@ -152,6 +153,7 @@ CIS565WEBGLCORE.createFBO = function(){
 
           // Set up GBuffer Color
           fbo[FBO_GBUFFER_COLOR] = gl.createFramebuffer();
+          gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTex, 0);
           gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[FBO_GBUFFER_COLOR]);
           gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures[2], 0);
 

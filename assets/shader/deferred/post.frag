@@ -48,6 +48,7 @@ void main()
   float totAO = 0.0;
   float depth = texture2D( u_depthTex, v_texcoord ).x;
   float sampleDepth;
+  /*
   for(  int x = - gaussSize; x <= gaussSize; x++){
     for(int y = - gaussSize; y <= gaussSize; y++){
       coord = v_texcoord + onePixel * vec2(x,y);
@@ -63,13 +64,14 @@ void main()
     }
   }
   totAO *= 1.0/gaussTot;
-  
+  */
   
   /////////////////////////////////////////////////////////////////////
   /////////////  GLOW ///////////////////////////////////////////
   float intensity;
   color = vec3(0,0,0);
   gaussTot = 0.0;
+  /*
   for(  int x = - gaussSize; x <= gaussSize; x++){
     for(int y = - gaussSize; y <= gaussSize; y++){
       coord = v_texcoord + onePixel * vec2(x,y);
@@ -83,7 +85,7 @@ void main()
     }
   }
   color *= 1.0/gaussTot;
-  
+  */
   vec3 currentColor = texture2D( u_shadeTex, v_texcoord).rgb;
   //currentColor *= localAO;
   intensity = max(currentColor.x, max(currentColor.y, currentColor.z));
