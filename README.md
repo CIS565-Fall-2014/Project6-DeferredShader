@@ -6,13 +6,29 @@ Fall 2014
 RESULTS:
 -------------------------------------------------------------------------------
 
-Diffuse and Blinn-Phong shading
+* Diffuse and Blinn-Phong shading
 
 ![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled6.png)
 
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled2.png)
+
+* Bloom
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled7.png)
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled3.png)
+
+* "Toon" Shading (with normal based silhouetting)
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled8.png)
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled4.png)
+
+* Screen Space Ambient Occlusion
+
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled5.png)
+
 ![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/Untitled1.png)
-
-
 
 -------------------------------------------------------------------------------
 CONTROLS:
