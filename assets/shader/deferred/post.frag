@@ -24,7 +24,7 @@ float linearizeDepth( float exp_depth, float near, float far ){
 }
 
 float gaussianWeight(float x, float y, float sigma){
-  float xSquared = x * y;
+  float xSquared = x * x;
   float ySquared = y * y;
   float sigmaSquared = sigma * sigma;
   float exponent = (xSquared + ySquared)/sigmaSquared;
@@ -57,9 +57,9 @@ void main()
       sampleDepth = texture2D( u_depthTex, coord ).x;
       gaussTot += gaussWeight;
       if(abs(sampleDepth - depth) > depthThresh){
-        totAO += AO;
+        totAO += AO * gaussWeight;
       }else{
-        totAO += localAO;
+        totAO += localAO * gaussWeight;
       }
     }
   }
@@ -71,7 +71,7 @@ void main()
   float intensity;
   color = vec3(0,0,0);
   gaussTot = 0.0;
-  /*
+  
   for(  int x = - gaussSize; x <= gaussSize; x++){
     for(int y = - gaussSize; y <= gaussSize; y++){
       coord = v_texcoord + onePixel * vec2(x,y);
@@ -85,7 +85,7 @@ void main()
     }
   }
   color *= 1.0/gaussTot;
-  */
+  
   vec3 currentColor = texture2D( u_shadeTex, v_texcoord).rgb;
   //currentColor *= localAO;
   intensity = max(currentColor.x, max(currentColor.y, currentColor.z));
@@ -96,8 +96,8 @@ void main()
 
  
  
-  color = texture2D( u_shadeTex, v_texcoord).rgb;
+  //color = texture2D( u_shadeTex, v_texcoord).rgb;
   //color = vec3(totAO);
-  gl_FragColor = vec4(color, 1.0); 
+  gl_FragColor = vec4(currentColor, 1.0); 
   //gl_FragColor = vec4(texture2D( u_shadeTex, v_texcoord).rgb, 1.0); 
 }
