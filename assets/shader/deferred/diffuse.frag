@@ -9,7 +9,7 @@ uniform mat4 u_modelview;
 uniform float u_zFar;
 uniform float u_zNear;
 uniform int u_displayType;
-
+uniform float u_toon;
 varying vec2 v_texcoord;
 
 float linearizeDepth( float exp_depth, float near, float far ){
@@ -33,4 +33,7 @@ void main()
 	float specular = pow(max(dot(reflect, -normalize(position)), 0.0), 25.0);
 	
     gl_FragColor = diffuse * vec4(color, 1.0) + 0.2 * specular * vec4(1.0,1.0,1.0,1.0);
+	float shade_num = 3.0;
+	if(u_toon >0.0)
+		gl_FragColor = floor(gl_FragColor * shade_num)/ shade_num;
 }
