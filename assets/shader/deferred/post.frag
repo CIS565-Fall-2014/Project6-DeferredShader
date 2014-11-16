@@ -4,17 +4,18 @@ precision highp float;
 #define DISPLAY_BLOOM2 6
 #define DISPLAY_TOON 7
 #define DISPLAY_AMBIENT_OCCU 8
-#define DISPLAY_AMBIENT 9
+#define DISPLAY_DIFFUSE 9
+#define DISPLAY_AMBIENT 0
 
 #define KernelSize 64
-#define NoiseSize 16
-#define Radius 3.0
-#define BlurSize 2
+#define Radius 0.02
+#define BlurSize 4
 
 uniform sampler2D u_shadeTex;
 uniform sampler2D u_normalTex;
 uniform sampler2D u_positionTex;
 uniform sampler2D u_depthTex;
+uniform sampler2D u_colorTex;
 
 uniform mat4 u_mvp;
 
@@ -53,10 +54,17 @@ float edgeDetect(vec2 texcoord)
 	return sqrt(dot(Gx, Gx) + dot(Gy, Gy));
 }
 
-float rand(vec2 co){
-    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+highp float rand(vec2 co)
+{
+    highp float a = 12.9898;
+    highp float b = 78.233;
+    highp float c = 43758.5453;
+    highp float dt= dot(co.xy ,vec2(a,b));
+    highp float sn= mod(dt,3.14);
+    return fract(sin(sn) * c);
+	
+	//return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
-
 void main()
 {
   // Currently acts as a pass filter that immmediately renders the shaded texture
@@ -64,6 +72,7 @@ void main()
   // NOTE : You may choose to use a key-controlled switch system to display one feature at a time
   
 	vec3 color;
+	float occlusion;
 	
 	if( u_displayType == DISPLAY_BLOOM )
 	{
@@ -86,7 +95,21 @@ void main()
 	}
 	else if (u_displayType == DISPLAY_BLOOM2)
 	{
-		gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0); 
+	
+		vec3 normal = normalize(texture2D(u_normalTex, v_texcoord).rgb);
+		color = vec3(0,0,0);
+		float weight = 0.0;
+		for (int i = -5; i<= 5; i++)
+		{
+			vec2 texcoord = v_texcoord + vec2(float(i) / float(u_width));
+			float g = edgeDetect(texcoord);
+			if (g > 0.9)
+			{
+				weight += 1.0 - abs(float(i)) / 5.0;
+			}
+		}
+		gl_FragColor = vec4(0.8*texture2D( u_shadeTex, v_texcoord).rgb+float(weight)/5.0*vec3(1.0, 1.0, 0.0), 1.0); 
+	
 	}
 	else if (u_displayType == DISPLAY_TOON)
 	{
@@ -112,85 +135,63 @@ void main()
 		gl_FragColor = vec4(color-line, 1.0); 
 		
 	}
-	else if (u_displayType == DISPLAY_AMBIENT_OCCU)
+	else if (u_displayType == DISPLAY_AMBIENT_OCCU || u_displayType == DISPLAY_AMBIENT)
 	{
-		//generate samples
-		vec3 kernel[KernelSize];
-		for (int i = 0; i < KernelSize; ++i) {
-		   kernel[i] = normalize(vec3(rand(vec2(-1.0, 1.0)), rand(vec2(-1.0, 1.0)), rand(vec2(0.0, 1.0)) ));
-		   
-		   float scale = float(i) / float(KernelSize);
-		   scale = mix(0.1, 1.0, scale * scale);
-		   kernel[i] *= scale;
-		}
+		occlusion = 0.0;
 		
-		//noise
-		//vec3 noise[NoiseSize];
-		//for (int i = 0; i < NoiseSize; ++i) {
-		//   noise[i] = normalize(vec3(rand(vec2(-1.0, 1.0)), rand(vec2(-1.0, 1.0)), 0.0));
-		//}
-		
-		//occlusion factor
-		vec3 pos = texture2D(u_positionTex, v_texcoord).rgb;
-		float depth = texture2D(u_depthTex, v_texcoord).r;
-		float linearDepth = linearizeDepth(depth, u_zNear, u_zFar);
-		pos.z = linearDepth;
-		vec3 normal = normalize(texture2D(u_normalTex, v_texcoord).rgb);
-		
-		vec2 noiseTex = v_texcoord * vec2(float(u_width)/4.0, float(u_height)/4.0);
-		vec3 noise;
-		for (int i = 0; i < NoiseSize; i++)
+		vec3 orgColor = texture2D(u_colorTex, v_texcoord).rgb;
+		if (orgColor.r == 1.0)
 		{
-			if (i == int(noiseTex.x * 4.0 + noiseTex.y))
-				noise = normalize(vec3(rand(vec2(-1.0, 1.0)), rand(vec2(-1.0, 1.0)), 0.0));
+			float depth = linearizeDepth( texture2D(u_depthTex, v_texcoord).r, u_zNear, u_zFar);
+			vec3 pos = vec3(texture2D(u_positionTex, v_texcoord).xy, depth);
+			
+			vec3 normal = normalize(texture2D(u_normalTex, v_texcoord).rgb);
+			
+			for(int i = 0; i < KernelSize; i++)
+			{
+				//generate kernel samples	  
+				vec3 kernel = normalize(vec3(rand(vec2(pos.x, float(i)*0.1357)),
+											rand(vec2(pos.y, float(i)*0.2468)),
+											(rand(vec2(pos.z, float(i)*0.1479)) + 1.0 ) / 2.0 ));		
+											
+				float scale = float(i) / float(KernelSize);
+				scale = mix(0.1, 1.0, scale * scale);
+				kernel *= scale ;
+				
+				//random noise
+				vec3 rvec = vec3(rand(vec2(pos.x, float(i)*0.1234)),
+								 rand(vec2(pos.y, float(i)*0.5678)),
+								 0.0) ;
+					
+				//orientation normal
+				vec3 tangent = normalize(rvec - normal * dot(rvec, normal));
+				vec3 bitangent = cross(normal, tangent);
+				mat3 tbn = mat3(tangent, bitangent, normal);
+				
+				//occlusion factor	
+				vec3 sample = tbn * kernel;
+				sample = vec3(sample.x, sample.y, -sample.z) * Radius + pos;
+							
+				vec4 offset = vec4(sample, 1);
+				offset = u_mvp * offset;
+				offset.xy /= offset.w;
+				offset.xy = offset.xy * 0.5 + 0.5;
+				
+				float sampleDepth = texture2D(u_depthTex, offset.xy ).r;
+				sampleDepth = linearizeDepth( sampleDepth, u_zNear, u_zFar );
+					
+				float rangeCheck= abs(pos.z - sampleDepth) < Radius ? 1.0 : 0.0;
+				occlusion += (sampleDepth <= sample.z ? 1.0 : 0.0) * rangeCheck;
+			}		
+			occlusion = 1.0 - occlusion/float(KernelSize);
 		}
 		
-		vec3 randvec = noise * 2.0 - 1.0;
-		vec3 tangent = normalize(randvec - normal * dot(randvec, normal));
-		vec3 bitangent = cross(normal, tangent);
-		mat3 tbn = mat3(tangent, bitangent, normal);
-		
-		float occlusion = 0.0;
-		for (int i = 0; i < KernelSize; i++)
-		{
-			vec3 sample = tbn * kernel[i];
-			sample = sample * Radius + pos;
+		if (u_displayType == DISPLAY_AMBIENT)
+			color = texture2D( u_shadeTex, v_texcoord).rgb;
+		else	
+			color = vec3(0.8,0.8,0.8);
 			
-			vec4 offset = vec4(sample, 1);
-			offset = u_mvp * offset;
-			offset.xy /= offset.w;
-			offset.xy = offset.xy * 0.5 + 0.5;
-			
-			float sampleDep = texture2D(u_depthTex, offset.xy).r;
-			
-			float inside = abs(pos.z - sampleDep) < Radius ? 1.0 : 0.0;
-			occlusion += (sampleDep <= sample.z ? 1.0 : 0.0) * inside;  //front has smaller z
-		}
-		
-		occlusion = 1.0 - (occlusion / float(KernelSize));
-		
-		/*
-		//blur
-		vec2 texelSize = 1.0 / vec2(textureSize(uInputTex, 0));
-		float result = 0.0;
-		vec2 hlim = vec2(float(-BlurSize) * 0.5 + 0.5);
-		for (int i = 0; i < BlurSize; ++i) {
-			for (int j = 0; j < BlurSize; ++j) {
-				vec2 offset = (hlim + vec2(float(x), float(y))) * texelSize;
-				result += texture(uTexInput, vTexcoord + offset).r;
-			}
-		}
-		fResult = result / float(uBlurSize * uBlurSize);
-		*/
-		
-		color = texture2D( u_shadeTex, v_texcoord).rgb;
-		color =vec3 (1,1,1);
-		gl_FragColor = vec4(color * occlusion, 1.0); 
-		
-	}
-	else if (u_displayType == DISPLAY_AMBIENT)
-	{
-		gl_FragColor = vec4(0,0,1, 1.0); 
+		gl_FragColor = vec4(occlusion * color, 1.0); 
 	}
 	else
 		gl_FragColor = vec4(texture2D( u_shadeTex, v_texcoord).rgb, 1.0); 

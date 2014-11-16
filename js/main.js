@@ -21,6 +21,7 @@ var passProg;     // Shader program for G-Buffer
 var shadeProg;    // Shader program for P-Buffer
 var diagProg;     // Shader program from diagnostic 
 var postProg;     // Shader for post-process effects
+var postProg2;
 
 // Multi-Pass programs
 var posProg;
@@ -37,6 +38,15 @@ var lightPos = [0.0, 0.5, 0.5];
 
 var eyePos = [0.0, 1.0, 1.0];
 
+var stats = new Stats();
+stats.setMode(0); // 0: fps, 1: ms
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.right = '0px';
+stats.domElement.style.top = '108px';
+document.body.appendChild(stats.domElement );
+var renderloop = document.createElement('div');
+renderloop.innerHTML = 'render';
+stats.domElement.appendChild(renderloop);
 
 var main = function (canvasId, messageId) {
   var canvas;
@@ -64,20 +74,10 @@ var main = function (canvasId, messageId) {
   CIS565WEBGLCORE.run(gl);
 };
 
-var stats = new Stats();
-stats.setMode(0); // 0: fps, 1: ms
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.right = '0px';
-stats.domElement.style.top = '108px';
-document.body.appendChild(stats.domElement );
-var renderloop = document.createElement('div');
-renderloop.innerHTML = 'render';
-stats.domElement.appendChild(renderloop);
 	
 var renderLoop = function () {
   window.requestAnimationFrame(renderLoop);
-
-  stats.begin()
+  stats.begin();
   render();
   stats.end();
 };
@@ -93,6 +93,8 @@ var render = function () {
   if (!isDiagnostic) {
     renderShade();
     renderPost();
+	if (texToDisplay == 6)
+		renderPost2();
   } else {
     renderDiagnostic();
   }
@@ -315,6 +317,10 @@ var renderPost = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
   gl.uniform1i( postProg.uNormalSamplerLoc, 1 );
   
+  gl.activeTexture( gl.TEXTURE2 );  //color
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
+  gl.uniform1i( postProg.uColorSamplerLoc, 2 );
+  
   gl.activeTexture( gl.TEXTURE3 );  //depth
   gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
   gl.uniform1i( postProg.uDepthSamplerLoc, 3 ); 
@@ -340,6 +346,29 @@ var renderPost = function () {
   gl.uniformMatrix4fv( postProg.uMVPLoc, false, mvpMat );
   
   drawQuad(postProg);
+};
+
+var renderPost2 = function () {
+  gl.useProgram(postProg2.ref());
+
+  gl.disable(gl.DEPTH_TEST);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // Bind necessary textures
+  gl.activeTexture( gl.TEXTURE1 );  //normal
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
+  gl.uniform1i( postProg2.uNormalSamplerLoc, 1 );
+  
+  gl.activeTexture( gl.TEXTURE4 );
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
+  gl.uniform1i(postProg2.uShadeSamplerLoc, 4 );
+  
+  gl.uniform1i( postProg2.uDisplayTypeLoc, texToDisplay ); 
+  
+  gl.uniform1i(postProg2.uWidthLoc, canvas.width);
+  gl.uniform1i(postProg2.uHeightLoc, canvas.height);
+  
+  drawQuad(postProg2);
 };
 
 var initGL = function (canvasId, messageId) {
@@ -560,6 +589,7 @@ var initShaders = function () {
 	postProg.uNormalSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_normalTex");
 	postProg.uDepthSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_depthTex");
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
+	postProg.uColorSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_colorTex");
 	
 	postProg.uZNearLoc = gl.getUniformLocation( postProg.ref(), "u_zNear" );
     postProg.uZFarLoc = gl.getUniformLocation( postProg.ref(), "u_zFar" );
@@ -575,6 +605,23 @@ var initShaders = function () {
 	postProg.uMVPLoc = gl.getUniformLocation( postProg.ref(), "u_mvp" );
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
+  
+  
+  // Create shader program for post-process2
+  postProg2 = CIS565WEBGLCORE.createShaderProgram();
+  postProg2.loadShader(gl, "assets/shader/deferred/quad.vert", "assets/shader/deferred/post2.frag");
+  postProg2.addCallback( function() { 
+    postProg2.aVertexPosLoc = gl.getAttribLocation( postProg2.ref(), "a_pos" );
+    postProg2.aVertexTexcoordLoc = gl.getAttribLocation( postProg2.ref(), "a_texcoord" );
+	postProg2.uNormalSamplerLoc = gl.getUniformLocation( postProg2.ref(), "u_normalTex");
+    postProg2.uShadeSamplerLoc = gl.getUniformLocation( postProg2.ref(), "u_shadeTex");
+	
+	postProg2.uDisplayTypeLoc = gl.getUniformLocation( postProg2.ref(), "u_displayType" );
+	postProg2.uWidthLoc = gl.getUniformLocation( postProg2.ref(), "u_width" );
+	postProg2.uHeightLoc = gl.getUniformLocation( postProg2.ref(), "u_height" );
+  });
+  CIS565WEBGLCORE.registerAsyncObj(gl, postProg2); 
+  
 };
 
 var initFramebuffer = function () {
