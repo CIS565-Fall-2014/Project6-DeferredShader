@@ -50,77 +50,28 @@ WASDRF - Movement (along w the arrow keys)
 * 2 - Normals
 * 3 - Color
 * 4 - Depth
+* 5 - Bloom
+* 6 - Toon Shading
+* 7 - SSAO
 * 0 - Full deferred pipeline
 
-There are also mouse controls for camera rotation.
-
 -------------------------------------------------------------------------------
-REQUIREMENTS:
+PERFORMANCE:
 -------------------------------------------------------------------------------
 
-In this project, you are given code for:
-* Loading .obj file
-* Deferred shading pipeline
-* GBuffer pass
+I did some test for Bloom and SSAO effect with different samples number. For the Bloom effect the fps drop very quickly with the samples number increasing.
+I think it will be better to separate this step into two passes, which will greatly benefit the efficiency.
+ 
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/image.png)
 
-You are required to implement:
-* Either of the following effects
-  * Bloom
-  * "Toon" Shading (with basic silhouetting)
-* Screen Space Ambient Occlusion
-* Diffuse and Blinn-Phong shading
-
-**NOTE**: Implementing separable convolution will require another link in your pipeline and will count as an extra feature if you do performance analysis with a standard one-pass 2D convolution. The overhead of rendering and reading from a texture _may_ offset the extra computations for smaller 2D kernels.
-
-You must implement two of the following extras:
-* The effect you did not choose above
-* Compare performance to a normal forward renderer with
-  * No optimizations
-  * Coarse sort geometry front-to-back for early-z
-  * Z-prepass for early-z
-* Optimize g-buffer format, e.g., pack things together, quantize, reconstruct z from normal x and y (because it is normalized), etc.
-  * Must be accompanied with a performance analysis to count
-* Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
+![](https://github.com/DiracSea3921/Project6-DeferredShader/blob/master/image2.png)
 
 -------------------------------------------------------------------------------
-RUNNING THE CODE:
+REFERENCES:
 -------------------------------------------------------------------------------
-
-Since the code attempts to access files that are local to your computer, you
-will either need to:
-
-* Run your browser under modified security settings, or
-* Create a simple local server that serves the files
-
-
-FIREFOX: change ``strict_origin_policy`` to false in about:config 
-
-CHROME:  run with the following argument : `--allow-file-access-from-files`
-
-(You can do this on OSX by running Chrome from /Applications/Google
-Chrome/Contents/MacOS with `open -a "Google Chrome" --args
---allow-file-access-from-files`)
-
-* To check if you have set the flag properly, you can open chrome://version and
-  check under the flags
-
-RUNNING A SIMPLE SERVER: 
-
-If you have Python installed, you can simply run a simple HTTP server off your
-machine from the root directory of this repository with the following command:
-
-`python -m SimpleHTTPServer`
-
--------------------------------------------------------------------------------
-RESOURCES:
--------------------------------------------------------------------------------
-
-The following are articles and resources that have been chosen to help give you
-a sense of each of the effects:
 
 * Bloom : [GPU Gems](http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html) 
-* Screen Space Ambient Occlusion : [Floored
-  Article](http://floored.com/blog/2013/ssao-screen-space-ambient-occlusion.html)
+* Screen Space Ambient Occlusion : (http://john-chapman-graphics.blogspot.com/2013/01/ssao-tutorial.html)
 
 -------------------------------------------------------------------------------
 README
