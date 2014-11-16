@@ -21,7 +21,7 @@ varying vec2 v_texcoord;
 //light
 const vec3 lightPos = vec3(-2.0, 3.0, 1.0);
 //Specular Exponent
-const float specExp = 6.0;
+const float specExp = 2.0;
 const int   LOOPS = 16;
 uniform float u_randomNoise[64];
 
@@ -92,26 +92,14 @@ void main()
   accumulatedAO = accumulatedAO / (4.0 * float(LOOPS));
   gl_FragColor = vec4(1.0 - accumulatedAO);
   */
-  ////////////////////////////////////////
-  //begin Toon Shader
-  ////////////////////////////////////////
-  
-  if(diffuse < .35){
-    color = vec3(0,0,0);
-  }else if(diffuse < .70){
-    color = vec3(.33,0,0);
-  }else if(diffuse < .90){
-    color = vec3(.66,0,0);
-  }else{
-    color = vec3(1,0,0);
-  }
+  color = diffCol + specular;
   if (depth > .99){
     color = vec3(.33,.33,.33);
   }
   
   //gl_FragColor = vec4(texture2D(u_colorTex, v_texcoord).rgb, 1.0);
-  gl_FragColor = vec4(color, 1.0);
-  //gl_FragColor = vec4(diffCol + specular , 1.0);
+  //gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(color , 1.0);
   //gl_FragColor = vec4((1.0 - accumulatedAO) * (diffCol + specular) , 1.0);
   //gl_FragColor = vec4(texture2D(u_extraTex, v_texcoord).rgb, 1.0);
 }

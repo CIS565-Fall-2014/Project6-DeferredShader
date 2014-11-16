@@ -90,8 +90,8 @@ var render = function () {
 
   if (!isDiagnostic) {
     renderAmbient();// Calculate Ambient Occlusion Before next rendering step!
-    //renderShade();
-    renderToon();
+    renderShade();
+    //renderToon();
     renderPost();
   } else {
     renderDiagnostic();

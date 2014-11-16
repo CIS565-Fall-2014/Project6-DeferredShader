@@ -14,8 +14,8 @@ varying vec2 v_texcoord;
 
 const float thresh = 0.95;
 const float depthThresh = .001;
-const int gaussSize = 5;
-const float SIGMA = 2.0;
+const int gaussSize = 7;
+const float SIGMA = 2.5;
 const float PI = 3.1415926;
 const float E = 2.718281828459045;
 
@@ -48,7 +48,7 @@ void main()
   float totAO = 0.0;
   float depth = texture2D( u_depthTex, v_texcoord ).x;
   float sampleDepth;
-  /*
+  
   for(  int x = - gaussSize; x <= gaussSize; x++){
     for(int y = - gaussSize; y <= gaussSize; y++){
       coord = v_texcoord + onePixel * vec2(x,y);
@@ -64,7 +64,7 @@ void main()
     }
   }
   totAO *= 1.0/gaussTot;
-  */
+
   
   /////////////////////////////////////////////////////////////////////
   /////////////  GLOW ///////////////////////////////////////////
@@ -95,9 +95,12 @@ void main()
  //////////////////////////////////////////////////////////////////////
 
  
- 
-  //color = texture2D( u_shadeTex, v_texcoord).rgb;
-  //color = vec3(totAO);
+  /*
+  color = texture2D( u_shadeTex, v_texcoord).rgb;
+  color = vec3(totAO);
+  vec3 currentColor = color;
+  currentColor = color * totAO;
+  */
   gl_FragColor = vec4(currentColor, 1.0); 
   //gl_FragColor = vec4(texture2D( u_shadeTex, v_texcoord).rgb, 1.0); 
 }
