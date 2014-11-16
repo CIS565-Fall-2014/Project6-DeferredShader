@@ -1,58 +1,27 @@
 ------------------------------------------------------------------------------
 CIS565: Project 6 -- Deferred Shader
 -------------------------------------------------------------------------------
-Fall 2014
--------------------------------------------------------------------------------
-Due Wed, 11/12/2014 at Noon
--------------------------------------------------------------------------------
-
--------------------------------------------------------------------------------
-NOTE:
--------------------------------------------------------------------------------
-This project requires any graphics card with support for a modern OpenGL 
-pipeline. Any AMD, NVIDIA, or Intel card from the past few years should work 
-fine, and every machine in the SIG Lab and Moore 100 is capable of running 
-this project.
-
-This project also requires a WebGL capable browser. The project is known to 
-have issues with Chrome on windows, but Firefox seems to run it fine.
 
 -------------------------------------------------------------------------------
 INTRODUCTION:
 -------------------------------------------------------------------------------
+In this project, I wrote a basic deferred shading with GLSL and OpenGL. In this deferred lighting pipeline, I implemented some simple effect, including 
+Diffuse and Blinn-Phong shading, Bloom, "Toon" shading, and Screen Space Ambient Occlusion.
 
-In this project, you will get introduced to the basics of deferred shading. You will write GLSL and OpenGL code to perform various tasks in a deferred lighting pipeline such as creating and writing to a G-Buffer.
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/p_bloom1(fps%201).PNG)
 
 -------------------------------------------------------------------------------
 CONTENTS:
 -------------------------------------------------------------------------------
-The Project5 root directory contains the following subdirectories:
+The root directory contains the following subdirectories:
 	
 * js/ contains the javascript files, including external libraries, necessary.
 * assets/ contains the textures that will be used in the second half of the
   assignment.
 * resources/ contains the screenshots found in this readme file.
-
- This Readme file edited as described above in the README section.
-
 -------------------------------------------------------------------------------
-OVERVIEW:
+Control:
 -------------------------------------------------------------------------------
-The deferred shader you will write will have the following stages:
-
-Stage 1 renders the scene geometry to the G-Buffer
-* pass.vert
-* pass.frag
-
-Stage 2 renders the lighting passes and accumulates to the P-Buffer
-* quad.vert
-* diffuse.frag
-* diagnostic.frag
-
-Stage 3 renders the post processing
-* post.vert
-* post.frag
-
 The keyboard controls are as follows:
 WASDRF - Movement (along w the arrow keys)
 * W - Zoom in
@@ -64,157 +33,115 @@ WASDRF - Movement (along w the arrow keys)
 * ^ - Up
 * v - Down
 * < - Left
-* > - Right
+* \> - Right
+
+
 * 1 - World Space Position
 * 2 - Normals
 * 3 - Color
 * 4 - Depth
+* 5 - Bloom (one-pass)
+* 6 - Bloom (two-pass)
+* 7 - "Toon" Shading
+* 8 - Screen Space Ambient Occlusion
+* 9 - Diffuse and Blinn-Phong shading
 * 0 - Full deferred pipeline
 
 There are also mouse controls for camera rotation.
 
 -------------------------------------------------------------------------------
-REQUIREMENTS:
+Basic Features:
 -------------------------------------------------------------------------------
-
-In this project, you are given code for:
-* Loading .obj file
-* Deferred shading pipeline
-* GBuffer pass
-
-You are required to implement:
-* Either of the following effects
-  * Bloom
-  * "Toon" Shading (with basic silhouetting)
-* Screen Space Ambient Occlusion
+I've implemented the following basic features:
 * Diffuse and Blinn-Phong shading
 
-**NOTE**: Implementing separable convolution will require another link in your pipeline and will count as an extra feature if you do performance analysis with a standard one-pass 2D convolution. The overhead of rendering and reading from a texture _may_ offset the extra computations for smaller 2D kernels.
+It's simple for diffuse and blinn-phong shading, just pass the vertex normal, light position and camera position to the shader file, which are used to calculate the the shader color.
 
-You must implement two of the following extras:
-* The effect you did not choose above
-* Compare performance to a normal forward renderer with
-  * No optimizations
-  * Coarse sort geometry front-to-back for early-z
-  * Z-prepass for early-z
-* Optimize g-buffer format, e.g., pack things together, quantize, reconstruct z from normal x and y (because it is normalized), etc.
-  * Must be accompanied with a performance analysis to count
-* Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
+suzanne.obj: normal of each vertex
 
--------------------------------------------------------------------------------
-RUNNING THE CODE:
--------------------------------------------------------------------------------
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/s_normal(fps%2060).PNG)
 
-Since the code attempts to access files that are local to your computer, you
-will either need to:
+Diffuse and Blinn-Phong shading:
 
-* Run your browser under modified security settings, or
-* Create a simple local server that serves the files
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/s_diffuse.PNG)
+
+* Bloom (one-pass 2D convolution and two-pass separable convolution)  
+http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html
+
+First, I use a 3*3 sobel operator to extra the edge of the model, which are used as the glowing part. Then use a 11 * 11 blur filter to do convolution for the glowing part; then add the flowing texture to the original image.
+
+I also implemented a two-pass convolution operators. I added another post fragment shader to handle the second pass. The two-pass convolution is of higher efficiency compared with the 2D convoluiton operator. 
+
+Bloom (5 * 5 blur filter):
+
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/s_bloom(r%3D2).PNG)
+
+Bloom (11*11 blur filter):
+
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/s_bloom1.PNG)
 
 
-FIREFOX: change ``strict_origin_policy`` to false in about:config 
+* "Toon" Shading (with basic silhouetting)
 
-CHROME:  run with the following argument : `--allow-file-access-from-files`
+First, I decretized the color based on the diffuse shading. Then, I used sobel operator to extra the edge and added a dark color to the edge. Finally, combined the reuslts of this two parts.
 
-(You can do this on OSX by running Chrome from /Applications/Google
-Chrome/Contents/MacOS with `open -a "Google Chrome" --args
---allow-file-access-from-files`)
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/s_tooon.PNG)
 
-* To check if you have set the flag properly, you can open chrome://version and
-  check under the flags
+* Screen Space Ambient Occlusion  
 
-RUNNING A SIMPLE SERVER: 
+I followed the algorithm in this article to do the SSAO.  
+http://john-chapman-graphics.blogspot.co.uk/2013/01/ssao-tutorial.html
 
-If you have Python installed, you can simply run a simple HTTP server off your
-machine from the root directory of this repository with the following command:
+First, generate a sample kernel, generate the noise in a shpere and find the normal-oriented hemisphere. Then, project each sample point into screen space to get the coordinates into the depth buffer. Next, read sampleDepth out of the depth buffer. If this is in front of the sample position, the sample contributes to occlusion. If sampleDepth is behind the sample position, the sample doesn't contribute to the occlusion factor. 
 
-`python -m SimpleHTTPServer`
+SSAO:
 
--------------------------------------------------------------------------------
-RESOURCES:
--------------------------------------------------------------------------------
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/s_occlusion.PNG)
 
-The following are articles and resources that have been chosen to help give you
-a sense of each of the effects:
+Final result wiht SSAO:
 
-* Bloom : [GPU Gems](http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html) 
-* Screen Space Ambient Occlusion : [Floored
-  Article](http://floored.com/blog/2013/ssao-screen-space-ambient-occlusion.html)
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/s_ssao.PNG)
 
--------------------------------------------------------------------------------
-README
--------------------------------------------------------------------------------
-All students must replace or augment the contents of this Readme.md in a clear 
-manner with the following:
 
-* A brief description of the project and the specific features you implemented.
-* At least one screenshot of your project running.
-* A 30 second or longer video of your project running.  To create the video you
-  can use [Open Broadcaster Software](http://obsproject.com) 
-* A performance evaluation (described in detail below).
+Another model: sponza.obj
+
+Normal:
+
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/p_normal(fps%2025).PNG)
+
+Diffuse adn Blinn-Phong shading:
+
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/p_blinn.PNG)
+
+Bloom:
+
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/p_bloom1(fps%201).PNG)
+
+"Toon" shading:
+
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/p_toon(fps%201).PNG)
 
 -------------------------------------------------------------------------------
 PERFORMANCE EVALUATION
 -------------------------------------------------------------------------------
-The performance evaluation is where you will investigate how to make your 
-program more efficient using the skills you've learned in class. You must have
-performed at least one experiment on your code to investigate the positive or
-negative effects on performance. 
+The following table shows the FPS for each featurs:
 
-We encourage you to get creative with your tweaks. Consider places in your code
-that could be considered bottlenecks and try to improve them. 
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/p_toon(fps%201).PNG)
 
-Each student should provide no more than a one page summary of their
-optimizations along with tables and or graphs to visually explain any
-performance differences.
+I also compared the performance of one-pass and two-pass bloom effect with different-size filter. The following chart shows that, two-pass bloom is of higher efficiency than one-pass bloom.
+
+![ScreenShot](https://github.com/liying3/Project6-DeferredShader/blob/master/results/p_toon(fps%201).PNG)
 
 -------------------------------------------------------------------------------
 THIRD PARTY CODE POLICY
 -------------------------------------------------------------------------------
-* Use of any third-party code must be approved by asking on the Google groups.  
-  If it is approved, all students are welcome to use it.  Generally, we approve 
-  use of third-party code that is not a core part of the project.  For example, 
-  for the ray tracer, we would approve using a third-party library for loading 
-  models, but would not approve copying and pasting a CUDA function for doing 
-  refraction.
-* Third-party code must be credited in README.md.
-* Using third-party code without its approval, including using another 
-  student's code, is an academic integrity violation, and will result in you 
-  receiving an F for the semester.
+* stas.js  
+It's a library to visualize realize fps and timing.  
+https://github.com/mrdoob/stats.js/
+* random noise in GLSL:  
+http://byteblacksmith.com/improvements-to-the-canonical-one-liner-glsl-rand-for-opengl-es-2-0/
 
 -------------------------------------------------------------------------------
-SELF-GRADING
--------------------------------------------------------------------------------
-* On the submission date, email your grade, on a scale of 0 to 100, to Harmony,
-  harmoli+cis565@seas.upenn.edu, with a one paragraph explanation.  Be concise and 
-  realistic.  Recall that we reserve 30 points as a sanity check to adjust your 
-  grade.  Your actual grade will be (0.7 * your grade) + (0.3 * our grade).  We 
-  hope to only use this in extreme cases when your grade does not realistically 
-  reflect your work - it is either too high or too low.  In most cases, we plan 
-  to give you the exact grade you suggest.
-* Projects are not weighted evenly, e.g., Project 0 doesn't count as much as 
-  the path tracer.  We will determine the weighting at the end of the semester 
-  based on the size of each project.
-
-
----
-SUBMISSION
----
-As with the previous projects, you should fork this project and work inside of
-your fork. Upon completion, commit your finished project back to your fork, and
-make a pull request to the master repository.  You should include a README.md
-file in the root directory detailing the following
-
-* A brief description of the project and specific features you implemented
-* At least one screenshot of your project running.
-* A link to a video of your project running.
-* Instructions for building and running your project if they differ from the
-  base code.
-* A performance writeup as detailed above.
-* A list of all third-party code used.
-* This Readme file edited as described above in the README section.
-
----
 ACKNOWLEDGEMENTS
 ---
 
