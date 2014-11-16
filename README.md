@@ -2,11 +2,6 @@
 CIS565: Project 6 -- Deferred Shader
 -------------------------------------------------------------------------------
 ![glow25](https://raw.githubusercontent.com/RTCassidy1/Project6-DeferredShader/master/renders/glow_25.png)
-![glow15](https://raw.githubusercontent.com/RTCassidy1/Project6-DeferredShader/master/renders/glow_15.png)
-![glow10](https://raw.githubusercontent.com/RTCassidy1/Project6-DeferredShader/master/renders/glow_10.png)
-![glow5](https://raw.githubusercontent.com/RTCassidy1/Project6-DeferredShader/master/renders/glow_5.png)
-![glow0](https://raw.githubusercontent.com/RTCassidy1/Project6-DeferredShader/master/renders/glow_0.png)
-
 
 -------------------------------------------------------------------------------
 CONTENTS:
