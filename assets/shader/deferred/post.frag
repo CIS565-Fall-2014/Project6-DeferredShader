@@ -92,7 +92,8 @@ void main()
 		if(sampleDepth <= samplePoint.z)
 			count+= 1.0;
 	}
-	gl_FragColor = vec4(value* (1.0-count/50.0), 1.0); // vec4(1.0 - count/50.0, 1.0 - count/50.0, 1.0 - count/50.0, 1.0);
+	//gl_FragColor = vec4(value* (1.0-count/50.0), 1.0); // vec4(1.0 - count/50.0, 1.0 - count/50.0, 1.0 - count/50.0, 1.0);
+	gl_FragColor = vec4(1.0 - count/50.0, 1.0 - count/50.0, 1.0 - count/50.0, 1.0);
 	}
 
 }
