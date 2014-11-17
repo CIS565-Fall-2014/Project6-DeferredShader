@@ -35,6 +35,6 @@ void main()
 	    gl_FragColor = color;
 	else if( u_displayType == DISPLAY_NORMAL )
 	    gl_FragColor = vec4( normal, 1 );
-	else
+	else if(u_displayType == DISPLAY_POS)
 	    gl_FragColor = vec4( position, 1 );
 }

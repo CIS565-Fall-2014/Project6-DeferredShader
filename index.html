@@ -1,9 +1,53 @@
 <html>
   <head>
+    <style type="text/css">
+      html {
+        height: 100%;
+      }
+      #title {
+        position: absolute;
+        top: 20px;
+        width: 420px;
+        left: 20px;
+        background-color: Lavender;
+        border-radius: 3px;
+        font: 20px Georgia;
+        padding: 10px;
+      }
+
+      #mode{
+        color: white;
+        position: absolute;
+        font-size: 18px;
+        top: 20px;
+        left: 550px;
+        border-radius: 3px;
+        background-color: darkOrange;
+        padding: 10px;
+      }
+
+       #info {
+
+        font-size: 16px;
+        position: absolute;
+        top: 65px;
+        left: 20px;
+        padding: 10px;
+
+      }
+
+      </style>
     <meta charset="utf-8"/>
     <title>CIS 565 WebGL Deferred Shader</title>
   </head>
   <body>
+    <div id="title">
+      Deferred Shader Demo - Lei Yang (Radium)
+    </div>
+    <div id="mode">Shader Off</div>
+    <div id="info">
+      Press "1": Position  // "2": Normal // "3": Color // "4": Depth // "5": Blinn-Phong Shader // "6": Bloom Shader // "7": Toon Shader  //  "8": Ambient Occlusion  // "9": Pixelation Shader  // "0": Frosted Glass Shader
+    </div>
     <div id="message" style="position:relative;top:100px"/>
     <canvas id="webglview" width="960" height="540">
       WebGL unavailable.
