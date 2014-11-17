@@ -435,8 +435,8 @@ var initObjs = function () {
   // Load the OBJ from file
  // objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
  // objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", null);
- // objloader.loadFromFile(gl, "assets/models/cow_vt.obj", null);
-  objloader.loadFromFile(gl, "assets/models/bunny.obj", null);
+    objloader.loadFromFile(gl, "assets/models/cow_vt.obj", null);
+ // objloader.loadFromFile(gl, "assets/models/bunny.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
