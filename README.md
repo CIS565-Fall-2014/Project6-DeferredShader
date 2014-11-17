@@ -1,6 +1,10 @@
 ------------------------------------------------------------------------------
 CIS565: Project 6 -- Deferred Shader
 -------------------------------------------------------------------------------
+#### Live Demo (http://radiumyang.github.io/Project6-DeferredShader/)
+
+[Please Open in FireFox Browser]
+
 ![a](results/all_shaders_cow.gif)
 ![a](results/all_shaders_sponza.gif)
 ![a](results/A_sponza.JPG)
