@@ -121,7 +121,17 @@ void main()
 #if TOON
     if (flagged(u_effect, 2)) {
         // Toon shading outline
-        if (n.z < 0.6) {
+        bool outline = false;
+        for (float dx = -1.0; dx < 1.5; dx += 1.0) {
+            for (float dy = -1.0; dy < 1.5; dy += 1.0) {
+                vec2 sampcoord = v_texcoord + vec2(dx, dy) / vec2(960, 540);
+                float depth = texture2D(u_depthTex, sampcoord).r;
+                if (abs(linearizeDepth(d, u_zNear, u_zFar) - linearizeDepth(depth, u_zNear, u_zFar)) > 0.1) {
+                    outline = true;
+                }
+            }
+        }
+        if (outline) {
             color = vec3(0.0);
         }
     }
