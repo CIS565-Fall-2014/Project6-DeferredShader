@@ -65,29 +65,45 @@ I implemented:
 SHADERS:
 -------------------------------------------------------------------------------
 #### Blinn-Phong
+![a](results/blinn_phong.JPG)
+![a](results/blinn_phong_ao.JPG)
 
 #### Bloom
+![a](results/bloom.JPG)
+
+reference:
+http://prideout.net/archive/bloom/
+Guassian Function: http://mathworld.wolfram.com/GaussianFunction.html
 
 #### Toon
+![a](results/toon2.JPG)
+![a](results/toon_sponza.JPG)
+
+reference:
+http://en.wikibooks.org/wiki/GLSL_Programming/Unity/Toon_Shading
+edge detection: http://www.forceflow.be/2010/04/14/contour-and-valley-detection-using-glsl/
 
 #### Ambient Occlusion (SSAO)
+![a](results/AO.JPG)
+![a](results/AO_sponza.JPG)
+
+reference:
+http://blog.evoserv.at/index.php/2012/12/hemispherical-screen-space-ambient-occlusion-ssao-for-deferred-renderers-using-openglglsl/
+http://john-chapman-graphics.blogspot.com/2013/01/ssao-tutorial.html
+random function: http://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
+
 
 #### Pixelation
+![a](results/pixel.JPG)
+![a](results/pixel_sponza.JPG)
+reference:
+http://www.geeks3d.com/20101029/shader-library-pixelation-post-processing-effect-glsl/
 
 #### Frosted Glass
-
-
-The performance evaluation is where you will investigate how to make your 
-program more efficient using the skills you've learned in class. You must have
-performed at least one experiment on your code to investigate the positive or
-negative effects on performance. 
-
-We encourage you to get creative with your tweaks. Consider places in your code
-that could be considered bottlenecks and try to improve them. 
-
-Each student should provide no more than a one page summary of their
-optimizations along with tables and or graphs to visually explain any
-performance differences.
+![a](results/glass.JPG)
+![a](results/glass_sponze.JPG)
+reference:
+http://www.geeks3d.com/20101228/shader-library-frosted-glass-post-processing-shader-glsl/
 
 -------------------------------------------------------------------------------
 RUNNING THE CODE:
@@ -99,7 +115,7 @@ FIREFOX: change ``strict_origin_policy`` to false in about:config
 PERFORMANCE ANALYSIS:
 -------------------------------------------------------------------------------
 
-FIREFOX: change ``strict_origin_policy`` to false in about:config 
+
 
 ---
 ACKNOWLEDGEMENTS
