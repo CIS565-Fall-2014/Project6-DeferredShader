@@ -31,6 +31,18 @@ var isDiagnostic = true;
 var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
+//SSAO
+var SSAOtoggle = 0;
+var samplekernel = [];
+var kernelSize = 50;
+var BlurRadius = 0.1;
+var ProjectionMat;
+
+//bloom
+var bloomToggle = 0;
+//added for shadeprogram
+var lightpos = vec3.fromValues(15.0, 15.0, 15.0);
+var lightcolor = vec3.fromValues(1.0, 1.0, 1.0);
 
 var main = function (canvasId, messageId) {
   var canvas;
@@ -40,7 +52,8 @@ var main = function (canvasId, messageId) {
 
   // Set up camera
   initCamera(canvas);
-
+    //setup ssao
+  initSSAO();
   // Set up FBOs
   initFramebuffer();
 
@@ -56,6 +69,16 @@ var main = function (canvasId, messageId) {
 
   // Start the rendering loop
   CIS565WEBGLCORE.run(gl);
+};
+//Generate SampleKernel
+var initSSAO = function () {
+    for (var i = 0; i < kernelSize; i++) {
+        var x = Math.random() * 2.0 - 1.0;
+        var y = Math.random() * 2.0 - 1.0;
+        var z = Math.random();
+
+        samplekernel[i] = [Math.random() * x, Math.random() * y, Math.random() * z];
+    }
 };
 
 var renderLoop = function () {
@@ -217,26 +240,34 @@ var renderShade = function () {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Bind necessary textures
-  //gl.activeTexture( gl.TEXTURE0 );  //position
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
-  //gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
+  gl.activeTexture( gl.TEXTURE0 );  //position
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
+  gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
 
-  //gl.activeTexture( gl.TEXTURE1 );  //normal
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  //gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
+  gl.activeTexture( gl.TEXTURE1 );  //normal
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
+  gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
 
   gl.activeTexture( gl.TEXTURE2 );  //color
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
-  gl.uniform1i( shadeProg.uColorSamplerLoc, 2 );
+  gl.uniform1i(shadeProg.uColorSamplerLoc, 2);
 
-  //gl.activeTexture( gl.TEXTURE3 );  //depth
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  //gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
+    gl.activeTexture( gl.TEXTURE3 );  //depth
+    gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+    gl.uniform1i(shadeProg.uDepthSamplerLoc, 3);
+
 
   // Bind necessary uniforms 
-  //gl.uniform1f( shadeProg.uZNearLoc, zNear );
-  //gl.uniform1f( shadeProg.uZFarLoc, zFar );
-  
+      gl.uniform1f( shadeProg.uZNearLoc, zNear );
+      gl.uniform1f( shadeProg.uZFarLoc, zFar );
+    gl.uniformMatrix4fv(shadeProg.u_MVLoc, false, camera.getViewTransform());
+    gl.uniform3fv(shadeProg.uLightposLoc, lightpos);
+    gl.uniform3fv(shadeProg.uLightColorLoc, lightcolor);
+    gl.uniform3fv(shadeProg.uEyePosLoc, camera.getEyePosition());
+    gl.uniform1f(shadeProg.screenHeightLoc, canvas.height);
+    gl.uniform1f(shadeProg.screenWidthLoc, canvas.width);
+    gl.uniform1i(shadeProg.uDisplayTypeLoc, texToDisplay);
+
   drawQuad(shadeProg);
 
   // Unbind FBO
@@ -270,7 +301,6 @@ var renderDiagnostic = function () {
   gl.uniform1f( diagProg.uZNearLoc, zNear );
   gl.uniform1f( diagProg.uZFarLoc, zFar );
   gl.uniform1i( diagProg.uDisplayTypeLoc, texToDisplay ); 
-  
   drawQuad(diagProg);
 };
 
@@ -280,11 +310,38 @@ var renderPost = function () {
   gl.disable(gl.DEPTH_TEST);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  // Bind necessary textures
+    // Bind necessary textures
+  gl.activeTexture(gl.TEXTURE0);  //position
+  gl.bindTexture(gl.TEXTURE_2D, fbo.texture(0));
+  gl.uniform1i(postProg.uPosSamplerLoc, 0);
+
+  gl.activeTexture(gl.TEXTURE1);  //normal
+  gl.bindTexture(gl.TEXTURE_2D, fbo.texture(1));
+  gl.uniform1i(postProg.uNormalSamplerLoc, 1);
+
+  //gl.activeTexture(gl.TEXTURE2);  //color
+  //gl.bindTexture(gl.TEXTURE_2D, fbo.texture(2));
+  //gl.uniform1i(postProg.uColorSamplerLoc, 2);
+
+  gl.activeTexture(gl.TEXTURE3);  //depth
+  gl.bindTexture(gl.TEXTURE_2D, fbo.depthTexture());
+  gl.uniform1i(postProg.uDepthSamplerLoc, 3);
+
   gl.activeTexture( gl.TEXTURE4 );
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
 
+    //setup uniforms
+  gl.uniformMatrix4fv(postProg.uProjectionMatLoc, false, ProjectionMat);
+  gl.uniform1f(postProg.uZFarLoc, zFar);
+  gl.uniform1f(postProg.uZNearLoc, zNear);
+  gl.uniform1i(postProg.uSSAOToggleLoc, SSAOtoggle);
+  gl.uniform1i(postProg.uBloomToggleLoc, bloomToggle);
+  gl.uniform1f(postProg.screenHeightLoc, canvas.height);
+  gl.uniform1f(postProg.screenWidthLoc, canvas.width);
+  gl.uniform1f(postProg.blurRadiusLoc, BlurRadius);
+  gl.uniform3fv(postProg.uSamplekernelLoc, samplekernel);
+   
   drawQuad(postProg);
 };
 
@@ -312,6 +369,7 @@ var initCamera = function () {
   persp = mat4.create();
   mat4.perspective(persp, todeg(60), canvas.width / canvas.height, 0.1, 2000);
 
+  ProjectionMat = persp;
   camera = CIS565WEBGLCORE.createCamera(CAMERA_TRACKING_TYPE);
   camera.goHome([0, 0, 4]);
   interactor = CIS565WEBGLCORE.CameraInteractor(camera, canvas);
@@ -321,7 +379,8 @@ var initCamera = function () {
     interactor.onKeyDown(e);
     switch(e.keyCode) {
       case 48:
-        isDiagnostic = false;
+          isDiagnostic = false;
+          texToDisplay = 0;
         break;
       case 49:
         isDiagnostic = true;
@@ -339,6 +398,18 @@ var initCamera = function () {
         isDiagnostic = true;
         texToDisplay = 4;
         break;
+        case 53:
+            isDiagnostic = false;
+            texToDisplay = 5;
+            break;
+        case 54:
+            isDiagnostic = false;
+            SSAOtoggle = 1 - SSAOtoggle;
+            break;
+        case 55:
+            isDiagnostic = false;
+            bloomToggle = 1 - bloomToggle;
+            break;
     }
   }
 };
@@ -348,8 +419,8 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", null);
-
+  objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+  //objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", null);
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
     model = new Model(gl, objloader);
@@ -463,7 +534,15 @@ var initShaders = function () {
     shadeProg.uPosSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_positionTex");
     shadeProg.uNormalSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_normalTex");
     shadeProg.uColorSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_colorTex");
-    shadeProg.uDepthSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_depthTex");
+    shadeProg.uDepthSamplerLoc = gl.getUniformLocation(shadeProg.ref(), "u_depthTex");
+
+      //added
+    shadeProg.uLightPosLoc = gl.getUniformLocation(shadeProg.ref(), "u_lightpos");
+    shadeProg.uLightColorLoc = gl.getUniformLocation(shadeProg.ref(), "u_lightcolor");
+    shadeProg.uEyePosLoc = gl.getUniformLocation(shadeProg.ref(), "u_eyepos");
+    shadeProg.u_MVLoc = gl.getUniformLocation(shadeProg.ref(), "u_View");
+    shadeProg.screenHeightLoc = gl.getUniformLocation(shadeProg.ref(), "screenHeight");
+    shadeProg.screenWidthLoc = gl.getUniformLocation(shadeProg.ref(), "screenWidth");
 
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
@@ -477,8 +556,22 @@ var initShaders = function () {
   postProg.addCallback( function() { 
     postProg.aVertexPosLoc = gl.getAttribLocation( postProg.ref(), "a_pos" );
     postProg.aVertexTexcoordLoc = gl.getAttribLocation( postProg.ref(), "a_texcoord" );
+    postProg.uShadeSamplerLoc = gl.getUniformLocation(postProg.ref(), "u_shadeTex");
+    postProg.uSSAOToggleLoc = gl.getUniformLocation(postProg.ref(), "u_SSAOToggle");
+    postProg.uBloomToggleLoc = gl.getUniformLocation(postProg.ref(), "u_BloomToggle");
 
-    postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
+    postProg.uPosSamplerLoc = gl.getUniformLocation(postProg.ref(), "u_positionTex");
+    postProg.uNormalSamplerLoc = gl.getUniformLocation(postProg.ref(), "u_normalTex");
+    postProg.uColorSamplerLoc = gl.getUniformLocation(postProg.ref(), "u_colorTex");
+    postProg.uDepthSamplerLoc = gl.getUniformLocation(postProg.ref(), "u_depthTex");
+
+    postProg.screenHeightLoc = gl.getUniformLocation(postProg.ref(), "u_ScreenHeight");
+    postProg.screenWidthLoc = gl.getUniformLocation(postProg.ref(), "u_ScreenWidth");
+    postProg.uZNearLoc = gl.getUniformLocation(postProg.ref(), "u_zNear");
+    postProg.uZFarLoc = gl.getUniformLocation(postProg.ref(), "u_zFar");
+    postProg.uSampleKernelLoc = gl.getUniformLocation(postProg.ref(), "u_sampleKernels");
+    postProg.blurRadiusLoc = gl.getUniformLocation(postProg.ref(), "u_blurRadius");
+    postProg.uProjectionMatLoc = gl.getUniformLocation(postProg.ref(), "u_projection");
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };
