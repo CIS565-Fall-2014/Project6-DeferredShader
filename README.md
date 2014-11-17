@@ -68,6 +68,11 @@ SHADERS:
 ![a](results/blinn_phong.JPG)
 ![a](results/blinn_phong_ao.JPG)
 
+reference:
+
+http://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model
+
+
 #### Bloom
 ![a](results/bloom.JPG)
 
@@ -75,7 +80,12 @@ reference:
 
 http://prideout.net/archive/bloom/
 
-Guassian Function: http://mathworld.wolfram.com/GaussianFunction.html
+I used Guassian Function (http://mathworld.wolfram.com/GaussianFunction.html) to generate sample kernels. Currently in the program the kernel size is 19.
+
+* float k = getKernelValue(sampletc_x, sampletc_y);
+* colorSum +=  k * texture2D(u_shadeTex, sampletc).rgb;
+
+The color sum is the what we want for the result.
 
 #### Toon
 ![a](results/toon2.JPG)
@@ -149,7 +159,7 @@ FIREFOX: change ``strict_origin_policy`` to false in about:config
 -------------------------------------------------------------------------------
 PERFORMANCE ANALYSIS:
 -------------------------------------------------------------------------------
-
+![a](results/fps.JPG)
 
 
 ---
