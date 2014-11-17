@@ -61,10 +61,24 @@ and specular color outputs, mapping those [0, 1] ranges using ramp functions:
     input spec  0.00  0.10 0.20  1.00
      toon spec  0.00  0.00 1.00  1.00
 
-Toon outlines are added by overwriting pixels with near-tangent view-space
-normals. This method doesn't look very good, but avoids the need for additional
-outputs to the post-processing stage and is considerably cheaper than a
-post-processed effect which reads multiple input pixels.
+**AFTER SUBMISSION:** New method:
+Toon outlines are added by overwriting pixels which are near hard drops in
+the view-space depth. This method does not show outlines on all edges
+(depending on the depth of the poly behind it), but avoids the need for
+additional outputs to the post-processing stage and is fairly cheap (with 9
+depth texture reads per fragment).
+
+Old method:
+An earlier approach was to draw outlines at pixels with near-tangent
+view-space normals. This didn't look very good, but was cheaper due to needing
+no additional texture reads.
+
+
+New method:
+
+![](images/toon2.png)
+
+Old method:
 
 ![](images/toon.png)
 
@@ -121,7 +135,8 @@ the textures, less memory access is performed.
 | No shading            |    10.5 ms |
 | Diffuse+specular only |    +0.0 ms |
 | Bloom only            |   +69.5 ms |
-| Toon only             |    +0.0 ms |
+| Toon only (old)       |    +0.0 ms |
+| Toon only (new)       |    +0.5 ms |
 | SSAO only             |    +4.0 ms |
 | Bloom & SSAO          |   +74.0 ms |
 
@@ -133,7 +148,8 @@ the textures, less memory access is performed.
 | No shading            |     9.0 ms |
 | Diffuse+specular only |    +1.5 ms |
 | Bloom only            |   +69.5 ms |
-| Toon only             |    +0.5 ms |
+| Toon only (old)       |    +0.5 ms |
+| Toon only (new)       |    +0.5 ms |
 | SSAO only             |    +5.0 ms |
 | Bloom & SSAO          |   +74.5 ms |
 
