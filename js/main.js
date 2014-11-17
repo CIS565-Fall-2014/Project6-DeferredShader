@@ -28,12 +28,23 @@ var posProg;
 var normProg;
 var colorProg;
 
-var isDiagnostic = true;
+var isDiagnostic = false;
 var zNear = 20;
 var zFar = 2000;
-var texToDisplay = 1;
+var texToDisplay = 5;
 
 var mode;
+
+//stats fps analysis
+var stats = new Stats();
+stats.setMode(0); // 0: fps, 1: ms
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.right = '10px';
+stats.domElement.style.top = '10px';
+document.body.appendChild(stats.domElement );
+var renderloop = document.createElement('div');
+renderloop.innerHTML = 'render';
+stats.domElement.appendChild(renderloop);
 
 var main = function (canvasId, messageId) {
   var canvas;
@@ -64,7 +75,9 @@ var main = function (canvasId, messageId) {
 
 var renderLoop = function () {
   window.requestAnimationFrame(renderLoop);
+  stats.begin();
   render();
+  stats.end();
 };
 
 var render = function () {
@@ -420,10 +433,10 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-    objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
+ // objloader.loadFromFile(gl, "assets/models/suzanne.obj", null);
  // objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", null);
  // objloader.loadFromFile(gl, "assets/models/cow_vt.obj", null);
- // objloader.loadFromFile(gl, "assets/models/bunny.obj", null);
+  objloader.loadFromFile(gl, "assets/models/bunny.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
