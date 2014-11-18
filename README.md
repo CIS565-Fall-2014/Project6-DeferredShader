@@ -11,6 +11,8 @@ Results:
 
 Live demo: https://cdn.rawgit.com/cyborgyl/Project6-DeferredShader/master/index.html
 
+SSAO may not work properly using Chrome
+
 ![diffuse](/Results/diffuse.PNG)
 
 Blinn-Phong
