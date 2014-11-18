@@ -22,7 +22,11 @@ SSAO
 
 ![bloom](/Results/bloom_ssao.PNG)
 
-Bloom
+Bloom + SSAO
+
+![bloom](/Results/toon_bloom_ssao.PNG)
+
+Toon + Bloom + SSAO
 
 -------------------------------------------------------------------------------
 OVERVIEW:
