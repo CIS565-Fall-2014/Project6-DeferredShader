@@ -10,8 +10,10 @@ Results:
 -------------------------------------------------------------------------------
 
 Live demo: https://cdn.rawgit.com/cyborgyl/Project6-DeferredShader/master/index.html
-Video: http://youtu.be/Q6Dw10o2hGM
+
 SSAO may not work properly using Chrome
+
+Video: http://youtu.be/Q6Dw10o2hGM
 
 ![diffuse](/Results/diffuse.PNG)
 
