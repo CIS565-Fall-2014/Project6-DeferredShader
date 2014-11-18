@@ -38,21 +38,6 @@ The Project5 root directory contains the following subdirectories:
 -------------------------------------------------------------------------------
 OVERVIEW:
 -------------------------------------------------------------------------------
-The deferred shader you will write will have the following stages:
-
-Stage 1 renders the scene geometry to the G-Buffer
-* pass.vert
-* pass.frag
-
-Stage 2 renders the lighting passes and accumulates to the P-Buffer
-* quad.vert
-* diffuse.frag
-* diagnostic.frag
-
-Stage 3 renders the post processing
-* post.vert
-* post.frag
-
 The keyboard controls are as follows:
 WASDRF - Movement (along w the arrow keys)
 * W - Zoom in
@@ -69,38 +54,21 @@ WASDRF - Movement (along w the arrow keys)
 * 2 - Normals
 * 3 - Color
 * 4 - Depth
-* 0 - Full deferred pipeline
-
+* 0 - Blinn-Phong
+* 5 - Toon
+* 6 - SSAO toggle
+* 7 - Bloom toggle
 There are also mouse controls for camera rotation.
 
 -------------------------------------------------------------------------------
 REQUIREMENTS:
 -------------------------------------------------------------------------------
-
-In this project, you are given code for:
-* Loading .obj file
-* Deferred shading pipeline
-* GBuffer pass
-
-You are required to implement:
+Features:
 * Either of the following effects
   * Bloom
   * "Toon" Shading (with basic silhouetting)
 * Screen Space Ambient Occlusion
 * Diffuse and Blinn-Phong shading
-
-**NOTE**: Implementing separable convolution will require another link in your pipeline and will count as an extra feature if you do performance analysis with a standard one-pass 2D convolution. The overhead of rendering and reading from a texture _may_ offset the extra computations for smaller 2D kernels.
-
-You must implement two of the following extras:
-* The effect you did not choose above
-* Compare performance to a normal forward renderer with
-  * No optimizations
-  * Coarse sort geometry front-to-back for early-z
-  * Z-prepass for early-z
-* Optimize g-buffer format, e.g., pack things together, quantize, reconstruct z from normal x and y (because it is normalized), etc.
-  * Must be accompanied with a performance analysis to count
-* Additional lighting and pre/post processing effects! (email first please, if they are good you may add multiple).
-
 -------------------------------------------------------------------------------
 RUNNING THE CODE:
 -------------------------------------------------------------------------------
@@ -129,18 +97,6 @@ If you have Python installed, you can simply run a simple HTTP server off your
 machine from the root directory of this repository with the following command:
 
 `python -m SimpleHTTPServer`
-
--------------------------------------------------------------------------------
-RESOURCES:
--------------------------------------------------------------------------------
-
-The following are articles and resources that have been chosen to help give you
-a sense of each of the effects:
-
-* Bloom : [GPU Gems](http://http.developer.nvidia.com/GPUGems/gpugems_ch21.html) 
-* Screen Space Ambient Occlusion : [Floored
-  Article](http://floored.com/blog/2013/ssao-screen-space-ambient-occlusion.html)
-
 -------------------------------------------------------------------------------
 README
 -------------------------------------------------------------------------------
@@ -167,20 +123,6 @@ that could be considered bottlenecks and try to improve them.
 Each student should provide no more than a one page summary of their
 optimizations along with tables and or graphs to visually explain any
 performance differences.
-
--------------------------------------------------------------------------------
-THIRD PARTY CODE POLICY
--------------------------------------------------------------------------------
-* Use of any third-party code must be approved by asking on the Google groups.  
-  If it is approved, all students are welcome to use it.  Generally, we approve 
-  use of third-party code that is not a core part of the project.  For example, 
-  for the ray tracer, we would approve using a third-party library for loading 
-  models, but would not approve copying and pasting a CUDA function for doing 
-  refraction.
-* Third-party code must be credited in README.md.
-* Using third-party code without its approval, including using another 
-  student's code, is an academic integrity violation, and will result in you 
-  receiving an F for the semester.
 
 -------------------------------------------------------------------------------
 SELF-GRADING
@@ -222,3 +164,9 @@ Many thanks to Cheng-Tso Lin, whose framework for CIS700 we used for this
 assignment.
 
 This project makes use of [three.js](http://www.threejs.org).
+
+SSAO tutorial:
+http://john-chapman-graphics.blogspot.co.uk/2013/01/ssao-tutorial.html
+
+Bloom:
+http://wp.applesandoranges.eu/?p=14
