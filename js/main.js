@@ -44,9 +44,11 @@ var bloomToggle = 0;
 var lightpos = vec3.fromValues(15.0, 15.0, 15.0);
 var lightcolor = vec3.fromValues(1.0, 1.0, 1.0);
 
+var stats;
+
 var main = function (canvasId, messageId) {
   var canvas;
-
+  stats = initStats();
   // Initialize WebGL
   initGL(canvasId, messageId);
 
@@ -80,7 +82,20 @@ var initSSAO = function () {
         samplekernel[i] = [Math.random() * x, Math.random() * y, Math.random() * z];
     }
 };
+function initStats() {
+    stats = new Stats();
+    stats.setMode(0); // 0: fps, 1: ms
 
+    // Align top-left
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '0px';
+    stats.domElement.style.top = '0px';
+
+    document.body.appendChild(stats.domElement);
+
+
+    return stats;
+}
 var renderLoop = function () {
   window.requestAnimationFrame(renderLoop);
   render();
@@ -99,7 +114,8 @@ var render = function () {
   } else {
     renderDiagnostic();
   }
-
+  if (stats)
+      stats.update();
   gl.useProgram(null);
 };
 
