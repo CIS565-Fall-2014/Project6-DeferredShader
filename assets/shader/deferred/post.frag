@@ -41,13 +41,13 @@ vec4 bloom()
             sum += texture2D(u_shadeTex, v_texcoord + vec2(j,i) * 0.002) * 0.25;
         }
    }
-       if (texture2D(u_shadeTex, v_texcoord).r < 0.3)
+       if (length(texture2D(u_shadeTex, v_texcoord).rgb) < 0.3)
     {
        outColor = sum*sum*0.012 + texture2D(u_shadeTex, v_texcoord);
     }
     else
     {
-        if (texture2D(u_shadeTex, v_texcoord).r < 0.5)
+        if (length(texture2D(u_shadeTex, v_texcoord).rgb) < 0.5)
         {
             outColor = sum*sum*0.009 + texture2D(u_shadeTex, v_texcoord);
         }
