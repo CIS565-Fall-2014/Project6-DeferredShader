@@ -8,6 +8,9 @@ In this project, you will get introduced to the basics of deferred shading. You 
 -------------------------------------------------------------------------------
 Results:
 -------------------------------------------------------------------------------
+
+Live demo: https://cdn.rawgit.com/cyborgyl/Project6-DeferredShader/master/index.html
+
 ![diffuse](/Results/diffuse.PNG)
 
 Blinn-Phong
