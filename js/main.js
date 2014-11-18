@@ -27,10 +27,10 @@ var posProg;
 var normProg;
 var colorProg;
 
-var isDiagnostic = true;
+var isDiagnostic = false;
 var zNear = 20;
 var zFar = 2000;
-var texToDisplay = 1;
+var texToDisplay = 0;
 //SSAO
 var SSAOtoggle = 0;
 var samplekernel = [];
