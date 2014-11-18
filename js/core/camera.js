@@ -9,116 +9,116 @@ var CIS565WEBGLCORE = CIS565WEBGLCORE || {};
 var CAMERA_ORBIT_TYPE    = 1;
 var CAMERA_TRACKING_TYPE = 2;
 
-CIS565WEBGLCORE.createCamera = function(t){
-    var matrix     = mat4.create();
-    var up         = vec3.create();
-    var right      = vec3.create();
-    var normal     = vec3.create();
-    var position   = vec3.create();
-    var home       = vec3.create();
-    var azimuth    = 0.0;
-    var elevation  = 0.0;
-    var type       = t;
-    var steps      = 0;
+CIS565WEBGLCORE.createCamera = function (t) {
+    var matrix = mat4.create();
+    var up = vec3.create();
+    var right = vec3.create();
+    var normal = vec3.create();
+    var position = vec3.create();
+    var home = vec3.create();
+    var azimuth = 0.0;
+    var elevation = 0.0;
+    var type = t;
+    var steps = 0;
 
-    
-    setType = function(t){
-        
+
+    setType = function (t) {
+
         type = t;
-        
+
         if (t != CAMERA_ORBIT_TYPE && t != CAMERA_TRACKING_TYPE) {
             alert('Wrong Camera Type!. Setting Orbitting type by default');
             type = CAMERA_ORBIT_TYPE;
         }
     };
-    update = function(){
-        if (type == CAMERA_TRACKING_TYPE){
+    update = function () {
+        if (type == CAMERA_TRACKING_TYPE) {
             mat4.identity(matrix);
-            mat4.translate( matrix, matrix, position );
-            mat4.rotateY( matrix, matrix, azimuth * Math.PI/180 );
-            mat4.rotateX( matrix, matrix, elevation * Math.PI/180 );
+            mat4.translate(matrix, matrix, position);
+            mat4.rotateY(matrix, matrix, azimuth * Math.PI / 180);
+            mat4.rotateX(matrix, matrix, elevation * Math.PI / 180);
         }
         else {
-            mat4.rotateY( matrix, matrix, azimuth * Math.PI/180 );
-            mat4.rotateX( matrix, matrix, elevation * Math.PI/180 );
-            mat4.translate( matrix, matrix, position );
+            mat4.rotateY(matrix, matrix, azimuth * Math.PI / 180);
+            mat4.rotateX(matrix, matrix, elevation * Math.PI / 180);
+            mat4.translate(matrix, matrix, position);
         }
 
         var m = matrix;
-        vec4.transformMat4( right, [1,0,0,0], m );
-        vec4.transformMat4( up, [0,1,0,0], m );
-        vec4.transformMat4( normal, [0,0,1,0], m );
-        vec3.normalize( normal, normal );
-        vec3.normalize( up, up );
-        vec3.normalize( right, right );
+        vec4.transformMat4(right, [1, 0, 0, 0], m);
+        vec4.transformMat4(up, [0, 1, 0, 0], m);
+        vec4.transformMat4(normal, [0, 0, 1, 0], m);
+        vec3.normalize(normal, normal);
+        vec3.normalize(up, up);
+        vec3.normalize(right, right);
 
-        if(type == CAMERA_TRACKING_TYPE){
-            vec4.transformMat4( position, [0,0,0,1], m );
-        } 
+        if (type == CAMERA_TRACKING_TYPE) {
+            vec4.transformMat4(position, [0, 0, 0, 1], m);
+        }
     };
-    setPosition = function(p){
-        vec3.set( position, p[0], p[1], p[2] );
+    setPosition = function (p) {
+        vec3.set(position, p[0], p[1], p[2]);
         update();
     };
 
-    dolly = function(s){
-        
-        var p =  vec3.create();
+    dolly = function (s) {
+
+        var p = vec3.create();
         var n = vec3.create();
-        
+
         p = position;
-        
+
         var step = s - steps;
-        
-        vec3.normalize( n, normal );
-        
+
+        vec3.normalize(n, normal);
+
         var newPosition = vec3.create();
-        
-        if(type == CAMERA_TRACKING_TYPE){
-            newPosition[0] = p[0] - step*n[0];
-            newPosition[1] = p[1] - step*n[1];
-            newPosition[2] = p[2] - step*n[2];
+
+        if (type == CAMERA_TRACKING_TYPE) {
+            newPosition[0] = p[0] - step * n[0];
+            newPosition[1] = p[1] - step * n[1];
+            newPosition[2] = p[2] - step * n[2];
         }
-        else{
+        else {
             newPosition[0] = p[0];
             newPosition[1] = p[1];
-            newPosition[2] = p[2] - step; 
+            newPosition[2] = p[2] - step;
         }
-    	
+
         setPosition(newPosition);
         steps = s;
     };
 
-    setAzimuth = function(az){
+    setAzimuth = function (az) {
         changeAzimuth(az - azimuth);
     };
 
-    changeAzimuth = function(az){
-        
-        azimuth +=az;
-        
-        if (azimuth > 360 || azimuth <-360) {
-    		azimuth = azimuth % 360;
-    	}
+    changeAzimuth = function (az) {
+
+        azimuth += az;
+
+        if (azimuth > 360 || azimuth < -360) {
+            azimuth = azimuth % 360;
+        }
         update();
     };
 
-    setElevation = function(el){
+    setElevation = function (el) {
         changeElevation(el - elevation);
     };
 
-    changeElevation = function(el){
-        
-        elevation +=el;
-        
-        if (elevation > 360 || elevation <-360) {
-    		elevation = elevation % 360;
-    	}
+    changeElevation = function (el) {
+
+        elevation += el;
+
+        if (elevation > 360 || elevation < -360) {
+            elevation = elevation % 360;
+        }
         update();
     };
 
-    goHome = function(h){
-        if (h != null){
+    goHome = function (h) {
+        if (h != null) {
             home = h;
         }
         setPosition(home);
@@ -127,39 +127,42 @@ CIS565WEBGLCORE.createCamera = function(t){
         steps = 0;
     };
 
-    getViewTransform = function(){
+    getViewTransform = function () {
         var m = mat4.create();
-        mat4.invert( m, matrix );
+        mat4.invert(m, matrix);
         return m;
     };
 
-    moveForward = function(){ 
-        vec3.scaleAndAdd( position, position, normal, -1.1 );
+    getEyePosition = function () {
+        return position;
+    }
+    moveForward = function () {
+        vec3.scaleAndAdd(position, position, normal, -1.1);
         update();
     };
 
-    moveBackward = function(){
-        vec3.scaleAndAdd( position, position, normal, 1.1 );
+    moveBackward = function () {
+        vec3.scaleAndAdd(position, position, normal, 1.1);
         update();
     };
 
-    moveLeft = function(){
-        vec3.scaleAndAdd( position, position, right, -1.1 );
+    moveLeft = function () {
+        vec3.scaleAndAdd(position, position, right, -1.1);
         update();
     };
 
-    moveRight = function(){
-        vec3.scaleAndAdd( position, position, right, 1.1 );
+    moveRight = function () {
+        vec3.scaleAndAdd(position, position, right, 1.1);
         update();
     };
 
-    moveUp= function(){
-        vec3.scaleAndAdd( position, position, up, 1.1 );
+    moveUp = function () {
+        vec3.scaleAndAdd(position, position, up, 1.1);
         update();
     };
 
-    moveDown = function(){
-        vec3.scaleAndAdd( position, position, up, -1.1 );
+    moveDown = function () {
+        vec3.scaleAndAdd(position, position, up, -1.1);
         update();
     };
 
@@ -172,12 +175,13 @@ CIS565WEBGLCORE.createCamera = function(t){
     newObj.changeAzimuth = changeAzimuth;
     newObj.setElevation = setElevation;
     newObj.changeElevation = changeElevation;
-    newObj.update = update;    
+    newObj.update = update;
     newObj.getViewTransform = getViewTransform;
-    newObj.moveForward = moveForward; 
-    newObj.moveBackward = moveBackward; 
+    newObj.getEyePosition = getEyePosition;
+    newObj.moveForward = moveForward;
+    newObj.moveBackward = moveBackward;
     newObj.moveLeft = moveLeft;
-    newObj.moveRight = moveRight; 
+    newObj.moveRight = moveRight;
     newObj.moveUp = moveUp;
     newObj.moveDown = moveDown;
 
