@@ -99,18 +99,6 @@ machine from the root directory of this repository with the following command:
 `python -m SimpleHTTPServer`
 
 -------------------------------------------------------------------------------
-README
--------------------------------------------------------------------------------
-All students must replace or augment the contents of this Readme.md in a clear 
-manner with the following:
-
-* A brief description of the project and the specific features you implemented.
-* At least one screenshot of your project running.
-* A 30 second or longer video of your project running.  To create the video you
-  can use [Open Broadcaster Software](http://obsproject.com) 
-* A performance evaluation (described in detail below).
-
--------------------------------------------------------------------------------
 PERFORMANCE EVALUATION
 -------------------------------------------------------------------------------
 Always 60fps steady using "suzanne" model. (on GTX780 and GT650M)
