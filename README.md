@@ -125,3 +125,5 @@ http://john-chapman-graphics.blogspot.co.uk/2013/01/ssao-tutorial.html
 
 Fast Bloom:
 https://software.intel.com/en-us/blogs/2014/07/15/an-investigation-of-fast-real-time-gpu-based-image-blur-algorithms
+
+http://wp.applesandoranges.eu/?p=14
