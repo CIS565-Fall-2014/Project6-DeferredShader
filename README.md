@@ -23,6 +23,7 @@ SSAO
 ![bloom](/Results/bloom_ssao.PNG)
 
 Bloom
+
 -------------------------------------------------------------------------------
 OVERVIEW:
 -------------------------------------------------------------------------------
@@ -85,6 +86,7 @@ If you have Python installed, you can simply run a simple HTTP server off your
 machine from the root directory of this repository with the following command:
 
 `python -m SimpleHTTPServer`
+
 -------------------------------------------------------------------------------
 README
 -------------------------------------------------------------------------------
