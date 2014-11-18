@@ -9,9 +9,20 @@ In this project, you will get introduced to the basics of deferred shading. You 
 Results:
 -------------------------------------------------------------------------------
 ![diffuse](/Results/diffuse.PNG)
+
+Blinn-Phong
+
 ![toon](/Results/toon.PNG)
+
+Toon Shading
+
 ![ssao](/Results/diffuse_ssao.PNG)
+
+SSAO 
+
 ![bloom](/Results/bloom_ssao.PNG)
+
+Bloom
 -------------------------------------------------------------------------------
 OVERVIEW:
 -------------------------------------------------------------------------------
