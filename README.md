@@ -111,7 +111,7 @@ manner with the following:
 -------------------------------------------------------------------------------
 PERFORMANCE EVALUATION
 -------------------------------------------------------------------------------
-Always 60fps steady using "suzanne" model.
+Always 60fps steady using "suzanne" model. (on GTX780 and GT650M)
 
 ACKNOWLEDGEMENTS
 ---
