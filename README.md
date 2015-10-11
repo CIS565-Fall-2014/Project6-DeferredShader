@@ -3,7 +3,7 @@ CIS 565 Project 6: Deferred Shader
 
 * Kai Ninomiya (Arch Linux, Intel i5-2410M)
 
-### [Live Demo](https://kainino0x.github.io/Project6-DeferredShader/)
+### [Live Demo](https://kainino0x.github.io/cis565-webgl-deferred-shading/)
 
 ### [Demo Video](http://youtu.be/15UsLDPgzYw)
 
