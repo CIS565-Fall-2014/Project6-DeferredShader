@@ -28,9 +28,23 @@ var normProg;
 var colorProg;
 
 var isDiagnostic = true;
+var effect = 0;
 var zNear = 20;
 var zFar = 2000;
 var texToDisplay = 1;
+var lamppos_w = vec3.create();
+vec3.set(lamppos_w, 0, 2, 4);
+var lamppos = vec3.create();
+
+var stats = new Stats();
+stats.setMode(1); // 0: fps, 1: ms
+
+// align top-left
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '8px';
+stats.domElement.style.top = '8px';
+
+document.body.appendChild( stats.domElement );
 
 var main = function (canvasId, messageId) {
   var canvas;
@@ -64,6 +78,7 @@ var renderLoop = function () {
 };
 
 var render = function () {
+  stats.begin();
   if (fbo.isMultipleTargets()) {
     renderPass();
   } else {
@@ -77,7 +92,9 @@ var render = function () {
     renderDiagnostic();
   }
 
+  gl.finish();
   gl.useProgram(null);
+  stats.end();
 };
 
 var drawModel = function (program, mask) {
@@ -207,6 +224,8 @@ var renderMulti = function () {
   fbo.unbind(gl);
 };
 
+var time = 0.0;
+
 var renderShade = function () {
   gl.useProgram(shadeProg.ref());
   gl.disable(gl.DEPTH_TEST);
@@ -217,26 +236,35 @@ var renderShade = function () {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Bind necessary textures
-  //gl.activeTexture( gl.TEXTURE0 );  //position
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
-  //gl.uniform1i( shadeProg.uPosSamplerLoc, 0 );
+  gl.activeTexture( gl.TEXTURE0 );
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( shadeProg.uDepthSamplerLoc, 0 );
 
-  //gl.activeTexture( gl.TEXTURE1 );  //normal
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  //gl.uniform1i( shadeProg.uNormalSamplerLoc, 1 );
+  gl.activeTexture( gl.TEXTURE1 );
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
+  gl.uniform1i( shadeProg.uPosSamplerLoc, 1 );
 
-  gl.activeTexture( gl.TEXTURE2 );  //color
+  gl.activeTexture( gl.TEXTURE2 );
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( shadeProg.uColorSamplerLoc, 2 );
 
-  //gl.activeTexture( gl.TEXTURE3 );  //depth
-  //gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  //gl.uniform1i( shadeProg.uDepthSamplerLoc, 3 );
+  /*
+  gl.activeTexture( gl.TEXTURE3 );
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(3) );
+  gl.uniform1i( shadeProg.uNormalSamplerLoc, 3 );
+  */
 
   // Bind necessary uniforms 
-  //gl.uniform1f( shadeProg.uZNearLoc, zNear );
-  //gl.uniform1f( shadeProg.uZFarLoc, zFar );
-  
+  gl.uniform1f( shadeProg.uZNearLoc, zNear );
+  gl.uniform1f( shadeProg.uZFarLoc, zFar );
+  var lrot = mat4.create();
+  mat4.rotateY(lrot, lrot, time);
+  time += 0.04;
+  vec3.transformMat4(lamppos, lamppos_w, lrot);
+  vec3.transformMat4(lamppos, lamppos, camera.getViewTransform());
+  gl.uniform3f( shadeProg.uLampposLoc, lamppos[0], lamppos[1], lamppos[2] );
+  gl.uniform1i(shadeProg.uEffectLoc, effect);
+
   drawQuad(shadeProg);
 
   // Unbind FBO
@@ -251,20 +279,22 @@ var renderDiagnostic = function () {
 
   // Bind necessary textures
   gl.activeTexture( gl.TEXTURE0 );  //position
-  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(0) );
-  gl.uniform1i( diagProg.uPosSamplerLoc, 0 );
+  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
+  gl.uniform1i( diagProg.uDepthSamplerLoc, 0 );
 
   gl.activeTexture( gl.TEXTURE1 );  //normal
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(1) );
-  gl.uniform1i( diagProg.uNormalSamplerLoc, 1 );
+  gl.uniform1i( diagProg.uPosSamplerLoc, 1 );
 
   gl.activeTexture( gl.TEXTURE2 );  //color
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(2) );
   gl.uniform1i( diagProg.uColorSamplerLoc, 2 );
 
+  /*
   gl.activeTexture( gl.TEXTURE3 );  //depth
-  gl.bindTexture( gl.TEXTURE_2D, fbo.depthTexture() );
-  gl.uniform1i( diagProg.uDepthSamplerLoc, 3 ); 
+  gl.bindTexture( gl.TEXTURE_2D, fbo.texture(3) );
+  gl.uniform1i( diagProg.uNormalSamplerLoc, 3 ); 
+  */
 
   // Bind necessary uniforms 
   gl.uniform1f( diagProg.uZNearLoc, zNear );
@@ -285,6 +315,9 @@ var renderPost = function () {
   gl.bindTexture( gl.TEXTURE_2D, fbo.texture(4) );
   gl.uniform1i(postProg.uShadeSamplerLoc, 4 );
 
+  gl.uniform2f(postProg.uResolutionLoc, canvas.width, canvas.height);
+  gl.uniform1i(postProg.uEffectLoc, effect);
+
   drawQuad(postProg);
 };
 
@@ -302,7 +335,7 @@ var initGL = function (canvasId, messageId) {
 
   // Set up WebGL stuff
   gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.clearColor(0.3, 0.3, 0.3, 1.0);
+  gl.clearColor(0.0, 0.0, 0.0, 0.0);
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LESS);
 };
@@ -322,6 +355,7 @@ var initCamera = function () {
     switch(e.keyCode) {
       case 48:
         isDiagnostic = false;
+        effect = 0;
         break;
       case 49:
         isDiagnostic = true;
@@ -339,6 +373,18 @@ var initCamera = function () {
         isDiagnostic = true;
         texToDisplay = 4;
         break;
+      case 54:
+        effect ^= 1;
+        break;
+      case 55:
+        effect ^= 2;
+        break;
+      case 56:
+        effect ^= 4;
+        break;
+      case 57:
+        effect ^= 8;
+        break;
     }
   }
 };
@@ -348,7 +394,7 @@ var initObjs = function () {
   objloader = CIS565WEBGLCORE.createOBJLoader();
 
   // Load the OBJ from file
-  objloader.loadFromFile(gl, "assets/models/crytek-sponza/sponza.obj", null);
+  objloader.loadFromFile(gl, "assets/models/suzanne_sub.obj", null);
 
   // Add callback to upload the vertices once loaded
   objloader.addCallback(function () {
@@ -443,7 +489,7 @@ var initShaders = function () {
     diagProg.aVertexTexcoordLoc = gl.getAttribLocation( diagProg.ref(), "a_texcoord" );
 
     diagProg.uPosSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_positionTex");
-    diagProg.uNormalSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_normalTex");
+    //diagProg.uNormalSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_normalTex");
     diagProg.uColorSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_colorTex");
     diagProg.uDepthSamplerLoc = gl.getUniformLocation( diagProg.ref(), "u_depthTex");
 
@@ -461,13 +507,15 @@ var initShaders = function () {
     shadeProg.aVertexTexcoordLoc = gl.getAttribLocation( shadeProg.ref(), "a_texcoord" );
 
     shadeProg.uPosSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_positionTex");
-    shadeProg.uNormalSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_normalTex");
+    //shadeProg.uNormalSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_normalTex");
     shadeProg.uColorSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_colorTex");
     shadeProg.uDepthSamplerLoc = gl.getUniformLocation( shadeProg.ref(), "u_depthTex");
 
     shadeProg.uZNearLoc = gl.getUniformLocation( shadeProg.ref(), "u_zNear" );
     shadeProg.uZFarLoc = gl.getUniformLocation( shadeProg.ref(), "u_zFar" );
     shadeProg.uDisplayTypeLoc = gl.getUniformLocation( shadeProg.ref(), "u_displayType" );
+    shadeProg.uLampposLoc = gl.getUniformLocation( shadeProg.ref(), "u_lamppos" );
+    shadeProg.uEffectLoc = gl.getUniformLocation(shadeProg.ref(), "u_effect");
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, shadeProg); 
 
@@ -479,6 +527,8 @@ var initShaders = function () {
     postProg.aVertexTexcoordLoc = gl.getAttribLocation( postProg.ref(), "a_texcoord" );
 
     postProg.uShadeSamplerLoc = gl.getUniformLocation( postProg.ref(), "u_shadeTex");
+    postProg.uResolutionLoc = gl.getUniformLocation(postProg.ref(), "u_resolution");
+    postProg.uEffectLoc = gl.getUniformLocation(postProg.ref(), "u_effect");
   });
   CIS565WEBGLCORE.registerAsyncObj(gl, postProg); 
 };

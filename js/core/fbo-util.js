@@ -5,10 +5,10 @@ var CIS565WEBGLCORE = CIS565WEBGLCORE || {};
 
 var FBO_GBUFFER = 0;
 var FBO_PBUFFER = 10;
-var FBO_GBUFFER_POSITION = 0;
-var FBO_GBUFFER_NORMAL = 1;
+var FBO_GBUFFER_DEPTH = 0;
+var FBO_GBUFFER_POSITION = 1;
 var FBO_GBUFFER_COLOR = 2;
-var FBO_GBUFFER_DEPTH = 3;
+var FBO_GBUFFER_NORMAL = 3;
 var FBO_GBUFFER_TEXCOORD = 4;
 
 CIS565WEBGLCORE.createFBO = function(){
@@ -95,6 +95,7 @@ CIS565WEBGLCORE.createFBO = function(){
             return false;
           }
         } else {
+          /*
           fbo[FBO_GBUFFER_POSITION] = gl.createFramebuffer();
           
           // Set up GBuffer Position
@@ -147,6 +148,7 @@ CIS565WEBGLCORE.createFBO = function(){
             console.log("GBuffer Color FBO incomplete! Init failed!");
             return false;
           }
+          */
         }
 
         gl.bindFramebuffer( gl.FRAMEBUFFER, null );
